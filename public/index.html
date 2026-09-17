@@ -177,9 +177,15 @@
   </div>
 
   <script>
-    let balance = 0;
-    let energy = 100;
+    
+let balance = 0;
+let energy = 100;
+let level = 1;
 
+    function updateLevel() {
+  level = Math.floor(balance / 100) + 1;
+  document.getElementById("level").textContent = "⭐ Level " + level;
+}
     const maxEnergy = 100;
 
     const balanceElement = document.getElementById("balance");
@@ -204,6 +210,7 @@
 
       balance++;
       energy--;
+      updateLevel();
 
       balanceElement.textContent =
         balance.toLocaleString("uz-UZ") + " 🪙";
