@@ -264,25 +264,48 @@
 let balance = 0;
 let energy = 100;
 let level = 1;
-    let selectedSkin = "#f5b800";
+let selectedSkin = "#f5b800";
+
+const maxEnergy = 100;
+
+const balanceElement = document.getElementById("balance");
+const energyElement = document.getElementById("energy");
+const levelElement = document.getElementById("level");
+const coin = document.getElementById("coin");
 
 const skinButton = document.getElementById("skinButton");
 const skinPanel = document.getElementById("skinPanel");
 const skinOptions = document.querySelectorAll(".skin-option");
-    skinButton.addEventListener("click", () => {
-  
-    function updateLevel() {
-  level = Math.floor(balance / 100) + 1;
-  document.getElementById("level").textContent = "⭐ Level " + level;
-}
-    const maxEnergy = 100;
 
-    const balanceElement = document.getElementById("balance");
-    const energyElement = document.getElementById("energy");
-    const coin = document.getElementById("coin");
-      const skinButton = document.getElementById("skinButton");
-const skinPanel = document.getElementById("skinPanel");
-const skinOptions = document.querySelectorAll(".skin-option");
+function updateLevel() {
+  level = Math.floor(balance / 100) + 1;
+  levelElement.textContent = "⭐ Level " + level;
+}
+
+function updateEnergy() {
+  energyElement.textContent = "⚡ " + energy + " / " + maxEnergy;
+
+  if (energy <= 0) {
+    coin.classList.add("disabled");
+  } else {
+    coin.classList.remove("disabled");
+  }
+}
+
+coin.addEventListener("click", () => {
+  if (energy <= 0) {
+    return;
+  }
+
+  balance++;
+  energy--;
+
+  balanceElement.textContent =
+    balance.toLocaleString("uz-UZ") + " 🪙";
+
+  updateLevel();
+  updateEnergy();
+});
 
 skinButton.addEventListener("click", () => {
   skinPanel.classList.toggle("show");
@@ -304,42 +327,15 @@ skinOptions.forEach((skin) => {
   });
 });
 
-    function updateEnergy() {
-      energyElement.textContent = "⚡ " + energy + " / " + maxEnergy;
-
-      if (energy <= 0) {
-        coin.classList.add("disabled");
-      } else {
-        coin.classList.remove("disabled");
-      }
-    }
-
-    coin.addEventListener("click", () => {
-
-      if (energy <= 0) {
-        return;
-      }
-
-      balance++;
-      energy--;
-      updateLevel();
-
-      balanceElement.textContent =
-        balance.toLocaleString("uz-UZ") + " 🪙";
-
-      updateEnergy();
-    });
-
-    setInterval(() => {
-
-      if (energy < maxEnergy) {
-        energy++;
-        updateEnergy();
-      }
-
-    }, 1000);
-
+setInterval(() => {
+  if (energy < maxEnergy) {
+    energy++;
     updateEnergy();
+  }
+}, 1000);
+
+updateEnergy();
+updateLevel();
   </script>
 
 </body>
