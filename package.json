@@ -1,0 +1,13 @@
+{
+  "name": "uzcoin",
+  "version": "1.0.0",
+  "description": "Uzbek Tap-to-Earn Telegram Mini App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "telegraf": "^4.16.3"
+  }
+}
