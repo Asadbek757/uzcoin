@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UZCOIN</title>
+</head>
+
+<body>
+  <h1>🪙 UZCOIN</h1>
+
+  <h2 id="balance">0 🪙</h2>
+
+  <button id="coin">🪙<br>TEGISH</button>
+
+  <script>
+    let balance = 0;
+
+    const balanceElement = document.getElementById("balance");
+    const coinButton = document.getElementById("coin");
+
+    coinButton.addEventListener("click", () => {
+      balance++;
+      balanceElement.textContent = balance + " 🪙";
+    });
+  </script>
+</body>
+</html>
