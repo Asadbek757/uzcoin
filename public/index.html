@@ -270,24 +270,19 @@ const skinButton = document.getElementById("skinButton");
 const skinPanel = document.getElementById("skinPanel");
 const skinOptions = document.querySelectorAll(".skin-option");
     skinButton.addEventListener("click", () => {
-  skinPanel.classList.toggle("show");
-});
+  
+    function updateLevel() {
+  level = Math.floor(balance / 100) + 1;
+  document.getElementById("level").textContent = "⭐ Level " + level;
+}
+    const maxEnergy = 100;
 
-skinOptions.forEach((skin) => {
-  skin.addEventListener("click", () => {
-    const requiredLevel = Number(skin.dataset.level);
-    const color = skin.dataset.color;
-
-    if (level < requiredLevel) {
-      alert("🔒 Bu skin uchun Level " + requiredLevel + " kerak!");
-      return;
-    }
-
-    selectedSkin = color;
-    coin.style.background = selectedSkin;
-    skinPanel.classList.remove("show");
-  });
-});
+    const balanceElement = document.getElementById("balance");
+    const energyElement = document.getElementById("energy");
+    const coin = document.getElementById("coin");
+      const skinButton = document.getElementById("skinButton");
+const skinPanel = document.getElementById("skinPanel");
+const skinOptions = document.querySelectorAll(".skin-option");
 
 skinButton.addEventListener("click", () => {
   skinPanel.classList.toggle("show");
@@ -308,16 +303,6 @@ skinOptions.forEach((skin) => {
     skinPanel.classList.remove("show");
   });
 });
-
-    function updateLevel() {
-  level = Math.floor(balance / 100) + 1;
-  document.getElementById("level").textContent = "⭐ Level " + level;
-}
-    const maxEnergy = 100;
-
-    const balanceElement = document.getElementById("balance");
-    const energyElement = document.getElementById("energy");
-    const coin = document.getElementById("coin");
 
     function updateEnergy() {
       energyElement.textContent = "⚡ " + energy + " / " + maxEnergy;
