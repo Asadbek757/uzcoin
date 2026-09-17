@@ -127,6 +127,57 @@
     .nav-button.active {
       color: white;
     }
+    .skin-button {
+  margin-top: 18px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 14px;
+  background: #252b36;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.skin-panel {
+  display: none;
+  width: 90%;
+  max-width: 360px;
+  margin-top: 12px;
+  padding: 15px;
+  background: #191d26;
+  border: 1px solid #292e38;
+  border-radius: 18px;
+}
+
+.skin-panel.show {
+  display: block;
+}
+
+.skin-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.skin-option {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #252b36;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+}
+
+.skin-option span {
+  font-size: 12px;
+  opacity: 0.65;
+}
   </style>
 </head>
 
@@ -145,6 +196,38 @@
       <button class="coin" id="coin">🪙</button>
 
       <div class="tap-text">TAP TO EARN</div>
+      <button class="skin-button" id="skinButton">🎨 Coin Skin</button>
+
+<div class="skin-panel" id="skinPanel">
+
+  <div class="skin-title">🎨 COIN SKIN</div>
+
+  <button class="skin-option" data-level="1" data-color="#f5b800">
+    🟡 Gold
+    <span>Level 1</span>
+  </button>
+
+  <button class="skin-option" data-level="5" data-color="#2196f3">
+    🔵 Blue
+    <span>Level 5</span>
+  </button>
+
+  <button class="skin-option" data-level="10" data-color="#9c27b0">
+    🟣 Purple
+    <span>Level 10</span>
+  </button>
+
+  <button class="skin-option" data-level="15" data-color="#f44336">
+    🔴 Red
+    <span>Level 15</span>
+  </button>
+
+  <button class="skin-option" data-level="20" data-color="#222222">
+    ⚫ Black
+    <span>Level 20</span>
+  </button>
+
+</div>
 
       <div class="energy" id="energy">⚡ 100 / 100</div>
 
@@ -181,6 +264,50 @@
 let balance = 0;
 let energy = 100;
 let level = 1;
+    let selectedSkin = "#f5b800";
+
+const skinButton = document.getElementById("skinButton");
+const skinPanel = document.getElementById("skinPanel");
+const skinOptions = document.querySelectorAll(".skin-option");
+    skinButton.addEventListener("click", () => {
+  skinPanel.classList.toggle("show");
+});
+
+skinOptions.forEach((skin) => {
+  skin.addEventListener("click", () => {
+    const requiredLevel = Number(skin.dataset.level);
+    const color = skin.dataset.color;
+
+    if (level < requiredLevel) {
+      alert("🔒 Bu skin uchun Level " + requiredLevel + " kerak!");
+      return;
+    }
+
+    selectedSkin = color;
+    coin.style.background = selectedSkin;
+    skinPanel.classList.remove("show");
+  });
+});
+
+skinButton.addEventListener("click", () => {
+  skinPanel.classList.toggle("show");
+});
+
+skinOptions.forEach((skin) => {
+  skin.addEventListener("click", () => {
+    const requiredLevel = Number(skin.dataset.level);
+    const color = skin.dataset.color;
+
+    if (level < requiredLevel) {
+      alert("🔒 Bu skin uchun Level " + requiredLevel + " kerak!");
+      return;
+    }
+
+    selectedSkin = color;
+    coin.style.background = selectedSkin;
+    skinPanel.classList.remove("show");
+  });
+});
 
     function updateLevel() {
   level = Math.floor(balance / 100) + 1;
