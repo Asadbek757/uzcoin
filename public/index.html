@@ -2,27 +2,177 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>UZCOIN</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #10131a;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header {
+      width: 100%;
+      text-align: center;
+      padding-top: 25px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .balance {
+      margin-top: 18px;
+      font-size: 34px;
+      font-weight: bold;
+    }
+
+    .coin-area {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding-bottom: 50px;
+    }
+
+    .coin {
+      width: 230px;
+      height: 230px;
+      border-radius: 50%;
+      border: none;
+      background: #f5b800;
+      box-shadow:
+        0 0 0 10px rgba(245, 184, 0, 0.12),
+        0 0 50px rgba(245, 184, 0, 0.35);
+      font-size: 105px;
+      cursor: pointer;
+      transition: transform 0.08s;
+      user-select: none;
+    }
+
+    .coin:active {
+      transform: scale(0.92);
+    }
+
+    .tap-text {
+      margin-top: 22px;
+      font-size: 15px;
+      opacity: 0.65;
+      letter-spacing: 2px;
+    }
+
+    .energy {
+      margin-top: 18px;
+      font-size: 16px;
+    }
+
+    .bottom-nav {
+      width: 100%;
+      height: 75px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: #191d26;
+      border-top: 1px solid #292e38;
+    }
+
+    .nav-button {
+      background: none;
+      border: none;
+      color: #8e96a3;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .nav-button span {
+      display: block;
+      font-size: 25px;
+      margin-bottom: 4px;
+    }
+
+    .nav-button.active {
+      color: white;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>🪙 UZCOIN</h1>
 
-  <h2 id="balance">0 🪙</h2>
+  <div class="app">
 
-  <button id="coin">🪙<br>TEGISH</button>
+    <div class="header">
+      <div class="logo">🪙 UZCOIN</div>
+      <div class="balance" id="balance">0 🪙</div>
+    </div>
+
+    <div class="coin-area">
+
+      <button class="coin" id="coin">🪙</button>
+
+      <div class="tap-text">TAP TO EARN</div>
+
+      <div class="energy">⚡ 100 / 100</div>
+
+    </div>
+
+    <div class="bottom-nav">
+
+      <button class="nav-button active">
+        <span>🏠</span>
+        Home
+      </button>
+
+      <button class="nav-button">
+        <span>🏆</span>
+        Rank
+      </button>
+
+      <button class="nav-button">
+        <span>👥</span>
+        Friends
+      </button>
+
+      <button class="nav-button">
+        <span>👤</span>
+        Profile
+      </button>
+
+    </div>
+
+  </div>
 
   <script>
     let balance = 0;
 
     const balanceElement = document.getElementById("balance");
-    const coinButton = document.getElementById("coin");
+    const coin = document.getElementById("coin");
 
-    coinButton.addEventListener("click", () => {
+    coin.addEventListener("click", () => {
       balance++;
-      balanceElement.textContent = balance + " 🪙";
+      balanceElement.textContent =
+        balance.toLocaleString("uz-UZ") + " 🪙";
     });
   </script>
+
 </body>
 </html>
