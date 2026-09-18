@@ -1,1051 +1,1274 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  >
-
-  <title>UZCOIN</title>
-
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      min-height: 100%;
-      font-family: Arial, sans-serif;
-      background: #080b14;
-      color: white;
-      overflow-x: hidden;
-    }
-
-    body {
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at 50% 5%, rgba(50, 90, 180, .22), transparent 32%),
-        radial-gradient(circle at 15% 70%, rgba(0, 150, 255, .08), transparent 28%),
-        radial-gradient(circle at 90% 80%, rgba(140, 50, 255, .08), transparent 30%),
-        linear-gradient(180deg, #0b1020 0%, #070a12 100%);
-    }
-
-    button {
-      font-family: inherit;
-    }
-
-    /* =========================
-       LOADING
-    ========================= */
-
-    #loading {
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-
-      background:
-        radial-gradient(circle at center, #17203b 0%, #070a12 65%);
-      transition: opacity .25s ease;
-    }
-
-    #loading.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .loading-logo {
-      font-size: 38px;
-      font-weight: 900;
-      letter-spacing: 4px;
-      color: #ffd83d;
-      text-shadow: 0 0 25px rgba(255, 210, 50, .45);
-    }
-
-    .loading-text {
-      margin-top: 12px;
-      color: #aeb7cc;
-      font-size: 14px;
-    }
-
-    .loader {
-      width: 38px;
-      height: 38px;
-      margin-top: 20px;
-      border-radius: 50%;
-      border: 3px solid rgba(255,255,255,.12);
-      border-top-color: #ffd83d;
-      animation: spin .8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* =========================
-       APP
-    ========================= */
-
-    #app {
-      width: 100%;
-      min-height: 100vh;
-      padding-bottom: 90px;
-    }
-
-    .container {
-      width: min(100%, 520px);
-      margin: auto;
-      padding: 15px;
-    }
-
-    /* =========================
-       HEADER
-    ========================= */
-
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      padding: 13px 15px;
-      border-radius: 18px;
-
-      background: rgba(19, 25, 42, .78);
-      border: 1px solid rgba(255,255,255,.07);
-      box-shadow: 0 10px 30px rgba(0,0,0,.18);
-      backdrop-filter: blur(14px);
-    }
-
-    .brand {
-      font-weight: 900;
-      font-size: 21px;
-      letter-spacing: 1px;
-    }
-
-    .brand span {
-      color: #ffd83d;
-    }
-
-    .level-badge {
-      padding: 7px 11px;
-      border-radius: 12px;
-
-      background: rgba(255,216,61,.1);
-      border: 1px solid rgba(255,216,61,.25);
-
-      color: #ffd83d;
-      font-weight: 800;
-      font-size: 13px;
-    }
-
-    /* =========================
-       BALANCE
-    ========================= */
-
-    .balance-box {
-      text-align: center;
-      margin-top: 24px;
-    }
-
-    .balance-label {
-      color: #8f9ab2;
-      font-size: 13px;
-      margin-bottom: 5px;
-    }
-
-    #balance {
-      font-size: 38px;
-      font-weight: 900;
-      letter-spacing: .5px;
-      color: white;
-      text-shadow: 0 0 18px rgba(255,255,255,.08);
-    }
-
-    .coin-symbol {
-      color: #ffd83d;
-    }
-
-    /* =========================
-       LEVEL
-    ========================= */
-
-    .level-info {
-      text-align: center;
-      margin-top: 7px;
-      color: #9da8bd;
-      font-size: 13px;
-    }
-
-    .progress {
-      width: 100%;
-      height: 7px;
-      margin-top: 10px;
-
-      background: rgba(255,255,255,.08);
-      border-radius: 20px;
-      overflow: hidden;
-    }
-
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-
-      background: linear-gradient(
-        90deg,
-        #ffd83d,
-        #ffb300
-      );
-
-      border-radius: 20px;
-      transition: width .25s ease;
-    }
-
-    /* =========================
-       ENERGY
-    ========================= */
-
-    .energy-box {
-      margin-top: 16px;
-      padding: 12px 14px;
-
-      border-radius: 15px;
-      background: rgba(17,23,39,.72);
-      border: 1px solid rgba(255,255,255,.06);
-    }
-
-    .energy-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      margin-bottom: 8px;
-      font-size: 13px;
-    }
-
-    .energy-title {
-      color: #aeb8ca;
-    }
-
-    #energyText {
-      color: #ffd83d;
-      font-weight: 800;
-    }
-
-    .energy-progress {
-      height: 8px;
-      background: rgba(255,255,255,.08);
-      border-radius: 20px;
-      overflow: hidden;
-    }
-
-    #energyBar {
-      height: 100%;
-      width: 100%;
-      border-radius: 20px;
-
-      background: linear-gradient(
-        90deg,
-        #00c6ff,
-        #0072ff
-      );
-
-      transition: width .15s linear;
-    }
-
-    /* =========================
-       COIN AREA
-    ========================= */
-
-    .coin-area {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      margin-top: 25px;
-      margin-bottom: 25px;
-
-      position: relative;
-    }
-
-    .coin-glow {
-      position: absolute;
-      width: 230px;
-      height: 230px;
-
-      border-radius: 50%;
-
-      background: radial-gradient(
-        circle,
-        rgba(255,205,50,.24),
-        rgba(255,205,50,.08) 40%,
-        transparent 70%
-      );
-
-      filter: blur(4px);
-      pointer-events: none;
-    }
-
-    .coin {
-      position: relative;
-      z-index: 2;
-
-      width: 190px;
-      height: 190px;
-
-      border: none;
-      border-radius: 50%;
-
-      cursor: pointer;
-      user-select: none;
-      touch-action: manipulation;
-
-      background:
-        radial-gradient(
-          circle at 34% 27%,
-          #fffbc4 0%,
-          #ffe46b 12%,
-          #ffd02e 29%,
-          #f5b800 55%,
-          #c47b00 82%,
-          #895000 100%
-        );
-
-      box-shadow:
-        0 0 0 7px rgba(245,184,0,.13),
-        0 0 0 11px rgba(245,184,0,.05),
-        0 0 30px rgba(255,196,30,.34),
-        0 15px 30px rgba(0,0,0,.4),
-        inset 0 5px 9px rgba(255,255,255,.65),
-        inset 0 -10px 14px rgba(90,45,0,.35);
-
-      transition:
-        transform .07s ease,
-        box-shadow .12s ease;
-    }
-
-    .coin::before {
-      content: "";
-
-      position: absolute;
-      inset: 9px;
-
-      border-radius: 50%;
-
-      border: 3px solid rgba(255,255,255,.52);
-
-      box-shadow:
-        inset 0 0 0 3px rgba(120,70,0,.2),
-        0 0 0 2px rgba(255,220,80,.25);
-    }
-
-    .coin::after {
-      content: "";
-
-      position: absolute;
-      inset: 22px;
-
-      border-radius: 50%;
-
-      border: 2px solid rgba(255,255,255,.3);
-    }
-
-    .coin-logo {
-      position: absolute;
-      inset: 0;
-      z-index: 3;
-
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      color: #fffbe9;
-
-      text-shadow:
-        0 2px 0 #986000,
-        0 4px 8px rgba(70,40,0,.5);
-
-      pointer-events: none;
-    }
-
-    .coin-logo .uz {
-      font-size: 55px;
-      line-height: 52px;
-      font-weight: 1000;
-      letter-spacing: -2px;
-    }
-
-    .coin-logo .coin-text {
-      margin-top: 5px;
-
-      font-size: 13px;
-      font-weight: 900;
-      letter-spacing: 4px;
-    }
-
-    .coin:active {
-      transform: scale(.91);
-
-      box-shadow:
-        0 0 0 5px rgba(245,184,0,.18),
-        0 0 40px rgba(255,210,50,.65),
-        0 8px 16px rgba(0,0,0,.3),
-        inset 0 5px 10px rgba(255,255,255,.5);
-    }
-
-    /* =========================
-       TAP EFFECT
-    ========================= */
-
-    .tap-effect {
-      position: fixed;
-      z-index: 9999;
-
-      pointer-events: none;
-
-      font-size: 23px;
-      font-weight: 900;
-
-      color: #ffd83d;
-
-      text-shadow:
-        0 2px 5px #000,
-        0 0 12px rgba(255,210,50,.7);
-
-      animation: tapFloat .65s ease-out forwards;
-    }
-
-    @keyframes tapFloat {
-      0% {
-        opacity: 1;
-        transform:
-          translate(-50%, 0)
-          scale(.75);
-      }
-
-      45% {
-        opacity: 1;
-        transform:
-          translate(-50%, -32px)
-          scale(1.12);
-      }
-
-      100% {
-        opacity: 0;
-        transform:
-          translate(-50%, -75px)
-          scale(1);
-      }
-    }
-
-    /* =========================
-       TAP POWER
-    ========================= */
-
-    .power-box {
-      text-align: center;
-      margin-top: -4px;
-      color: #9da8bd;
-      font-size: 13px;
-    }
-
-    #tapPower {
-      color: #ffd83d;
-      font-weight: 900;
-    }
-
-    /* =========================
-       PANELS
-    ========================= */
-
-    .panel {
-      margin-top: 20px;
-
-      padding: 16px;
-
-      border-radius: 18px;
-
-      background: rgba(17,23,39,.72);
-      border: 1px solid rgba(255,255,255,.06);
-
-      backdrop-filter: blur(12px);
-    }
-
-    .panel-title {
-      font-size: 18px;
-      font-weight: 900;
-      margin-bottom: 13px;
-    }
-
-    /* =========================
-       SKINS
-    ========================= */
-
-    .skins {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-
-      max-height: 480px;
-      overflow-y: auto;
-      padding-right: 2px;
-    }
-
-    .skin-option {
-      position: relative;
-
-      min-height: 91px;
-
-      padding: 12px;
-
-      text-align: left;
-
-      border-radius: 14px;
-
-      color: white;
-      background: rgba(255,255,255,.045);
-
-      border: 1px solid rgba(255,255,255,.07);
-
-      cursor: pointer;
-
-      transition:
-        transform .12s ease,
-        border-color .12s ease,
-        background .12s ease;
-    }
-
-    .skin-option:active {
-      transform: scale(.97);
-    }
-
-    .skin-option.selected {
-      border-color: #ffd83d;
-      background: rgba(255,216,61,.09);
-    }
-
-    .skin-option.locked {
-      opacity: .45;
-      filter: grayscale(.35);
-    }
-
-    .skin-name {
-      font-size: 15px;
-      font-weight: 900;
-    }
-
-    .skin-info {
-      margin-top: 7px;
-      color: #98a4ba;
-      font-size: 11px;
-      line-height: 1.45;
-    }
-
-    .lock {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 15px;
-    }
-
-    /* =========================
-       RANK / FRIENDS / PROFILE
-    ========================= */
-
-    .page {
-      display: none;
-    }
-
-    .page.active {
-      display: block;
-    }
-
-    .rank-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      padding: 13px 0;
-
-      border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-
-    .rank-row:last-child {
-      border-bottom: none;
-    }
-
-    .rank-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .rank-number {
-      width: 28px;
-      color: #8894aa;
-      font-weight: 900;
-    }
-
-    .rank-name {
-      font-weight: 800;
-    }
-
-    .rank-balance {
-      color: #ffd83d;
-      font-weight: 900;
-    }
-
-    .profile-card {
-      text-align: center;
-      padding: 20px;
-    }
-
-    .avatar {
-      width: 78px;
-      height: 78px;
-
-      margin: auto;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 50%;
-
-      background:
-        linear-gradient(135deg, #ffd83d, #f28b00);
-
-      color: #151515;
-
-      font-size: 30px;
-      font-weight: 900;
-
-      box-shadow:
-        0 0 25px rgba(255,190,30,.25);
-    }
-
-    .profile-name {
-      margin-top: 12px;
-      font-size: 20px;
-      font-weight: 900;
-    }
-
-    .profile-username {
-      margin-top: 4px;
-      color: #8f9bb1;
-    }
-
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .stat {
-      padding: 13px;
-      border-radius: 13px;
-      background: rgba(255,255,255,.045);
-    }
-
-    .stat-title {
-      color: #8e99ad;
-      font-size: 11px;
-    }
-
-    .stat-value {
-      margin-top: 5px;
-      font-size: 18px;
-      font-weight: 900;
-    }
-
-    .invite-box {
-      padding: 14px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.04);
-    }
-
-    .invite-link {
-      margin-top: 10px;
-      padding: 10px;
-
-      border-radius: 10px;
-
-      background: rgba(0,0,0,.2);
-
-      color: #aeb8ca;
-
-      font-size: 11px;
-
-      word-break: break-all;
-    }
-
-    .copy-btn {
-      width: 100%;
-      margin-top: 10px;
-
-      padding: 12px;
-
-      border: none;
-      border-radius: 12px;
-
-      background: #ffd83d;
-      color: #17130a;
-
-      font-weight: 900;
-
-      cursor: pointer;
-    }
-
-    /* =========================
-       BOTTOM NAV
-    ========================= */
-
-    .bottom-nav {
-      position: fixed;
-      left: 50%;
-      bottom: 10px;
-
-      transform: translateX(-50%);
-
-      width: min(
-        calc(100% - 20px),
-        500px
-      );
-
-      z-index: 5000;
-
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 5px;
-
-      padding: 7px;
-
-      border-radius: 18px;
-
-      background: rgba(15,20,34,.9);
-      border: 1px solid rgba(255,255,255,.07);
-
-      backdrop-filter: blur(15px);
-      box-shadow: 0 10px 35px rgba(0,0,0,.35);
-    }
-
-    .nav-btn {
-      border: none;
-      background: transparent;
-
-      color: #778298;
-
-      padding: 9px 5px;
-
-      border-radius: 13px;
-
-      cursor: pointer;
-
-      font-size: 11px;
-      font-weight: 800;
-    }
-
-    .nav-btn .icon {
-      display: block;
-      font-size: 20px;
-      margin-bottom: 3px;
-    }
-
-    .nav-btn.active {
-      color: #ffd83d;
-      background: rgba(255,216,61,.09);
-    }
-
-    /* =========================
-       LEVEL POPUP
-    ========================= */
-
-    .popup {
-      position: fixed;
-      inset: 0;
-
-      z-index: 10000;
-
-      display: none;
-
-      align-items: center;
-      justify-content: center;
-
-      padding: 20px;
-
-      background: rgba(0,0,0,.65);
-      backdrop-filter: blur(5px);
-    }
-
-    .popup.show {
-      display: flex;
-    }
-
-    .popup-card {
-      width: min(360px, 100%);
-
-      padding: 28px 20px;
-
-      text-align: center;
-
-      border-radius: 24px;
-
-      background:
-        radial-gradient(
-          circle at top,
-          rgba(255,216,61,.12),
-          transparent 55%
-        ),
-        #111729;
-
-      border: 1px solid rgba(255,255,255,.08);
-
-      box-shadow: 0 20px 60px rgba(0,0,0,.5);
-    }
-
-    .popup-icon {
-      font-size: 55px;
-    }
-
-    .popup-title {
-      margin-top: 10px;
-      font-size: 25px;
-      font-weight: 900;
-    }
-
-    .popup-text {
-      margin-top: 8px;
-      color: #9ca8bc;
-    }
-
-    .popup-close {
-      width: 100%;
-      margin-top: 20px;
-
-      padding: 13px;
-
-      border: none;
-      border-radius: 13px;
-
-      background: #ffd83d;
-      color: #15120a;
-
-      font-weight: 900;
-    }
-
-    /* =========================
-       MOBILE
-    ========================= */
-
-    @media (max-width: 380px) {
-      .coin {
-        width: 170px;
-        height: 170px;
-      }
-
-      .coin-logo .uz {
-        font-size: 49px;
-      }
-
-      #balance {
-        font-size: 34px;
-      }
-
-      .skins {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<title>UZCOIN</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  font-family: Arial, sans-serif;
+  background: #07111f;
+  color: white;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(0,180,255,.16), transparent 32%),
+    radial-gradient(circle at 10% 90%, rgba(120,0,255,.12), transparent 30%),
+    linear-gradient(180deg, #07111f 0%, #030812 100%);
+}
+
+/* =========================
+   LOADING
+========================= */
+
+#loading {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  background:
+    radial-gradient(circle, #102b49 0%, #030812 65%);
+}
+
+.loading-logo {
+  font-size: 42px;
+  font-weight: 900;
+  color: #f5b800;
+
+  text-shadow:
+    0 0 15px rgba(245,184,0,.7),
+    0 0 35px rgba(245,184,0,.3);
+
+  margin-bottom: 15px;
+}
+
+.loading-text {
+  font-size: 15px;
+  color: #aab8c8;
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255,255,255,.15);
+  border-top-color: #f5b800;
+  border-radius: 50%;
+  margin-top: 20px;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* =========================
+   APP
+========================= */
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+  padding-bottom: 85px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+  width: 100%;
+  padding: 18px 16px 10px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 1px;
+
+  color: #f5b800;
+
+  text-shadow:
+    0 0 12px rgba(245,184,0,.5);
+}
+
+.header-level {
+  padding: 7px 12px;
+  border-radius: 12px;
+
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.08);
+
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* =========================
+   BALANCE
+========================= */
+
+.balance-box {
+  text-align: center;
+  margin-top: 5px;
+}
+
+.balance-label {
+  color: #8292a6;
+  font-size: 13px;
+}
+
+.balance {
+  margin-top: 4px;
+
+  font-size: 34px;
+  font-weight: 900;
+
+  color: #fff;
+
+  text-shadow:
+    0 0 20px rgba(255,255,255,.12);
+}
+
+/* =========================
+   LEVEL PROGRESS
+========================= */
+
+.level-progress {
+  width: calc(100% - 40px);
+  max-width: 500px;
+
+  margin: 12px auto 0;
+}
+
+.level-text {
+  display: flex;
+  justify-content: space-between;
+
+  font-size: 11px;
+  color: #8292a6;
+
+  margin-bottom: 5px;
+}
+
+.progress-bg {
+  width: 100%;
+  height: 7px;
+
+  background: rgba(255,255,255,.08);
+
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+
+  border-radius: 20px;
+
+  background: linear-gradient(
+    90deg,
+    #f5b800,
+    #ffdb55
+  );
+
+  box-shadow:
+    0 0 12px rgba(245,184,0,.45);
+
+  transition: width .25s ease;
+}
+
+/* =========================
+   HOME
+========================= */
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+/* =========================
+   ENERGY
+========================= */
+
+.energy-box {
+  width: calc(100% - 50px);
+  max-width: 430px;
+
+  margin: 18px auto 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 9px 13px;
+
+  border-radius: 14px;
+
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.07);
+}
+
+.energy-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.energy-icon {
+  font-size: 18px;
+}
+
+.energy-title {
+  font-size: 12px;
+  color: #8796a9;
+}
+
+.energy-value {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* =========================
+   COIN AREA
+========================= */
+
+.coin-area {
+  min-height: 350px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+
+  overflow: hidden;
+}
+
+/* decorative circles */
+
+.coin-area::before {
+  content: "";
+
+  position: absolute;
+
+  width: 270px;
+  height: 270px;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(255,255,255,.045);
+
+  box-shadow:
+    0 0 70px rgba(0,170,255,.06);
+
+  pointer-events: none;
+}
+
+.coin-area::after {
+  content: "";
+
+  position: absolute;
+
+  width: 190px;
+  height: 190px;
+
+  border-radius: 50%;
+
+  border: 1px dashed rgba(255,255,255,.04);
+
+  animation: rotateCircle 25s linear infinite;
+
+  pointer-events: none;
+}
+
+@keyframes rotateCircle {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
+   COIN
+========================= */
+
+.coin {
+  position: relative;
+
+  width: 190px;
+  height: 190px;
+
+  border-radius: 50%;
+
+  border: none;
+
+  cursor: pointer;
+
+  user-select: none;
+  touch-action: manipulation;
+
+  outline: none;
+
+  transition:
+    transform .08s ease,
+    filter .2s ease;
+
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 18px 45px rgba(0,0,0,.45);
+}
+
+.coin:active {
+  transform: scale(.91);
+}
+
+/* inner coin */
+
+.coin-inner {
+  width: 158px;
+  height: 158px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+
+  border: 3px solid rgba(255,255,255,.25);
+
+  overflow: hidden;
+}
+
+.coin-inner::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 9px;
+
+  border-radius: 50%;
+
+  border: 2px solid rgba(255,255,255,.18);
+}
+
+.coin-inner::after {
+  content: "";
+
+  position: absolute;
+
+  width: 80px;
+  height: 30px;
+
+  top: 22px;
+  left: 22px;
+
+  background: rgba(255,255,255,.22);
+
+  border-radius: 50%;
+
+  transform: rotate(-35deg);
+
+  filter: blur(4px);
+}
+
+.coin-symbol {
+  position: relative;
+
+  z-index: 3;
+
+  font-size: 60px;
+
+  font-weight: 900;
+
+  color: rgba(255,255,255,.9);
+
+  text-shadow:
+    2px 3px 0 rgba(0,0,0,.2),
+    0 0 15px rgba(255,255,255,.15);
+}
+
+/* =========================
+   COIN MATERIALS
+========================= */
+
+/* CLASSIC / BRONZE */
+
+.coin.skin-classic {
+  background:
+    radial-gradient(
+      circle at 35% 28%,
+      #ffe89a 0%,
+      #e6a91b 25%,
+      #a96708 60%,
+      #603300 100%
+    );
+
+  box-shadow:
+    0 0 0 7px rgba(170,100,10,.15),
+    0 0 40px rgba(245,184,0,.35),
+    inset 0 0 25px rgba(255,255,255,.25);
+}
+
+.coin.skin-classic .coin-inner {
+  background:
+    repeating-radial-gradient(
+      circle,
+      rgba(255,255,255,.05) 0 2px,
+      rgba(0,0,0,.05) 3px 5px
+    ),
+    linear-gradient(
+      145deg,
+      #ffd96a,
+      #b8760c
+    );
+}
+
+/* OCEAN */
+
+.coin.skin-ocean {
+  background:
+    radial-gradient(
+      circle at 30% 25%,
+      #b9f4ff,
+      #23a8e8 30%,
+      #075d9e 65%,
+      #032f59
+    );
+
+  box-shadow:
+    0 0 45px rgba(33,150,243,.45),
+    inset 0 0 30px rgba(255,255,255,.2);
+}
+
+.coin.skin-ocean .coin-inner {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255,255,255,.1) 0 3px,
+      transparent 3px 9px
+    ),
+    linear-gradient(
+      145deg,
+      #68ddff,
+      #0868a8
+    );
+}
+
+/* NEBULA */
+
+.coin.skin-nebula {
+  background:
+    radial-gradient(
+      circle at 35% 25%,
+      #f2a5ff,
+      #a93bd2 30%,
+      #54209a 65%,
+      #241044
+    );
+
+  box-shadow:
+    0 0 55px rgba(156,39,176,.6),
+    inset 0 0 30px rgba(255,255,255,.2);
+}
+
+.coin.skin-nebula .coin-inner {
+  background:
+    radial-gradient(circle at 70% 25%, #e9a4ff 0 5%, transparent 6%),
+    radial-gradient(circle at 30% 70%, #d15cff 0 4%, transparent 5%),
+    linear-gradient(
+      145deg,
+      #d85df3,
+      #5c1d9e
+    );
+}
+
+/* EMERALD */
+
+.coin.skin-emerald {
+  background:
+    radial-gradient(
+      circle at 32% 24%,
+      #baffd5,
+      #28c76f 30%,
+      #087c43 65%,
+      #033b23
+    );
+
+  box-shadow:
+    0 0 50px rgba(76,175,80,.5),
+    inset 0 0 30px rgba(255,255,255,.2);
+}
+
+.coin.skin-emerald .coin-inner {
+  background:
+    linear-gradient(
+      135deg,
+      #79ffb2,
+      #07964e 55%,
+      #03582d
+    );
+}
+
+/* INFERNO */
+
+.coin.skin-inferno {
+  background:
+    radial-gradient(
+      circle at 32% 24%,
+      #ffe4b0,
+      #ff7b22 25%,
+      #e52d16 60%,
+      #5d0904
+    );
+
+  box-shadow:
+    0 0 55px rgba(244,67,54,.55),
+    inset 0 0 30px rgba(255,220,100,.2);
+}
+
+.coin.skin-inferno .coin-inner {
+  background:
+    repeating-linear-gradient(
+      125deg,
+      rgba(255,255,255,.07) 0 4px,
+      transparent 4px 10px
+    ),
+    linear-gradient(
+      145deg,
+      #ffb23e,
+      #d52a12
+    );
+}
+
+/* CYBER */
+
+.coin.skin-cyber {
+  background:
+    radial-gradient(
+      circle at 30% 24%,
+      #d8ffff,
+      #00d8ef 28%,
+      #00758b 60%,
+      #002b35
+    );
+
+  box-shadow:
+    0 0 55px rgba(0,188,212,.6),
+    inset 0 0 30px rgba(255,255,255,.2);
+}
+
+.coin.skin-cyber .coin-inner {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,.07) 0 2px,
+      transparent 2px 7px
+    ),
+    linear-gradient(
+      145deg,
+      #42f5ff,
+      #007d96
+    );
+}
+
+/* IMMORTAL */
+
+.coin.skin-immortal {
+  background:
+    radial-gradient(
+      circle at 32% 23%,
+      #ffffff,
+      #c99cff 20%,
+      #7137d0 55%,
+      #291052
+    );
+
+  box-shadow:
+    0 0 70px rgba(103,58,183,.75),
+    0 0 110px rgba(150,80,255,.25),
+    inset 0 0 35px rgba(255,255,255,.25);
+}
+
+.coin.skin-immortal .coin-inner {
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      #b977ff,
+      #5424a6 65%,
+      #28104d
+    );
+}
+
+/* =========================
+   TAP EFFECT
+========================= */
+
+.tap-effect {
+  position: fixed;
+
+  z-index: 999;
+
+  pointer-events: none;
+
+  font-size: 23px;
+  font-weight: 900;
+
+  color: #fff;
+
+  text-shadow:
+    0 2px 7px rgba(0,0,0,.8);
+
+  animation: tapFloat .65s ease-out forwards;
+}
+
+@keyframes tapFloat {
+
+  0% {
+    opacity: 1;
+    transform:
+      translate(-50%, -50%)
+      scale(.8);
+  }
+
+  100% {
+    opacity: 0;
+    transform:
+      translate(-50%, -120px)
+      scale(1.25);
+  }
+}
+
+/* =========================
+   SKINS PANEL
+========================= */
+
+.section {
+  width: calc(100% - 24px);
+  max-width: 520px;
+
+  margin: 0 auto 20px;
+}
+
+.section-title {
+  font-size: 17px;
+  font-weight: 900;
+
+  margin-bottom: 12px;
+}
+
+.skins-panel {
+  padding: 12px;
+
+  border-radius: 18px;
+
+  background: rgba(255,255,255,.045);
+
+  border: 1px solid rgba(255,255,255,.07);
+
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.skin-option {
+  width: 100%;
+
+  min-height: 70px;
+
+  margin-bottom: 8px;
+
+  padding: 10px 12px;
+
+  border: 1px solid rgba(255,255,255,.07);
+
+  border-radius: 14px;
+
+  background: rgba(255,255,255,.045);
+
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    transform .15s ease,
+    background .15s ease,
+    border .15s ease;
+}
+
+.skin-option:last-child {
+  margin-bottom: 0;
+}
+
+.skin-option:active {
+  transform: scale(.98);
+}
+
+.skin-option.selected {
+  border-color: rgba(245,184,0,.65);
+
+  background: rgba(245,184,0,.09);
+
+  box-shadow:
+    inset 0 0 20px rgba(245,184,0,.04);
+}
+
+.skin-option.locked {
+  opacity: .38;
+}
+
+.skin-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.skin-icon {
+  width: 40px;
+  height: 40px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255,255,255,.07);
+
+  font-size: 21px;
+}
+
+.skin-name {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.skin-info {
+  color: #8796a9;
+  font-size: 11px;
+  line-height: 1.45;
+  margin-top: 2px;
+}
+
+.skin-status {
+  font-size: 11px;
+  color: #f5b800;
+  font-weight: 800;
+}
+
+/* =========================
+   OTHER PAGES
+========================= */
+
+.page-content {
+  width: calc(100% - 24px);
+  max-width: 520px;
+
+  margin: 20px auto;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 900;
+
+  margin-bottom: 16px;
+}
+
+.card {
+  padding: 16px;
+
+  margin-bottom: 10px;
+
+  border-radius: 16px;
+
+  background: rgba(255,255,255,.05);
+
+  border: 1px solid rgba(255,255,255,.07);
+}
+
+.rank-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 13px 5px;
+
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.rank-row:last-child {
+  border-bottom: none;
+}
+
+.rank-number {
+  width: 35px;
+  font-weight: 900;
+}
+
+.rank-name {
+  flex: 1;
+  font-weight: 700;
+}
+
+.rank-balance {
+  font-weight: 900;
+  color: #f5b800;
+}
+
+/* =========================
+   BOTTOM NAV
+========================= */
+
+.bottom-nav {
+  position: fixed;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  z-index: 500;
+
+  height: 72px;
+
+  padding:
+    7px 10px
+    calc(7px + env(safe-area-inset-bottom))
+    10px;
+
+  background:
+    rgba(4,10,18,.94);
+
+  backdrop-filter: blur(16px);
+
+  border-top:
+    1px solid rgba(255,255,255,.07);
+
+  display: flex;
+  justify-content: space-around;
+}
+
+.nav-btn {
+  flex: 1;
+
+  border: none;
+  background: transparent;
+
+  color: #708095;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 4px;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.nav-icon {
+  font-size: 21px;
+}
+
+.nav-btn.active {
+  color: #f5b800;
+
+  text-shadow:
+    0 0 10px rgba(245,184,0,.35);
+}
+
+/* =========================
+   LEVEL POPUP
+========================= */
+
+.level-popup {
+  position: fixed;
+  inset: 0;
+
+  z-index: 3000;
+
+  background: rgba(0,0,0,.7);
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 25px;
+}
+
+.level-popup.show {
+  display: flex;
+}
+
+.level-popup-box {
+  width: 100%;
+  max-width: 350px;
+
+  padding: 28px 20px;
+
+  border-radius: 24px;
+
+  text-align: center;
+
+  background:
+    linear-gradient(
+      180deg,
+      #162a43,
+      #091321
+    );
+
+  border: 1px solid rgba(245,184,0,.35);
+
+  box-shadow:
+    0 20px 70px rgba(0,0,0,.6);
+}
+
+.level-popup-icon {
+  font-size: 60px;
+
+  margin-bottom: 8px;
+}
+
+.level-popup-title {
+  font-size: 25px;
+  font-weight: 900;
+
+  color: #f5b800;
+}
+
+.level-popup-text {
+  color: #aab8c8;
+
+  margin-top: 8px;
+}
+
+.popup-close {
+  width: 100%;
+
+  margin-top: 20px;
+
+  padding: 13px;
+
+  border: none;
+  border-radius: 13px;
+
+  background: #f5b800;
+  color: #111;
+
+  font-size: 15px;
+  font-weight: 900;
+
+  cursor: pointer;
+}
+
+/* =========================
+   PROFILE
+========================= */
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+
+  margin: 0 auto 12px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 35px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f5b800,
+      #754f00
+    );
+
+  box-shadow:
+    0 0 30px rgba(245,184,0,.25);
+}
+
+.profile-name {
+  text-align: center;
+
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.profile-username {
+  text-align: center;
+
+  color: #8190a3;
+
+  font-size: 13px;
+
+  margin-top: 4px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 380px) {
+
+  .coin {
+    width: 170px;
+    height: 170px;
+  }
+
+  .coin-inner {
+    width: 142px;
+    height: 142px;
+  }
+
+  .coin-symbol {
+    font-size: 52px;
+  }
+
+  .coin-area {
+    min-height: 315px;
+  }
+
+}
+
+</style>
 </head>
 
 <body>
 
-  <!-- =========================
-       LOADING
-  ========================= -->
+<!-- =========================
+     LOADING
+========================= -->
 
-  <div id="loading">
-    <div class="loading-logo">UZCOIN</div>
-    <div class="loader"></div>
-    <div class="loading-text">
-      UZCOIN yuklanmoqda...
-    </div>
+<div id="loading">
+
+  <div class="loading-logo">
+    🪙 UZCOIN
   </div>
 
+  <div class="loading-text">
+    UZCOIN yuklanmoqda...
+  </div>
 
-  <!-- =========================
-       APP
-  ========================= -->
+  <div class="loading-spinner"></div>
 
-  <div id="app">
+</div>
 
-    <!-- HOME -->
-    <div
-      id="homePage"
-      class="page active"
-    >
 
-      <div class="container">
+<!-- =========================
+     APP
+========================= -->
 
-        <!-- HEADER -->
-        <div class="header">
+<div id="app">
 
-          <div class="brand">
-            🪙 <span>UZ</span>COIN
-          </div>
+  <!-- HEADER -->
+
+  <header class="header">
+
+    <div class="logo">
+      UZCOIN
+    </div>
+
+    <div class="header-level">
+      LEVEL <span id="level">1</span>
+    </div>
+
+  </header>
+
+
+  <!-- =====================
+       HOME
+  ====================== -->
+
+  <div
+    id="homePage"
+    class="page active"
+  >
+
+    <!-- BALANCE -->
+
+    <div class="balance-box">
+
+      <div class="balance-label">
+        BALANCE
+      </div>
+
+      <div
+        id="balance"
+        class="balance"
+      >
+        0
+      </div>
+
+    </div>
+
+
+    <!-- LEVEL PROGRESS -->
+
+    <div class="level-progress">
+
+      <div class="level-text">
+
+        <span>
+          LEVEL <span id="progressLevel">1</span>
+        </span>
+
+        <span id="nextLevelText">
+          2,000
+        </span>
+
+      </div>
+
+      <div class="progress-bg">
+
+        <div
+          id="progressFill"
+          class="progress-fill"
+        ></div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ENERGY -->
+
+    <div class="energy-box">
+
+      <div class="energy-left">
+
+        <div class="energy-icon">
+          ⚡
+        </div>
+
+        <div class="energy-title">
+          ENERGY
+        </div>
+
+      </div>
+
+      <div
+        id="energy"
+        class="energy-value"
+      >
+        100 / 100
+      </div>
+
+    </div>
+
+
+    <!-- COIN -->
+
+    <div class="coin-area">
+
+      <button
+        id="coin"
+        class="coin skin-classic"
+        type="button"
+      >
+
+        <div class="coin-inner">
 
           <div
-            id="levelBadge"
-            class="level-badge"
+            id="coinSymbol"
+            class="coin-symbol"
           >
-            LEVEL 1
+            UZ
           </div>
 
         </div>
 
+      </button>
 
-        <!-- BALANCE -->
-        <div class="balance-box">
-
-          <div class="balance-label">
-            Sizning balansingiz
-          </div>
-
-          <div id="balance">
-            <span class="coin-symbol">🪙</span>
-            0
-          </div>
-
-        </div>
+    </div>
 
 
-        <!-- LEVEL PROGRESS -->
-        <div class="level-info">
+    <!-- SKINS -->
 
-          <span id="levelText">
-            Level 1
-          </span>
+    <div class="section">
 
-          <span>
-            •
-          </span>
+      <div class="section-title">
+        🎨 Skins
+      </div>
 
-          <span id="nextLevelText">
-            2,000 gacha
-          </span>
+      <div
+        id="skinsPanel"
+        class="skins-panel"
+      >
 
-        </div>
+        <!-- CLASSIC -->
 
-        <div class="progress">
-          <div
-            id="levelProgress"
-            class="progress-bar"
-          ></div>
-        </div>
+        <button
+          class="skin-option"
+          data-skin="classic"
+          data-level="1"
+        >
 
+          <div class="skin-left">
 
-        <!-- ENERGY -->
-        <div class="energy-box">
-
-          <div class="energy-top">
-
-            <span class="energy-title">
-              ⚡ Energy
-            </span>
-
-            <span id="energyText">
-              100 / 100
-            </span>
-
-          </div>
-
-          <div class="energy-progress">
-
-            <div
-              id="energyBar"
-              style="width:100%"
-            ></div>
-
-          </div>
-
-        </div>
-
-
-        <!-- COIN -->
-        <div class="coin-area">
-
-          <div class="coin-glow"></div>
-
-          <button
-            id="coin"
-            class="coin"
-            type="button"
-          >
-
-            <div class="coin-logo">
-
-              <div class="uz">
-                UZ
-              </div>
-
-              <div class="coin-text">
-                UZCOIN
-              </div>
-
+            <div class="skin-icon">
+              🟡
             </div>
 
-          </button>
-
-        </div>
-
-
-        <!-- POWER -->
-        <div class="power-box">
-
-          👆 Har tap:
-          <span id="tapPower">
-            +1
-          </span>
-          🪙
-
-        </div>
-
-
-        <!-- SKINS -->
-        <div class="panel">
-
-          <div class="panel-title">
-            🎨 Skins
-          </div>
-
-          <div
-            id="skins"
-            class="skins"
-          >
-
-            <!-- CLASSIC -->
-            <button
-              class="skin-option"
-              data-skin="classic"
-            >
+            <div>
 
               <div class="skin-name">
-                🟡 Classic
+                Classic
               </div>
 
               <div class="skin-info">
@@ -1053,17 +1276,38 @@
                 +1 TAP • 100 ⚡
               </div>
 
-            </button>
+            </div>
+
+          </div>
+
+          <div
+            class="skin-status"
+            data-status="classic"
+          >
+            SELECT
+          </div>
+
+        </button>
 
 
-            <!-- OCEAN -->
-            <button
-              class="skin-option"
-              data-skin="ocean"
-            >
+        <!-- OCEAN -->
+
+        <button
+          class="skin-option"
+          data-skin="ocean"
+          data-level="2"
+        >
+
+          <div class="skin-left">
+
+            <div class="skin-icon">
+              🔵
+            </div>
+
+            <div>
 
               <div class="skin-name">
-                🔵 Ocean
+                Ocean
               </div>
 
               <div class="skin-info">
@@ -1071,17 +1315,38 @@
                 +3 TAP • 200 ⚡
               </div>
 
-            </button>
+            </div>
+
+          </div>
+
+          <div
+            class="skin-status"
+            data-status="ocean"
+          >
+            🔒
+          </div>
+
+        </button>
 
 
-            <!-- NEBULA -->
-            <button
-              class="skin-option"
-              data-skin="nebula"
-            >
+        <!-- NEBULA -->
+
+        <button
+          class="skin-option"
+          data-skin="nebula"
+          data-level="3"
+        >
+
+          <div class="skin-left">
+
+            <div class="skin-icon">
+              🟣
+            </div>
+
+            <div>
 
               <div class="skin-name">
-                🟣 Nebula
+                Nebula
               </div>
 
               <div class="skin-info">
@@ -1089,17 +1354,38 @@
                 +5 TAP • 300 ⚡
               </div>
 
-            </button>
+            </div>
+
+          </div>
+
+          <div
+            class="skin-status"
+            data-status="nebula"
+          >
+            🔒
+          </div>
+
+        </button>
 
 
-            <!-- EMERALD -->
-            <button
-              class="skin-option"
-              data-skin="emerald"
-            >
+        <!-- EMERALD -->
+
+        <button
+          class="skin-option"
+          data-skin="emerald"
+          data-level="4"
+        >
+
+          <div class="skin-left">
+
+            <div class="skin-icon">
+              🟢
+            </div>
+
+            <div>
 
               <div class="skin-name">
-                🟢 Emerald
+                Emerald
               </div>
 
               <div class="skin-info">
@@ -1107,17 +1393,38 @@
                 +8 TAP • 400 ⚡
               </div>
 
-            </button>
+            </div>
+
+          </div>
+
+          <div
+            class="skin-status"
+            data-status="emerald"
+          >
+            🔒
+          </div>
+
+        </button>
 
 
-            <!-- INFERNO -->
-            <button
-              class="skin-option"
-              data-skin="inferno"
-            >
+        <!-- INFERNO -->
+
+        <button
+          class="skin-option"
+          data-skin="inferno"
+          data-level="5"
+        >
+
+          <div class="skin-left">
+
+            <div class="skin-icon">
+              🔴
+            </div>
+
+            <div>
 
               <div class="skin-name">
-                🔴 Inferno
+                Inferno
               </div>
 
               <div class="skin-info">
@@ -1125,17 +1432,38 @@
                 +12 TAP • 500 ⚡
               </div>
 
-            </button>
+            </div>
+
+          </div>
+
+          <div
+            class="skin-status"
+            data-status="inferno"
+          >
+            🔒
+          </div>
+
+        </button>
 
 
-            <!-- CYBER -->
-            <button
-              class="skin-option"
-              data-skin="cyber"
-            >
+        <!-- CYBER -->
+
+        <button
+          class="skin-option"
+          data-skin="cyber"
+          data-level="6"
+        >
+
+          <div class="skin-left">
+
+            <div class="skin-icon">
+              🔷
+            </div>
+
+            <div>
 
               <div class="skin-name">
-                🔷 Cyber
+                Cyber
               </div>
 
               <div class="skin-info">
@@ -1143,17 +1471,38 @@
                 +16 TAP • 600 ⚡
               </div>
 
-            </button>
+            </div>
+
+          </div>
+
+          <div
+            class="skin-status"
+            data-status="cyber"
+          >
+            🔒
+          </div>
+
+        </button>
 
 
-            <!-- IMMORTAL -->
-            <button
-              class="skin-option"
-              data-skin="immortal"
-            >
+        <!-- IMMORTAL -->
+
+        <button
+          class="skin-option"
+          data-skin="immortal"
+          data-level="7"
+        >
+
+          <div class="skin-left">
+
+            <div class="skin-icon">
+              🔮
+            </div>
+
+            <div>
 
               <div class="skin-name">
-                🔮 Immortal
+                Immortal
               </div>
 
               <div class="skin-info">
@@ -1161,260 +1510,18 @@
                 +20 TAP • 700 ⚡
               </div>
 
-            </button>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- =========================
-         RANK
-    ========================= -->
-
-    <div
-      id="rankPage"
-      class="page"
-    >
-
-      <div class="container">
-
-        <div class="header">
-
-          <div class="brand">
-            🏆 <span>UZ</span>COIN
-          </div>
-
-          <div class="level-badge">
-            RANK
-          </div>
-
-        </div>
-
-        <div class="panel">
-
-          <div class="panel-title">
-            🏆 Reyting
-          </div>
-
-          <div id="rankList">
-
-            <div
-              style="
-                text-align:center;
-                color:#8d99ae;
-                padding:25px;
-              "
-            >
-              Reyting yuklanmoqda...
             </div>
 
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- =========================
-         FRIENDS
-    ========================= -->
-
-    <div
-      id="friendsPage"
-      class="page"
-    >
-
-      <div class="container">
-
-        <div class="header">
-
-          <div class="brand">
-            👥 <span>UZ</span>COIN
-          </div>
-
-          <div class="level-badge">
-            FRIENDS
-          </div>
-
-        </div>
-
-        <div class="panel">
-
-          <div class="panel-title">
-            👥 Do'stlarni taklif qiling
-          </div>
-
-          <div class="invite-box">
-
-            <div style="color:#aeb8ca;">
-              Do'stingizni taklif qiling va
-              bonuslar oling.
-            </div>
-
-            <div
-              id="inviteLink"
-              class="invite-link"
-            >
-              Havola tayyorlanmoqda...
-            </div>
-
-            <button
-              id="copyInvite"
-              class="copy-btn"
-              type="button"
-            >
-              📋 Havolani nusxalash
-            </button>
-
-          </div>
-
-        </div>
-
-        <div class="panel">
-
-          <div class="panel-title">
-            👥 Sizning do'stlaringiz
-          </div>
-
-          <div id="friendsList">
-
-            <div
-              style="
-                text-align:center;
-                color:#8d99ae;
-                padding:20px;
-              "
-            >
-              Hali do'stlar yo'q
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- =========================
-         PROFILE
-    ========================= -->
-
-    <div
-      id="profilePage"
-      class="page"
-    >
-
-      <div class="container">
-
-        <div class="header">
-
-          <div class="brand">
-            👤 <span>UZ</span>COIN
-          </div>
-
-          <div class="level-badge">
-            PROFILE
-          </div>
-
-        </div>
-
-        <div class="panel profile-card">
-
-          <div
-            id="avatar"
-            class="avatar"
-          >
-            U
           </div>
 
           <div
-            id="profileName"
-            class="profile-name"
+            class="skin-status"
+            data-status="immortal"
           >
-            User
+            🔒
           </div>
 
-          <div
-            id="profileUsername"
-            class="profile-username"
-          >
-            @username
-          </div>
-
-          <div class="stat-grid">
-
-            <div class="stat">
-
-              <div class="stat-title">
-                Balance
-              </div>
-
-              <div
-                id="profileBalance"
-                class="stat-value"
-              >
-                0
-              </div>
-
-            </div>
-
-            <div class="stat">
-
-              <div class="stat-title">
-                Level
-              </div>
-
-              <div
-                id="profileLevel"
-                class="stat-value"
-              >
-                1
-              </div>
-
-            </div>
-
-            <div class="stat">
-
-              <div class="stat-title">
-                Referrals
-              </div>
-
-              <div
-                id="profileReferrals"
-                class="stat-value"
-              >
-                0
-              </div>
-
-            </div>
-
-            <div class="stat">
-
-              <div class="stat-title">
-                Skin
-              </div>
-
-              <div
-                id="profileSkin"
-                class="stat-value"
-              >
-                Classic
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
+        </button>
 
       </div>
 
@@ -1423,759 +1530,1478 @@
   </div>
 
 
-  <!-- =========================
-       BOTTOM NAV
-  ========================= -->
-
-  <div class="bottom-nav">
-
-    <button
-      class="nav-btn active"
-      data-page="homePage"
-    >
-      <span class="icon">🪙</span>
-      Home
-    </button>
-
-    <button
-      class="nav-btn"
-      data-page="rankPage"
-    >
-      <span class="icon">🏆</span>
-      Rank
-    </button>
-
-    <button
-      class="nav-btn"
-      data-page="friendsPage"
-    >
-      <span class="icon">👥</span>
-      Friends
-    </button>
-
-    <button
-      class="nav-btn"
-      data-page="profilePage"
-    >
-      <span class="icon">👤</span>
-      Profile
-    </button>
-
-  </div>
-
-
-  <!-- =========================
-       LEVEL POPUP
-  ========================= -->
+  <!-- =====================
+       RANK
+  ====================== -->
 
   <div
-    id="levelPopup"
-    class="popup"
+    id="rankPage"
+    class="page"
   >
 
-    <div class="popup-card">
+    <div class="page-content">
 
-      <div class="popup-icon">
-        🎉
-      </div>
-
-      <div class="popup-title">
-        Level Up!
+      <div class="page-title">
+        🏆 Rank
       </div>
 
       <div
-        id="popupText"
-        class="popup-text"
+        id="rankList"
+        class="card"
       >
-        Siz yangi levelga o'tdingiz!
+        Yuklanmoqda...
       </div>
-
-      <button
-        id="popupClose"
-        class="popup-close"
-        type="button"
-      >
-        Davom etish
-      </button>
 
     </div>
 
   </div>
 
 
-  <script>
+  <!-- =====================
+       FRIENDS
+  ====================== -->
 
-    /* =====================================================
-       TELEGRAM
-    ===================================================== */
+  <div
+    id="friendsPage"
+    class="page"
+  >
 
-    const tg =
-      window.Telegram &&
-      window.Telegram.WebApp
-        ? window.Telegram.WebApp
-        : null;
+    <div class="page-content">
 
-    if (tg) {
-      tg.ready();
-      tg.expand();
+      <div class="page-title">
+        👥 Friends
+      </div>
 
-      try {
-        tg.setHeaderColor("#0b1020");
-        tg.setBackgroundColor("#080b14");
-      } catch (e) {}
+      <div class="card">
+
+        <div style="font-size:18px;font-weight:900;">
+          Do‘stlaringni taklif qil
+        </div>
+
+        <div
+          id="referralText"
+          style="
+            margin-top:8px;
+            color:#8492a5;
+            font-size:13px;
+            line-height:1.5;
+          "
+        >
+          Do‘stlaringni UZCOIN'ga taklif qil.
+        </div>
+
+        <button
+          id="copyReferral"
+          style="
+            width:100%;
+            margin-top:15px;
+            padding:13px;
+            border:0;
+            border-radius:12px;
+            background:#f5b800;
+            color:#111;
+            font-weight:900;
+          "
+        >
+          🔗 Linkni nusxalash
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================
+       PROFILE
+  ====================== -->
+
+  <div
+    id="profilePage"
+    class="page"
+  >
+
+    <div class="page-content">
+
+      <div class="page-title">
+        👤 Profile
+      </div>
+
+      <div class="card">
+
+        <div class="profile-avatar">
+          👤
+        </div>
+
+        <div
+          id="profileName"
+          class="profile-name"
+        >
+          User
+        </div>
+
+        <div
+          id="profileUsername"
+          class="profile-username"
+        >
+          @username
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          padding:8px 0;
+        ">
+
+          <span>🪙 Balance</span>
+
+          <strong id="profileBalance">
+            0
+          </strong>
+
+        </div>
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          padding:8px 0;
+        ">
+
+          <span>⭐ Level</span>
+
+          <strong id="profileLevel">
+            1
+          </strong>
+
+        </div>
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          padding:8px 0;
+        ">
+
+          <span>👥 Friends</span>
+
+          <strong id="profileFriends">
+            0
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     LEVEL POPUP
+========================= -->
+
+<div
+  id="levelPopup"
+  class="level-popup"
+>
+
+  <div class="level-popup-box">
+
+    <div
+      id="popupIcon"
+      class="level-popup-icon"
+    >
+      ⭐
+    </div>
+
+    <div class="level-popup-title">
+      LEVEL UP!
+    </div>
+
+    <div
+      id="popupText"
+      class="level-popup-text"
+    >
+      Yangi level ochildi!
+    </div>
+
+    <button
+      id="popupClose"
+      class="popup-close"
+    >
+      Davom etish
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     NAVIGATION
+========================= -->
+
+<nav class="bottom-nav">
+
+  <button
+    class="nav-btn active"
+    data-page="homePage"
+  >
+
+    <span class="nav-icon">
+      🏠
+    </span>
+
+    Home
+
+  </button>
+
+  <button
+    class="nav-btn"
+    data-page="rankPage"
+  >
+
+    <span class="nav-icon">
+      🏆
+    </span>
+
+    Rank
+
+  </button>
+
+  <button
+    class="nav-btn"
+    data-page="friendsPage"
+  >
+
+    <span class="nav-icon">
+      👥
+    </span>
+
+    Friends
+
+  </button>
+
+  <button
+    class="nav-btn"
+    data-page="profilePage"
+  >
+
+    <span class="nav-icon">
+      👤
+    </span>
+
+    Profile
+
+  </button>
+
+</nav>
+
+
+<script>
+
+/* =====================================================
+   TELEGRAM
+===================================================== */
+
+const tg =
+  window.Telegram?.WebApp;
+
+if (tg) {
+
+  tg.ready();
+
+  tg.expand();
+
+}
+
+
+/* =====================================================
+   DOM
+===================================================== */
+
+const loading =
+  document.getElementById("loading");
+
+const coin =
+  document.getElementById("coin");
+
+const coinSymbol =
+  document.getElementById("coinSymbol");
+
+const balanceEl =
+  document.getElementById("balance");
+
+const energyEl =
+  document.getElementById("energy");
+
+const levelEl =
+  document.getElementById("level");
+
+const progressLevel =
+  document.getElementById("progressLevel");
+
+const progressFill =
+  document.getElementById("progressFill");
+
+const nextLevelText =
+  document.getElementById("nextLevelText");
+
+const rankList =
+  document.getElementById("rankList");
+
+const levelPopup =
+  document.getElementById("levelPopup");
+
+const popupText =
+  document.getElementById("popupText");
+
+const popupIcon =
+  document.getElementById("popupIcon");
+
+
+/* =====================================================
+   TELEGRAM USER
+===================================================== */
+
+let telegramId = null;
+
+let initData = "";
+
+if (tg && tg.initDataUnsafe) {
+
+  if (tg.initDataUnsafe.user) {
+
+    telegramId =
+      String(
+        tg.initDataUnsafe.user.id
+      );
+
+  }
+
+  initData =
+    tg.initData || "";
+
+}
+
+
+/* =====================================================
+   STATE
+===================================================== */
+
+let balance = 0;
+
+let level = 1;
+
+let lastLevel = 1;
+
+let energy = 100;
+
+let maxEnergy = 100;
+
+let tapPower = 1;
+
+let selectedSkin = "classic";
+
+let skins = {};
+
+let userData = null;
+
+
+/* =====================================================
+   SKINS
+===================================================== */
+
+const SKINS = {
+
+  classic: {
+    level: 1,
+    power: 1,
+    maxEnergy: 100,
+    icon: "🟡",
+    name: "Classic"
+  },
+
+  ocean: {
+    level: 2,
+    power: 3,
+    maxEnergy: 200,
+    icon: "🔵",
+    name: "Ocean"
+  },
+
+  nebula: {
+    level: 3,
+    power: 5,
+    maxEnergy: 300,
+    icon: "🟣",
+    name: "Nebula"
+  },
+
+  emerald: {
+    level: 4,
+    power: 8,
+    maxEnergy: 400,
+    icon: "🟢",
+    name: "Emerald"
+  },
+
+  inferno: {
+    level: 5,
+    power: 12,
+    maxEnergy: 500,
+    icon: "🔴",
+    name: "Inferno"
+  },
+
+  cyber: {
+    level: 6,
+    power: 16,
+    maxEnergy: 600,
+    icon: "🔷",
+    name: "Cyber"
+  },
+
+  immortal: {
+    level: 7,
+    power: 20,
+    maxEnergy: 700,
+    icon: "🔮",
+    name: "Immortal"
+  }
+
+};
+
+
+/* =====================================================
+   LEVELS
+===================================================== */
+
+const LEVELS = {
+
+  1: {
+    min: 0,
+    max: 2000,
+    skin: "classic"
+  },
+
+  2: {
+    min: 2000,
+    max: 5000,
+    skin: "ocean"
+  },
+
+  3: {
+    min: 5000,
+    max: 10000,
+    skin: "nebula"
+  },
+
+  4: {
+    min: 10000,
+    max: 50000,
+    skin: "emerald"
+  },
+
+  5: {
+    min: 50000,
+    max: 100000,
+    skin: "inferno"
+  },
+
+  6: {
+    min: 100000,
+    max: 1000000,
+    skin: "cyber"
+  },
+
+  7: {
+    min: 1000000,
+    max: Infinity,
+    skin: "immortal"
+  }
+
+};
+
+
+function getLevelFromBalance(value) {
+
+  const amount =
+    Number(value) || 0;
+
+  if (amount >= 1000000)
+    return 7;
+
+  if (amount >= 100000)
+    return 6;
+
+  if (amount >= 50000)
+    return 5;
+
+  if (amount >= 10000)
+    return 4;
+
+  if (amount >= 5000)
+    return 3;
+
+  if (amount >= 2000)
+    return 2;
+
+  return 1;
+
+}
+
+
+/* =====================================================
+   FORMAT
+===================================================== */
+
+function formatNumber(value) {
+
+  return Number(value || 0)
+    .toLocaleString("en-US");
+
+}
+
+
+/* =====================================================
+   UI
+===================================================== */
+
+function updateBalance() {
+
+  balanceEl.textContent =
+    formatNumber(balance);
+
+  document.getElementById(
+    "profileBalance"
+  ).textContent =
+    formatNumber(balance);
+
+}
+
+
+function updateLevelUI() {
+
+  levelEl.textContent =
+    level;
+
+  progressLevel.textContent =
+    level;
+
+  document.getElementById(
+    "profileLevel"
+  ).textContent =
+    level;
+
+  const current =
+    LEVELS[level];
+
+  if (!current) {
+    return;
+  }
+
+  if (level === 7) {
+
+    progressFill.style.width =
+      "100%";
+
+    nextLevelText.textContent =
+      "MAX";
+
+    return;
+  }
+
+  const progress =
+    balance - current.min;
+
+  const needed =
+    current.max - current.min;
+
+  let percent =
+    (progress / needed) * 100;
+
+  percent =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        percent
+      )
+    );
+
+  progressFill.style.width =
+    percent + "%";
+
+  nextLevelText.textContent =
+    formatNumber(current.max);
+
+}
+
+
+function updateEnergyUI() {
+
+  energy =
+    Math.max(
+      0,
+      Math.min(
+        maxEnergy,
+        Math.floor(energy)
+      )
+    );
+
+  energyEl.textContent =
+    `${energy} / ${maxEnergy}`;
+
+}
+
+
+function updateTapPowerUI() {
+
+  /* tap power is represented by selected skin */
+}
+
+
+/* =====================================================
+   COIN DESIGN
+===================================================== */
+
+function updateCoinDesign() {
+
+  coin.className =
+    "coin skin-" +
+    selectedSkin;
+
+  const skin =
+    SKINS[selectedSkin];
+
+  if (skin) {
+
+    coinSymbol.textContent =
+      selectedSkin === "classic"
+        ? "UZ"
+        : selectedSkin === "ocean"
+        ? "≈"
+        : selectedSkin === "nebula"
+        ? "✦"
+        : selectedSkin === "emerald"
+        ? "◆"
+        : selectedSkin === "inferno"
+        ? "🔥"
+        : selectedSkin === "cyber"
+        ? "⚡"
+        : "♛";
+
+  }
+
+}
+
+
+/* =====================================================
+   SKIN LOCK SYSTEM
+===================================================== */
+
+function updateSkinLocks() {
+
+  document
+    .querySelectorAll(".skin-option")
+    .forEach(button => {
+
+      const skinName =
+        button.dataset.skin;
+
+      const requiredLevel =
+        Number(
+          button.dataset.level
+        );
+
+      const unlocked =
+        level >= requiredLevel;
+
+      const status =
+        button.querySelector(
+          "[data-status]"
+        );
+
+      button.classList.toggle(
+        "locked",
+        !unlocked
+      );
+
+      button.classList.toggle(
+        "selected",
+        skinName === selectedSkin
+      );
+
+      if (!status) {
+        return;
+      }
+
+      if (!unlocked) {
+
+        status.textContent =
+          "🔒";
+
+      } else if (
+        skinName === selectedSkin
+      ) {
+
+        status.textContent =
+          "✓";
+
+      } else {
+
+        status.textContent =
+          "SELECT";
+
+      }
+
+    });
+
+}
+
+
+/* =====================================================
+   LEVEL UP
+===================================================== */
+
+function checkLevelUp() {
+
+  const newLevel =
+    getLevelFromBalance(balance);
+
+  if (
+    newLevel >
+    lastLevel
+  ) {
+
+    level =
+      newLevel;
+
+    showLevelPopup(
+      newLevel
+    );
+
+  }
+
+  if (
+    newLevel !== level
+  ) {
+
+    level =
+      newLevel;
+
+  }
+
+  lastLevel =
+    newLevel;
+
+}
+
+
+function showLevelPopup(newLevel) {
+
+  popupIcon.textContent =
+    SKINS[
+      LEVELS[newLevel].skin
+    ]?.icon || "⭐";
+
+  popupText.textContent =
+    `Tabriklaymiz! Level ${newLevel} ochildi.`;
+
+  levelPopup.classList.add(
+    "show"
+  );
+
+}
+
+
+/* =====================================================
+   TAP EFFECT
+===================================================== */
+
+function showTapEffect(
+  power,
+  x,
+  y
+) {
+
+  const effect =
+    document.createElement("div");
+
+  effect.className =
+    "tap-effect";
+
+  effect.textContent =
+    "+" + power;
+
+  effect.style.left =
+    x + "px";
+
+  effect.style.top =
+    y + "px";
+
+  document.body.appendChild(
+    effect
+  );
+
+  setTimeout(() => {
+
+    effect.remove();
+
+  }, 700);
+
+}
+
+
+/* =====================================================
+   LOAD USER
+===================================================== */
+
+async function loadUser() {
+
+  try {
+
+    if (!telegramId) {
+
+      loading.querySelector(
+        ".loading-text"
+      ).textContent =
+        "❌ Telegram orqali oching";
+
+      return;
+
     }
 
+    const response =
+      await fetch(
+        "/api/user/" +
+        telegramId
+      );
 
-    /* =====================================================
-       DOM
-    ===================================================== */
+    if (!response.ok) {
 
-    const loading =
-      document.getElementById("loading");
-
-    const coin =
-      document.getElementById("coin");
-
-    const balanceEl =
-      document.getElementById("balance");
-
-    const energyText =
-      document.getElementById("energyText");
-
-    const energyBar =
-      document.getElementById("energyBar");
-
-    const tapPowerEl =
-      document.getElementById("tapPower");
-
-    const levelBadge =
-      document.getElementById("levelBadge");
-
-    const levelText =
-      document.getElementById("levelText");
-
-    const nextLevelText =
-      document.getElementById("nextLevelText");
-
-    const levelProgress =
-      document.getElementById("levelProgress");
-
-    const skinsContainer =
-      document.getElementById("skins");
-
-
-    /* =====================================================
-       TELEGRAM USER
-    ===================================================== */
-
-    const telegramUser =
-      tg &&
-      tg.initDataUnsafe &&
-      tg.initDataUnsafe.user
-        ? tg.initDataUnsafe.user
-        : null;
-
-    const telegramId =
-      telegramUser
-        ? String(telegramUser.id)
-        : null;
-
-    const initData =
-      tg
-        ? tg.initData
-        : "";
-
-
-    /* =====================================================
-       GAME STATE
-    ===================================================== */
-
-    let balance = 0;
-
-    let energy = 100;
-
-    let maxEnergy = 100;
-
-    let level = 1;
-
-    let lastLevel = 1;
-
-    let tapPower = 1;
-
-    let selectedSkin = "classic";
-
-    let skins = {};
-
-    let pendingTaps = 0;
-
-    let tapQueue = Promise.resolve();
-
-    let serverSyncRunning = false;
-
-
-    /* =====================================================
-       LEVELS
-    ===================================================== */
-
-    const LEVELS = {
-
-      1: {
-        min: 0,
-        max: 2000,
-        skin: "classic"
-      },
-
-      2: {
-        min: 2000,
-        max: 5000,
-        skin: "ocean"
-      },
-
-      3: {
-        min: 5000,
-        max: 10000,
-        skin: "nebula"
-      },
-
-      4: {
-        min: 10000,
-        max: 50000,
-        skin: "emerald"
-      },
-
-      5: {
-        min: 50000,
-        max: 100000,
-        skin: "inferno"
-      },
-
-      6: {
-        min: 100000,
-        max: 1000000,
-        skin: "cyber"
-      },
-
-      7: {
-        min: 1000000,
-        max: Infinity,
-        skin: "immortal"
-      }
-
-    };
-
-
-    /* =====================================================
-       GET LEVEL
-    ===================================================== */
-
-    function getLevelFromBalance(amount) {
-
-      amount =
-        Number(amount) || 0;
-
-      if (amount >= 1000000) {
-        return 7;
-      }
-
-      if (amount >= 100000) {
-        return 6;
-      }
-
-      if (amount >= 50000) {
-        return 5;
-      }
-
-      if (amount >= 10000) {
-        return 4;
-      }
-
-      if (amount >= 5000) {
-        return 3;
-      }
-
-      if (amount >= 2000) {
-        return 2;
-      }
-
-      return 1;
-    }
-
-
-    /* =====================================================
-       FORMAT NUMBER
-    ===================================================== */
-
-    function formatNumber(number) {
-
-      return Number(
-        number || 0
-      ).toLocaleString(
-        "en-US"
+      throw new Error(
+        "Server javobi: " +
+        response.status
       );
 
     }
 
+    const data =
+      await response.json();
 
-    /* =====================================================
-       BALANCE UI
-    ===================================================== */
+    if (!data.success) {
 
-    function updateBalance() {
+      throw new Error(
+        data.message ||
+        "Foydalanuvchi topilmadi"
+      );
 
-      balanceEl.innerHTML =
-        '<span class="coin-symbol">🪙</span> ' +
-        formatNumber(balance);
+    }
+
+    userData =
+      data.user;
+
+    skins =
+      data.skins || {};
+
+    balance =
+      Number(
+        userData.balance
+      ) || 0;
+
+    level =
+      getLevelFromBalance(
+        balance
+      );
+
+    lastLevel =
+      level;
+
+    energy =
+      Number(
+        userData.energy
+      );
+
+    maxEnergy =
+      Number(
+        userData.max_energy
+      ) || 100;
+
+    selectedSkin =
+      userData.skin ||
+      "classic";
+
+
+    /*
+      Serverdagi skin ma'lumotidan
+      aniq power/maxEnergy olish.
+    */
+
+    const selected =
+      skins[selectedSkin] ||
+      SKINS[selectedSkin];
+
+    if (selected) {
+
+      tapPower =
+        Number(
+          selected.power
+        ) || 1;
+
+      maxEnergy =
+        Number(
+          selected.maxEnergy ||
+          userData.max_energy
+        ) || 100;
 
     }
 
 
-    /* =====================================================
-       ENERGY UI
-    ===================================================== */
+    updateCoinDesign();
 
-    function updateEnergyUI() {
+    updateBalance();
+
+    updateLevelUI();
+
+    updateEnergyUI();
+
+    updateSkinLocks();
+
+
+    loadProfile(
+      userData
+    );
+
+    loadFriends(
+      userData
+    );
+
+
+    loading.classList.add(
+      "hidden"
+    );
+
+
+    /*
+      Serverdagi energy bilan
+      frontend timerini sinxronlaymiz.
+    */
+
+    startEnergyRegeneration();
+
+
+  } catch (error) {
+
+    console.error(
+      "LOAD USER ERROR:",
+      error
+    );
+
+    loading.querySelector(
+      ".loading-text"
+    ).textContent =
+      "❌ " +
+      error.message;
+
+  }
+
+}
+
+
+/* =====================================================
+   ENERGY TIMER
+===================================================== */
+
+/*
+  MUHIM:
+  1 SEKUND = 1 ENERGY.
+
+  Bu timer faqat UI uchun.
+  Server ham energy'ni elapsed seconds
+  bo'yicha hisoblaydi.
+*/
+
+let energyTimer = null;
+
+let lastEnergyTime =
+  Date.now();
+
+
+function startEnergyRegeneration() {
+
+  if (energyTimer) {
+
+    clearInterval(
+      energyTimer
+    );
+
+  }
+
+  lastEnergyTime =
+    Date.now();
+
+  energyTimer =
+    setInterval(() => {
+
+      if (
+        energy >= maxEnergy
+      ) {
+
+        lastEnergyTime =
+          Date.now();
+
+        return;
+
+      }
+
+      const now =
+        Date.now();
+
+      const elapsed =
+        Math.floor(
+          (now - lastEnergyTime) /
+          1000
+        );
+
+      if (
+        elapsed <= 0
+      ) {
+
+        return;
+
+      }
 
       energy =
-        Math.max(
-          0,
-          Math.min(
-            Number(maxEnergy) || 100,
-            Number(energy) || 0
-          )
+        Math.min(
+          maxEnergy,
+          energy + elapsed
         );
 
-      energyText.textContent =
-        `${Math.floor(energy)} / ${Math.floor(maxEnergy)}`;
+      lastEnergyTime +=
+        elapsed * 1000;
 
-      const percent =
-        maxEnergy > 0
-          ? (energy / maxEnergy) * 100
-          : 0;
+      updateEnergyUI();
 
-      energyBar.style.width =
-        `${Math.max(0, Math.min(100, percent))}%`;
+    }, 250);
 
-    }
+}
 
 
-    /* =====================================================
-       LEVEL UI
-    ===================================================== */
+/* =====================================================
+   FAST TAP QUEUE
+===================================================== */
 
-    function updateLevelUI() {
+/*
+  Tap darhol ekranda ishlaydi.
+  Serverga esa ketma-ket yuboriladi.
 
-      level =
-        getLevelFromBalance(balance);
+  Shu sababli:
+  - tap sekinlashmaydi
+  - response tartibi buzilmaydi
+  - energy noto'g'ri sakramaydi
+*/
 
-      levelBadge.textContent =
-        `LEVEL ${level}`;
+let pendingTaps = 0;
 
-      levelText.textContent =
-        `Level ${level}`;
-
-      const current =
-        LEVELS[level];
-
-      if (!current) {
-        return;
-      }
-
-      if (level === 7) {
-
-        nextLevelText.textContent =
-          "MAX LEVEL";
-
-        levelProgress.style.width =
-          "100%";
-
-        return;
-      }
-
-      nextLevelText.textContent =
-        `${formatNumber(current.max)} gacha`;
-
-      const progress =
-        (
-          (balance - current.min) /
-          (current.max - current.min)
-        ) * 100;
-
-      levelProgress.style.width =
-        `${Math.max(
-          0,
-          Math.min(100, progress)
-        )}%`;
-
-    }
+let tapQueueRunning = false;
 
 
-    /* =====================================================
-       TAP POWER UI
-    ===================================================== */
+function queueServerTap() {
 
-    function updateTapPowerUI() {
+  pendingTaps++;
 
-      tapPowerEl.textContent =
-        `+${Number(tapPower) || 1}`;
+  processTapQueue();
 
-    }
+}
 
 
-    /* =====================================================
-       TAP EFFECT
-    ===================================================== */
+async function processTapQueue() {
 
-    function showTapEffect(
-      power,
-      x,
-      y
-    ) {
+  if (
+    tapQueueRunning
+  ) {
 
-      const effect =
-        document.createElement("div");
+    return;
 
-      effect.className =
-        "tap-effect";
+  }
 
-      effect.textContent =
-        `+${power} 🪙`;
-
-      effect.style.left =
-        `${x}px`;
-
-      effect.style.top =
-        `${y}px`;
-
-      document.body.appendChild(
-        effect
-      );
-
-      setTimeout(
-        () => effect.remove(),
-        700
-      );
-
-    }
+  tapQueueRunning =
+    true;
 
 
-    /* =====================================================
-       LEVEL UP
-    ===================================================== */
+  while (
+    pendingTaps > 0
+  ) {
 
-    function showLevelUp(
-      newLevel
-    ) {
+    pendingTaps--;
 
-      if (newLevel <= lastLevel) {
-        return;
-      }
+    try {
 
-      lastLevel =
-        newLevel;
+      const response =
+        await fetch(
+          "/api/tap",
+          {
+            method: "POST",
 
-      const popup =
-        document.getElementById(
-          "levelPopup"
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+                telegramId:
+                  telegramId,
+
+                initData:
+                  initData
+              })
+          }
         );
 
-      const popupText =
-        document.getElementById(
-          "popupText"
-        );
-
-      popupText.textContent =
-        `Tabriklaymiz! Siz Level ${newLevel} ga o'tdingiz.`;
-
-      popup.classList.add(
-        "show"
-      );
-
-      if (tg) {
-
-        try {
-          tg.HapticFeedback.notificationOccurred(
-            "success"
-          );
-        } catch (e) {}
-
-      }
-
-    }
+      const data =
+        await response.json();
 
 
-    /* =====================================================
-       LOAD USER
-    ===================================================== */
+      if (
+        !data.success
+      ) {
 
-    async function loadUser() {
-
-      if (!telegramId) {
-
-        loading.querySelector(
-          ".loading-text"
-        ).textContent =
-          "❌ Telegram orqali oching";
-
-        return;
-
-      }
-
-      try {
-
-        const response =
-          await fetch(
-            "/api/user/" +
-            encodeURIComponent(
-              telegramId
-            )
-          );
-
-        if (!response.ok) {
-
-          throw new Error(
-            `Server ${response.status}`
-          );
-
-        }
-
-        const data =
-          await response.json();
-
-        if (!data.success) {
-
-          throw new Error(
-            data.message ||
-            "User topilmadi"
-          );
-
-        }
-
-        const user =
-          data.user;
-
-        skins =
-          data.skins || {};
+        /*
+          Server qabul qilmasa,
+          optimistik tapni qaytaramiz.
+        */
 
         balance =
-          Number(user.balance) || 0;
+          Math.max(
+            0,
+            balance -
+            tapPower
+          );
+
+        energy =
+          Math.min(
+            maxEnergy,
+            energy + 1
+          );
+
+        updateBalance();
+
+        updateEnergyUI();
+
+        console.log(
+          "Server tap xatosi:",
+          data.message
+        );
+
+        continue;
+
+      }
+
+
+      /*
+        Server tasdiqlagan
+        oxirgi holatni olamiz.
+
+        Faqat pending tap qolmaganida
+        energy/balance'ni to'liq sync qilamiz.
+      */
+
+      if (
+        pendingTaps === 0
+      ) {
+
+        balance =
+          Number(
+            data.balance
+          );
+
+        maxEnergy =
+          Number(
+            data.maxEnergy
+          ) || maxEnergy;
 
         level =
-          Number(user.level) ||
+          Number(
+            data.level
+          ) ||
           getLevelFromBalance(
             balance
           );
 
-        lastLevel =
-          level;
-
-        energy =
-          Number(user.energy) || 0;
-
-        maxEnergy =
-          Number(user.max_energy) || 100;
-
-        selectedSkin =
-          user.skin ||
-          "classic";
-
+        tapPower =
+          Number(
+            data.tapPower
+          ) ||
+          tapPower;
 
         /*
-         * Skin ma'lumoti
-         */
+          Server energy'si lokal
+          qiymatdan keskin past bo'lsa,
+          uni to'g'ridan-to'g'ri bosib
+          yubormaymiz.
 
-        const selected =
-          skins[selectedSkin];
+          Bu tez tap paytida
+          energy sakrashining oldini oladi.
+        */
 
-        if (selected) {
+        const serverEnergy =
+          Number(
+            data.energy
+          );
 
-          tapPower =
-            Number(
-              selected.power
-            ) || 1;
+        if (
+          Number.isFinite(
+            serverEnergy
+          )
+        ) {
 
-          maxEnergy =
-            Number(
-              selected.maxEnergy
-            ) || maxEnergy;
+          energy =
+            Math.max(
+              0,
+              Math.min(
+                maxEnergy,
+                serverEnergy
+              )
+            );
 
-          coin.style.background =
-            `
-            radial-gradient(
-              circle at 34% 27%,
-              #fffbc4 0%,
-              #ffe46b 12%,
-              ${selected.color} 42%,
-              ${selected.color} 65%,
-              #633900 100%
-            )
-            `;
+          lastEnergyTime =
+            Date.now();
 
         }
 
-
         updateBalance();
+
         updateLevelUI();
+
         updateEnergyUI();
-        updateTapPowerUI();
+
         updateSkinLocks();
-
-        loadProfile(user);
-        loadFriends(user);
-
-        loading.classList.add(
-          "hidden"
-        );
-
-      } catch (error) {
-
-        console.error(
-          "LOAD USER ERROR:",
-          error
-        );
-
-        loading.querySelector(
-          ".loading-text"
-        ).textContent =
-          "❌ Xato: " +
-          error.message;
 
       }
 
-    }
+    } catch (error) {
 
-
-    /* =====================================================
-       SKIN LOCKS
-    ===================================================== */
-
-    function updateSkinLocks() {
-
-      const buttons =
-        document.querySelectorAll(
-          ".skin-option"
-        );
-
-      buttons.forEach(
-        button => {
-
-          const skinName =
-            button.dataset.skin;
-
-          const skin =
-            skins[skinName];
-
-          if (!skin) {
-            return;
-          }
-
-          const requiredLevel =
-            Number(
-              skin.level
-            );
-
-          const unlocked =
-            level >= requiredLevel;
-
-          button.classList.toggle(
-            "locked",
-            !unlocked
-          );
-
-          button.classList.toggle(
-            "selected",
-            skinName === selectedSkin
-          );
-
-          let lock =
-            button.querySelector(
-              ".lock"
-            );
-
-          if (!unlocked) {
-
-            if (!lock) {
-
-              lock =
-                document.createElement(
-                  "div"
-                );
-
-              lock.className =
-                "lock";
-
-              button.appendChild(
-                lock
-              );
-
-            }
-
-            lock.textContent =
-              "🔒";
-
-          } else {
-
-            if (lock) {
-              lock.remove();
-            }
-
-          }
-
-        }
+      console.error(
+        "TAP SERVER ERROR:",
+        error
       );
 
+      /*
+        Network xatosida
+        tapni qaytaramiz.
+      */
+
+      balance =
+        Math.max(
+          0,
+          balance -
+          tapPower
+        );
+
+      energy =
+        Math.min(
+          maxEnergy,
+          energy + 1
+        );
+
+      updateBalance();
+
+      updateEnergyUI();
+
+    }
+
+  }
+
+
+  tapQueueRunning =
+    false;
+
+}
+
+
+/* =====================================================
+   COIN TAP
+===================================================== */
+
+coin.addEventListener(
+  "click",
+  event => {
+
+    if (
+      energy <= 0
+    ) {
+
+      return;
+
     }
 
 
-    /* =====================================================
-       SELECT SKIN
-    ===================================================== */
+    /*
+      Shu tap uchun
+      ayni paytdagi power.
+    */
 
-    skinsContainer.addEventListener(
+    const currentPower =
+      Number(
+        tapPower
+      ) || 1;
+
+
+    /*
+      DARHOL UI.
+    */
+
+    balance +=
+      currentPower;
+
+    energy =
+      Math.max(
+        0,
+        energy - 1
+      );
+
+
+    /*
+      Timer uchun
+      yangi vaqt nuqtasi.
+    */
+
+    lastEnergyTime =
+      Date.now();
+
+
+    showTapEffect(
+      currentPower,
+      event.clientX,
+      event.clientY
+    );
+
+
+    updateBalance();
+
+    updateEnergyUI();
+
+    checkLevelUp();
+
+    updateLevelUI();
+
+    updateSkinLocks();
+
+
+    /*
+      Serverga yuborish.
+    */
+
+    queueServerTap();
+
+  }
+);
+
+
+/* =====================================================
+   SKIN SELECT
+===================================================== */
+
+document
+  .querySelectorAll(".skin-option")
+  .forEach(button => {
+
+    button.addEventListener(
       "click",
-      async event => {
-
-        const button =
-          event.target.closest(
-            ".skin-option"
-          );
-
-        if (!button) {
-          return;
-        }
+      async () => {
 
         const skinName =
           button.dataset.skin;
 
-        const skin =
-          skins[skinName];
+        const requiredLevel =
+          Number(
+            button.dataset.level
+          );
 
-        if (!skin) {
-          return;
-        }
+
+        /*
+          Eski skinlar ham qoladi.
+          Faqat level >= talab qilingan
+          bo'lsa tanlanadi.
+        */
 
         if (
           level <
-          Number(skin.level)
+          requiredLevel
         ) {
 
           return;
 
         }
 
-        /*
-         * Pending taplar tugamaguncha
-         * skin almashtirmaymiz.
-         */
 
-        if (pendingTaps > 0) {
-
-          console.log(
-            "Avval taplar serverga yuborilsin."
-          );
+        if (
+          skinName ===
+          selectedSkin
+        ) {
 
           return;
 
         }
+
+
+        const oldSkin =
+          selectedSkin;
+
+        const oldPower =
+          tapPower;
+
+        const oldMaxEnergy =
+          maxEnergy;
+
+        const oldEnergy =
+          energy;
+
+
+        /*
+          UI'ni darhol almashtiramiz.
+        */
+
+        selectedSkin =
+          skinName;
+
+        const skin =
+          SKINS[skinName];
+
+        tapPower =
+          skin.power;
+
+        maxEnergy =
+          skin.maxEnergy;
+
+        /*
+          Yangi skin tanlanganda
+          energy to'liq bo'ladi.
+        */
+
+        energy =
+          maxEnergy;
+
+        lastEnergyTime =
+          Date.now();
+
+
+        updateCoinDesign();
+
+        updateEnergyUI();
+
+        updateSkinLocks();
+
 
         try {
 
@@ -2190,65 +3016,93 @@
                     "application/json"
                 },
 
-                body: JSON.stringify({
-                  telegramId,
-                  initData,
-                  skin: skinName
-                })
+                body:
+                  JSON.stringify({
+                    telegramId:
+                      telegramId,
+
+                    skin:
+                      skinName,
+
+                    initData:
+                      initData
+                  })
               }
             );
+
 
           const data =
             await response.json();
 
-          if (!data.success) {
 
-            console.log(
-              data.message
+          if (
+            !data.success
+          ) {
+
+            throw new Error(
+              data.message ||
+              "Skin tanlashda xato"
             );
 
-            return;
-
           }
+
+
+          /*
+            Server tasdiqladi.
+          */
 
           selectedSkin =
             skinName;
 
           tapPower =
             Number(
-              data.tapPower
-            ) || 1;
+              data.power ||
+              data.tapPower ||
+              skin.power
+            );
 
           maxEnergy =
             Number(
-              data.maxEnergy
-            ) || maxEnergy;
+              data.maxEnergy ||
+              skin.maxEnergy
+            );
+
+          /*
+            Level 3 = 300,
+            Level 4 = 400 va hokazo.
+          */
+
+          energy =
+            Number(
+              data.energy
+            );
+
+          if (
+            !Number.isFinite(
+              energy
+            )
+          ) {
+
+            energy =
+              maxEnergy;
+
+          }
 
           energy =
             Math.min(
-              energy,
-              maxEnergy
+              maxEnergy,
+              energy
             );
 
-          updateTapPowerUI();
+          lastEnergyTime =
+            Date.now();
+
+          updateCoinDesign();
+
           updateEnergyUI();
+
           updateSkinLocks();
 
-          if (skin.color) {
-
-            coin.style.background =
-              `
-              radial-gradient(
-                circle at 34% 27%,
-                #fffbc4 0%,
-                #ffe46b 12%,
-                ${skin.color} 42%,
-                ${skin.color} 65%,
-                #633900 100%
-              )
-              `;
-
-          }
 
         } catch (error) {
 
@@ -2257,821 +3111,569 @@
             error
           );
 
-        }
 
-      }
-    );
+          /*
+            Eski holatga qaytarish.
+          */
 
+          selectedSkin =
+            oldSkin;
 
-    /* =====================================================
-       FAST TAP
-    ===================================================== */
+          tapPower =
+            oldPower;
 
-    coin.addEventListener(
-      "click",
-      event => {
-
-        if (energy < 1) {
-          return;
-        }
-
-        /*
-         * Shu tap uchun power.
-         * Keyin skin o'zgarsa ham
-         * bu tap o'zgarmaydi.
-         */
-
-        const currentPower =
-          Number(tapPower) || 1;
-
-
-        /*
-         * UI DARHOL o'zgaradi.
-         */
-
-        balance +=
-          currentPower;
-
-        energy -= 1;
-
-        pendingTaps++;
-
-
-        updateBalance();
-        updateEnergyUI();
-        updateLevelUI();
-
-
-        /*
-         * Tap animatsiyasi
-         */
-
-        showTapEffect(
-          currentPower,
-          event.clientX,
-          event.clientY
-        );
-
-
-        /*
-         * Haptic
-         */
-
-        if (tg) {
-
-          try {
-
-            tg.HapticFeedback
-              .impactOccurred(
-                "light"
-              );
-
-          } catch (e) {}
-
-        }
-
-
-        /*
-         * Serverga navbat bilan yuborish.
-         */
-
-        tapQueue =
-          tapQueue.then(
-            async () => {
-
-              try {
-
-                const response =
-                  await fetch(
-                    "/api/tap",
-                    {
-                      method: "POST",
-
-                      headers: {
-                        "Content-Type":
-                          "application/json"
-                      },
-
-                      body: JSON.stringify({
-                        telegramId,
-                        initData
-                      })
-                    }
-                  );
-
-                const data =
-                  await response.json();
-
-
-                if (!data.success) {
-
-                  /*
-                   * Server qabul qilmasa,
-                   * lokal tapni qaytaramiz.
-                   */
-
-                  balance -=
-                    currentPower;
-
-                  energy =
-                    Math.min(
-                      maxEnergy,
-                      energy + 1
-                    );
-
-                  pendingTaps--;
-
-                  updateBalance();
-                  updateEnergyUI();
-                  updateLevelUI();
-
-                  console.log(
-                    "Tap xatosi:",
-                    data.message
-                  );
-
-                  return;
-
-                }
-
-
-                pendingTaps--;
-
-
-                /*
-                 * Muhim:
-                 *
-                 * Har bir response kelganda
-                 * energy'ni overwrite qilmaymiz.
-                 *
-                 * Aks holda tez tap paytida
-                 * eski response yangi energy'ni
-                 * buzishi mumkin.
-                 */
-
-                if (
-                  pendingTaps === 0
-                ) {
-
-                  const serverBalance =
-                    Number(
-                      data.balance
-                    );
-
-                  const serverEnergy =
-                    Number(
-                      data.energy
-                    );
-
-                  balance =
-                    serverBalance;
-
-                  /*
-                   * Server energy faqat
-                   * navbat tugaganda olinadi.
-                   */
-
-                  energy =
-                    Math.min(
-                      maxEnergy,
-                      serverEnergy
-                    );
-
-                  level =
-                    Number(
-                      data.level
-                    ) ||
-                    getLevelFromBalance(
-                      balance
-                    );
-
-                  tapPower =
-                    Number(
-                      data.tapPower
-                    ) ||
-                    tapPower;
-
-                  updateBalance();
-                  updateLevelUI();
-                  updateEnergyUI();
-                  updateTapPowerUI();
-                  updateSkinLocks();
-
-                  showLevelUp(
-                    level
-                  );
-
-                }
-
-              } catch (error) {
-
-                console.error(
-                  "TAP SERVER ERROR:",
-                  error
-                );
-
-                /*
-                 * Serverga yuborishda
-                 * aloqa uzilsa tapni qaytaramiz.
-                 */
-
-                balance -=
-                  currentPower;
-
-                energy =
-                  Math.min(
-                    maxEnergy,
-                    energy + 1
-                  );
-
-                pendingTaps--;
-
-                updateBalance();
-                updateEnergyUI();
-                updateLevelUI();
-
-              }
-
-            }
-          );
-
-      }
-    );
-
-
-    /* =====================================================
-       ENERGY REGENERATION
-       
-       EXACT:
-       1 SECOND = +1 ENERGY
-       
-       MAX ENERGY'DAN OSHMAYDI.
-    ===================================================== */
-
-    let lastEnergyTick =
-      Date.now();
-
-    setInterval(
-      () => {
-
-        const now =
-          Date.now();
-
-        /*
-         * Haqiqiy o'tgan sekundlarni
-         * hisoblaymiz.
-         */
-
-        const elapsed =
-          Math.floor(
-            (now - lastEnergyTick) /
-            1000
-          );
-
-        if (elapsed <= 0) {
-          return;
-        }
-
-        lastEnergyTick +=
-          elapsed * 1000;
-
-
-        if (
-          energy < maxEnergy
-        ) {
+          maxEnergy =
+            oldMaxEnergy;
 
           energy =
-            Math.min(
-              maxEnergy,
-              energy + elapsed
-            );
+            oldEnergy;
+
+          lastEnergyTime =
+            Date.now();
+
+          updateCoinDesign();
 
           updateEnergyUI();
 
+          updateSkinLocks();
+
         }
 
-      },
-      250
+      }
     );
 
+  });
 
-    /* =====================================================
-       SERVER ENERGY SYNC
-       
-       Har 5 sekundda tekshiradi.
-       Lekin local regeneration bilan
-       ikki marta qo'shmaydi.
-    ===================================================== */
 
-    setInterval(
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+document
+  .querySelectorAll(".nav-btn")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
       async () => {
 
-        if (
-          !telegramId ||
-          pendingTaps > 0 ||
-          serverSyncRunning
-        ) {
-          return;
-        }
+        const pageId =
+          button.dataset.page;
 
-        serverSyncRunning =
-          true;
 
-        try {
+        document
+          .querySelectorAll(".page")
+          .forEach(page => {
 
-          const response =
-            await fetch(
-              "/api/user/" +
-              encodeURIComponent(
-                telegramId
-              )
+            page.classList.remove(
+              "active"
             );
 
-          const data =
-            await response.json();
+          });
 
-          if (
-            data.success &&
-            data.user
-          ) {
 
-            const serverEnergy =
-              Number(
-                data.user.energy
-              );
-
-            /*
-             * Server ko'proq energy
-             * hisoblagan bo'lsa,
-             * uni olamiz.
-             */
-
-            if (
-              serverEnergy >
-              energy
-            ) {
-
-              energy =
-                Math.min(
-                  maxEnergy,
-                  serverEnergy
-                );
-
-              updateEnergyUI();
-
-            }
-
-          }
-
-        } catch (error) {
-
-          console.log(
-            "Energy sync error"
+        const page =
+          document.getElementById(
+            pageId
           );
 
-        } finally {
+        if (page) {
 
-          serverSyncRunning =
-            false;
+          page.classList.add(
+            "active"
+          );
 
         }
 
-      },
-      5000
+
+        document
+          .querySelectorAll(".nav-btn")
+          .forEach(btn => {
+
+            btn.classList.remove(
+              "active"
+            );
+
+          });
+
+
+        button.classList.add(
+          "active"
+        );
+
+
+        if (
+          pageId ===
+          "rankPage"
+        ) {
+
+          loadRank();
+
+        }
+
+      }
     );
 
-
-    /* =====================================================
-       NAVIGATION
-    ===================================================== */
-
-    document
-      .querySelectorAll(".nav-btn")
-      .forEach(
-        button => {
-
-          button.addEventListener(
-            "click",
-            () => {
-
-              const pageId =
-                button.dataset.page;
-
-              document
-                .querySelectorAll(
-                  ".page"
-                )
-                .forEach(
-                  page => {
-                    page.classList.remove(
-                      "active"
-                    );
-                  }
-                );
-
-              const page =
-                document.getElementById(
-                  pageId
-                );
-
-              if (page) {
-                page.classList.add(
-                  "active"
-                );
-              }
-
-              document
-                .querySelectorAll(
-                  ".nav-btn"
-                )
-                .forEach(
-                  btn => {
-                    btn.classList.remove(
-                      "active"
-                    );
-                  }
-                );
-
-              button.classList.add(
-                "active"
-              );
+  });
 
 
-              if (
-                pageId ===
-                "rankPage"
-              ) {
+/* =====================================================
+   RANK
+===================================================== */
 
-                loadRank();
+async function loadRank() {
 
-              }
+  try {
 
-            }
-          );
-
-        }
+    const response =
+      await fetch(
+        "/api/rank"
       );
 
+    const data =
+      await response.json();
 
-    /* =====================================================
-       RANK
-    ===================================================== */
 
-    async function loadRank() {
+    if (
+      !data.success
+    ) {
 
-      const rankList =
-        document.getElementById(
-          "rankList"
-        );
+      throw new Error(
+        data.message ||
+        "Rank yuklanmadi"
+      );
+
+    }
+
+
+    const users =
+      data.users ||
+      data.rank ||
+      [];
+
+
+    if (
+      users.length === 0
+    ) {
+
+      rankList.innerHTML =
+        "Hozircha rank bo‘sh.";
+
+      return;
+
+    }
+
+
+    rankList.innerHTML =
+      users
+        .map(
+          (user, index) => {
+
+            const name =
+              user.first_name ||
+              user.username ||
+              "User";
+
+            const userBalance =
+              Number(
+                user.balance
+              ) || 0;
+
+            return `
+
+              <div class="rank-row">
+
+                <div class="rank-number">
+                  #${index + 1}
+                </div>
+
+                <div class="rank-name">
+                  ${escapeHtml(name)}
+                </div>
+
+                <div class="rank-balance">
+                  ${formatNumber(userBalance)}
+                </div>
+
+              </div>
+
+            `;
+
+          }
+        )
+        .join("");
+
+  } catch (error) {
+
+    console.error(
+      "RANK ERROR:",
+      error
+    );
+
+    rankList.innerHTML =
+      "❌ Rank yuklanmadi.";
+
+  }
+
+}
+
+
+/* =====================================================
+   PROFILE
+===================================================== */
+
+function loadProfile(user) {
+
+  if (!user) {
+    return;
+  }
+
+  const name =
+    user.first_name ||
+    user.username ||
+    "User";
+
+  document.getElementById(
+    "profileName"
+  ).textContent =
+    name;
+
+  document.getElementById(
+    "profileUsername"
+  ).textContent =
+    user.username
+      ? "@" + user.username
+      : "Telegram user";
+
+  document.getElementById(
+    "profileFriends"
+  ).textContent =
+    Number(
+      user.referrals
+    ) || 0;
+
+}
+
+
+/* =====================================================
+   FRIENDS
+===================================================== */
+
+function loadFriends(user) {
+
+  const botUsername =
+    "UZCOIN_BOT";
+
+  if (!telegramId) {
+    return;
+  }
+
+  const link =
+    `https://t.me/${botUsername}?start=ref_${telegramId}`;
+
+  document.getElementById(
+    "referralText"
+  ).textContent =
+    `Sening referral linking: ${link}`;
+
+  document.getElementById(
+    "copyReferral"
+  ).onclick =
+    async () => {
 
       try {
 
-        const response =
-          await fetch(
-            "/api/rank"
-          );
+        await navigator.clipboard.writeText(
+          link
+        );
 
-        const data =
-          await response.json();
+        document.getElementById(
+          "copyReferral"
+        ).textContent =
+          "✅ Nusxalandi";
 
-        if (
-          !data.success ||
-          !Array.isArray(data.users)
-        ) {
+        setTimeout(() => {
 
-          throw new Error(
-            "Rank ma'lumotlari topilmadi"
-          );
+          document.getElementById(
+            "copyReferral"
+          ).textContent =
+            "🔗 Linkni nusxalash";
 
-        }
-
-        if (
-          data.users.length === 0
-        ) {
-
-          rankList.innerHTML =
-            `
-            <div style="
-              text-align:center;
-              color:#8d99ae;
-              padding:25px;
-            ">
-              Hali reyting bo'sh
-            </div>
-            `;
-
-          return;
-
-        }
-
-        rankList.innerHTML =
-          data.users
-            .map(
-              (user, index) => {
-
-                const name =
-                  user.first_name ||
-                  user.username ||
-                  "User";
-
-                return `
-                  <div class="rank-row">
-
-                    <div class="rank-left">
-
-                      <div class="rank-number">
-                        #${index + 1}
-                      </div>
-
-                      <div class="rank-name">
-                        ${escapeHtml(name)}
-                      </div>
-
-                    </div>
-
-                    <div class="rank-balance">
-                      🪙 ${formatNumber(
-                        user.balance
-                      )}
-                    </div>
-
-                  </div>
-                `;
-
-              }
-            )
-            .join("");
+        }, 1500);
 
       } catch (error) {
 
-        console.error(
-          "RANK ERROR:",
-          error
+        console.log(
+          "Copy error"
         );
-
-        rankList.innerHTML =
-          `
-          <div style="
-            text-align:center;
-            color:#ff7777;
-            padding:25px;
-          ">
-            Reytingni yuklab bo'lmadi
-          </div>
-          `;
 
       }
 
-    }
+    };
+
+}
 
 
-    /* =====================================================
-       PROFILE
-    ===================================================== */
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
 
-    function loadProfile(user) {
+function escapeHtml(value) {
 
-      if (!user) {
-        return;
-      }
+  return String(value || "")
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
 
-      const firstName =
-        user.first_name ||
-        "User";
-
-      const username =
-        user.username
-          ? "@" + user.username
-          : "Telegram user";
-
-      document.getElementById(
-        "profileName"
-      ).textContent =
-        firstName;
-
-      document.getElementById(
-        "profileUsername"
-      ).textContent =
-        username;
-
-      document.getElementById(
-        "profileBalance"
-      ).textContent =
-        formatNumber(
-          user.balance
-        );
-
-      document.getElementById(
-        "profileLevel"
-      ).textContent =
-        user.level || level;
-
-      document.getElementById(
-        "profileReferrals"
-      ).textContent =
-        user.referrals || 0;
-
-      document.getElementById(
-        "profileSkin"
-      ).textContent =
-        selectedSkin;
+}
 
 
-      const avatar =
-        document.getElementById(
-          "avatar"
-        );
+/* =====================================================
+   POPUP CLOSE
+===================================================== */
 
-      avatar.textContent =
-        firstName
-          .charAt(0)
-          .toUpperCase();
+document.getElementById(
+  "popupClose"
+).addEventListener(
+  "click",
+  () => {
 
-    }
+    levelPopup.classList.remove(
+      "show"
+    );
 
-
-    /* =====================================================
-       FRIENDS
-    ===================================================== */
-
-    function loadFriends(user) {
-
-      const friendsList =
-        document.getElementById(
-          "friendsList"
-        );
-
-      /*
-       * Hozircha serverdagi
-       * referrals sonini ko'rsatamiz.
-       */
-
-      const referrals =
-        Number(
-          user?.referrals || 0
-        );
-
-      if (referrals > 0) {
-
-        friendsList.innerHTML =
-          `
-          <div style="
-            padding:15px;
-            color:#aeb8ca;
-          ">
-            👥 Sizda
-            <b style="color:#ffd83d;">
-              ${referrals}
-            </b>
-            ta referral bor.
-          </div>
-          `;
-
-      } else {
-
-        friendsList.innerHTML =
-          `
-          <div style="
-            text-align:center;
-            color:#8d99ae;
-            padding:20px;
-          ">
-            Hali do'stlar yo'q
-          </div>
-          `;
-
-      }
+  }
+);
 
 
-      /*
-       * Invite link
-       */
+/* =====================================================
+   SERVER ENERGY SYNC
+===================================================== */
 
-      const botUsername =
-        "UZCOIN_BOT";
+/*
+  Serverni har 5 sekund tekshiramiz.
 
-      const inviteLink =
-        telegramId
-          ? `https://t.me/${botUsername}?start=ref_${telegramId}`
-          : "";
+  Lekin pending tap bor paytda
+  server energy'si bilan
+  local taplarni bosib tashlamaymiz.
+*/
 
-      document.getElementById(
-        "inviteLink"
-      ).textContent =
-        inviteLink ||
-        "Telegram orqali oching";
+setInterval(
+  async () => {
 
-      document.getElementById(
-        "copyInvite"
-      ).onclick =
-        async () => {
-
-          if (!inviteLink) {
-            return;
-          }
-
-          try {
-
-            await navigator
-              .clipboard
-              .writeText(
-                inviteLink
-              );
-
-            document.getElementById(
-              "copyInvite"
-            ).textContent =
-              "✅ Nusxalandi!";
-
-            setTimeout(
-              () => {
-
-                document.getElementById(
-                  "copyInvite"
-                ).textContent =
-                  "📋 Havolani nusxalash";
-
-              },
-              1500
-            );
-
-          } catch (error) {
-
-            console.log(
-              "Clipboard error"
-            );
-
-          }
-
-        };
-
-    }
-
-
-    /* =====================================================
-       HTML SECURITY
-    ===================================================== */
-
-    function escapeHtml(
-      value
+    if (
+      !telegramId
     ) {
 
-      return String(value)
-        .replace(
-          /&/g,
-          "&amp;"
-        )
-        .replace(
-          /</g,
-          "&lt;"
-        )
-        .replace(
-          />/g,
-          "&gt;"
-        )
-        .replace(
-          /"/g,
-          "&quot;"
-        )
-        .replace(
-          /'/g,
-          "&#039;"
-        );
+      return;
 
     }
 
+    if (
+      pendingTaps > 0 ||
+      tapQueueRunning
+    ) {
 
-    /* =====================================================
-       POPUP CLOSE
-    ===================================================== */
+      return;
 
-    document
-      .getElementById(
-        "popupClose"
-      )
-      .addEventListener(
-        "click",
-        () => {
+    }
 
-          document
-            .getElementById(
-              "levelPopup"
+    try {
+
+      const response =
+        await fetch(
+          "/api/user/" +
+          telegramId
+        );
+
+      const data =
+        await response.json();
+
+
+      if (
+        !data.success ||
+        !data.user
+      ) {
+
+        return;
+
+      }
+
+
+      const serverUser =
+        data.user;
+
+
+      const serverBalance =
+        Number(
+          serverUser.balance
+        );
+
+
+      /*
+        Balance faqat pending tap
+        bo'lmaganda sync qilinadi.
+      */
+
+      if (
+        Number.isFinite(
+          serverBalance
+        )
+      ) {
+
+        balance =
+          serverBalance;
+
+      }
+
+
+      const serverLevel =
+        getLevelFromBalance(
+          balance
+        );
+
+
+      if (
+        serverLevel >
+        level
+      ) {
+
+        level =
+          serverLevel;
+
+      }
+
+
+      const serverMax =
+        Number(
+          serverUser.max_energy
+        );
+
+
+      if (
+        Number.isFinite(
+          serverMax
+        ) &&
+        serverMax > 0
+      ) {
+
+        maxEnergy =
+          serverMax;
+
+      }
+
+
+      const serverEnergy =
+        Number(
+          serverUser.energy
+        );
+
+
+      if (
+        Number.isFinite(
+          serverEnergy
+        )
+      ) {
+
+        energy =
+          Math.max(
+            0,
+            Math.min(
+              maxEnergy,
+              serverEnergy
             )
-            .classList.remove(
-              "show"
-            );
+          );
+
+      }
+
+
+      if (
+        serverUser.skin
+      ) {
+
+        selectedSkin =
+          serverUser.skin;
+
+        const skin =
+          SKINS[selectedSkin];
+
+        if (skin) {
+
+          tapPower =
+            skin.power;
+
+          /*
+            Backend max_energy
+            bilan moslashtiramiz.
+          */
+
+          if (
+            !serverMax ||
+            serverMax <= 0
+          ) {
+
+            maxEnergy =
+              skin.maxEnergy;
+
+          }
 
         }
+
+      }
+
+
+      lastEnergyTime =
+        Date.now();
+
+
+      updateBalance();
+
+      updateLevelUI();
+
+      updateEnergyUI();
+
+      updateCoinDesign();
+
+      updateSkinLocks();
+
+
+    } catch (error) {
+
+      console.log(
+        "Energy sync error"
       );
 
+    }
 
-    /* =====================================================
-       START
-    ===================================================== */
+  },
+  5000
+);
 
-    loadUser();
 
-  </script>
+/* =====================================================
+   START
+===================================================== */
+
+loadUser();
+
+</script>
 
 </body>
-                </html>
+  </html>
