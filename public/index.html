@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
@@ -11,19 +14,25 @@
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+
   <style>
+
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
 
+
     html,
     body {
+
       margin: 0;
       padding: 0;
+
       width: 100%;
       min-height: 100%;
+
       font-family:
         -apple-system,
         BlinkMacSystemFont,
@@ -31,14 +40,18 @@
         Roboto,
         Arial,
         sans-serif;
+
       background: #080a12;
-      color: #fff;
+      color: white;
+
       overflow-x: hidden;
     }
+
 
     body {
       min-height: 100vh;
     }
+
 
     button {
       border: 0;
@@ -46,35 +59,46 @@
       font-family: inherit;
     }
 
+
     /* =========================
        LOADING
     ========================= */
 
     #loading {
+
       position: fixed;
       inset: 0;
+
       z-index: 9999;
+
       display: flex;
       align-items: center;
       justify-content: center;
+
       background:
         radial-gradient(
           circle at 50% 45%,
-          #353d70 0%,
-          #111525 40%,
-          #06070d 100%
+          #3b436f 0%,
+          #151a2c 42%,
+          #06070c 100%
         );
     }
+
 
     .loading-box {
       text-align: center;
     }
 
+
     .loading-coin {
-      width: 92px;
-      height: 92px;
-      border-radius: 50%;
+
+      width: 90px;
+      height: 90px;
+
       margin: auto;
+
+      border-radius: 50%;
+
       display: flex;
       align-items: center;
       justify-content: center;
@@ -82,34 +106,40 @@
       font-size: 48px;
       font-weight: 900;
 
-      color: #fff;
       background:
         radial-gradient(
-          circle at 35% 25%,
-          #fff8b0 0%,
-          #ffd82e 22%,
-          #ffb000 55%,
-          #e88700 100%
+          circle at 30% 20%,
+          #fff7a3,
+          #ffd52a 28%,
+          #ffad00 65%,
+          #dc7900
         );
 
-      border: 4px solid #ffc629;
+      border: 4px solid #ffc52a;
 
       box-shadow:
-        0 0 25px rgba(255, 196, 0, .55),
+        0 0 35px rgba(255,190,0,.5),
         inset 5px 5px 12px rgba(255,255,255,.45),
-        inset -8px -10px 15px rgba(172,87,0,.3);
+        inset -8px -10px 15px rgba(140,60,0,.3);
 
-      animation: loadingSpin 1.5s infinite linear;
+      animation:
+        loadingSpin 1.4s infinite linear;
     }
+
 
     .loading-text {
+
       margin-top: 18px;
-      font-size: 18px;
-      font-weight: 700;
-      opacity: .8;
+
+      font-size: 19px;
+      font-weight: 900;
+
+      letter-spacing: 2px;
     }
 
+
     @keyframes loadingSpin {
+
       from {
         transform: rotateY(0deg);
       }
@@ -117,329 +147,398 @@
       to {
         transform: rotateY(360deg);
       }
+
     }
+
 
     /* =========================
        APP
     ========================= */
 
     #app {
+
       display: none;
+
       min-height: 100vh;
+
       position: relative;
+
       overflow: hidden;
 
       background:
         radial-gradient(
           ellipse at 50% 48%,
-          rgba(95, 107, 165, .85) 0%,
-          rgba(44, 50, 84, .85) 25%,
-          rgba(14, 17, 29, .98) 60%,
+          rgba(91,105,170,.9) 0%,
+          rgba(51,58,97,.86) 26%,
+          rgba(18,21,35,.98) 61%,
           #07080d 100%
         );
     }
 
+
     #app::before {
+
       content: "";
+
       position: absolute;
-      width: 650px;
-      height: 650px;
+
+      width: 680px;
+      height: 680px;
+
       left: 50%;
-      top: 44%;
-      transform: translate(-50%, -50%);
+      top: 46%;
+
+      transform:
+        translate(-50%,-50%);
+
       border-radius: 50%;
 
       background:
         radial-gradient(
           circle,
-          rgba(112, 125, 190, .55) 0%,
-          rgba(83, 94, 150, .28) 35%,
+          rgba(117,132,202,.48),
+          rgba(83,96,157,.2) 40%,
           transparent 72%
         );
 
-      filter: blur(25px);
+      filter: blur(24px);
+
       pointer-events: none;
     }
 
+
     .app-content {
+
       position: relative;
       z-index: 2;
+
       width: 100%;
       max-width: 520px;
+
       min-height: 100vh;
+
       margin: auto;
+
       padding:
-        max(14px, env(safe-area-inset-top))
-        18px
-        calc(120px + env(safe-area-inset-bottom))
-        18px;
+        max(10px,env(safe-area-inset-top))
+        16px
+        calc(125px + env(safe-area-inset-bottom))
+        16px;
     }
 
+
     /* =========================
-       TOP USER CARD
+       TOP USER
     ========================= */
 
     .top-user {
-      margin-top: 8px;
-      width: 100%;
-      min-height: 76px;
-      padding: 10px 14px;
 
-      border-radius: 23px;
+      width: 100%;
+      min-height: 75px;
+
+      margin-top: 6px;
+
+      padding: 9px 12px;
 
       display: flex;
       align-items: center;
       justify-content: space-between;
+
       gap: 10px;
+
+      border-radius: 22px;
 
       background:
         linear-gradient(
           135deg,
-          rgba(38,38,42,.98),
-          rgba(28,29,33,.96)
+          rgba(39,40,44,.98),
+          rgba(28,29,33,.97)
         );
 
       box-shadow:
-        0 8px 25px rgba(0,0,0,.28),
+        0 8px 25px rgba(0,0,0,.3),
         inset 0 1px 0 rgba(255,255,255,.06);
     }
 
+
     .user-left {
+
       display: flex;
       align-items: center;
+
       min-width: 0;
-      gap: 12px;
+
+      gap: 11px;
     }
 
-    .avatar-small {
-      width: 54px;
-      height: 54px;
-      flex-shrink: 0;
-      border-radius: 17px;
-      overflow: hidden;
 
-      background:
-        linear-gradient(
-          135deg,
-          #ffcf36,
-          #ff9d00
-        );
+    .avatar-small {
+
+      width: 53px;
+      height: 53px;
+
+      flex-shrink: 0;
+
+      border-radius: 17px;
+
+      overflow: hidden;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
-      color: white;
-      font-size: 24px;
-      font-weight: 900;
+      background:
+        linear-gradient(
+          135deg,
+          #ffd532,
+          #e58600
+        );
 
-      box-shadow:
-        inset 0 2px 5px rgba(255,255,255,.3),
-        0 3px 10px rgba(0,0,0,.25);
+      font-size: 23px;
+      font-weight: 900;
     }
+
 
     .avatar-small img {
+
+      display: none;
+
       width: 100%;
       height: 100%;
+
       object-fit: cover;
-      display: none;
     }
+
 
     .user-info {
       min-width: 0;
     }
 
+
     .user-name {
-      font-size: 17px;
-      font-weight: 800;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+
       max-width: 210px;
+
+      font-size: 17px;
+      font-weight: 850;
+
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
+
     .user-balance {
+
       margin-top: 3px;
+
       display: flex;
       align-items: center;
+
       gap: 6px;
 
       font-size: 16px;
-      font-weight: 800;
-      color: #fff;
+      font-weight: 850;
     }
 
+
     .tiny-coin {
+
       width: 20px;
       height: 20px;
+
       border-radius: 50%;
 
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
 
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 900;
-      color: #fff;
 
       background:
         radial-gradient(
-          circle at 30% 25%,
-          #fff4a1,
-          #ffc91d 38%,
-          #e88900
+          circle at 30% 20%,
+          #fff6a0,
+          #ffcf1c 35%,
+          #df8000
         );
-
-      box-shadow:
-        inset 1px 1px 2px rgba(255,255,255,.5);
     }
+
 
     .top-league {
+
       display: flex;
       align-items: center;
-      gap: 6px;
+
+      gap: 5px;
+
       flex-shrink: 0;
 
-      font-size: 15px;
-      font-weight: 800;
+      font-size: 14px;
+      font-weight: 900;
     }
+
 
     .league-icon {
-      font-size: 29px;
+      font-size: 27px;
     }
 
+
     /* =========================
-       HOME
+       SCREENS
     ========================= */
 
     .screen {
       display: none;
-      min-height: calc(100vh - 30px);
+
+      min-height:
+        calc(100vh - 30px);
     }
+
 
     .screen.active {
       display: block;
     }
 
+
+    /* =========================
+       HOME
+    ========================= */
+
     .home-screen {
       text-align: center;
     }
 
+
     .main-balance {
-      margin-top: 32px;
+      margin-top: 25px;
     }
 
-    .balance-number {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
 
-      font-size: clamp(48px, 13vw, 72px);
-      line-height: .95;
-      font-weight: 900;
+    .balance-number {
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      gap: 9px;
+
+      font-size:
+        clamp(48px, 13vw, 70px);
+
+      line-height: 1;
+
+      font-weight: 950;
+
       letter-spacing: -2px;
 
       text-shadow:
-        0 4px 20px rgba(0,0,0,.35);
+        0 5px 20px rgba(0,0,0,.35);
     }
 
-    .balance-number .coin-mini {
-      width: 44px;
-      height: 44px;
+
+    .coin-mini {
+
+      width: 43px;
+      height: 43px;
+
       border-radius: 50%;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
-      font-size: 25px;
-      color: white;
-      font-weight: 900;
+      font-size: 24px;
 
       background:
         radial-gradient(
-          circle at 30% 25%,
-          #fff7aa,
-          #ffd21f 30%,
-          #ffae00 60%,
-          #d97900
+          circle at 30% 20%,
+          #fff7a0,
+          #ffd01d 35%,
+          #ffac00 65%,
+          #d87500
         );
 
-      border: 2px solid #ffce22;
+      border: 2px solid #ffc821;
 
       box-shadow:
         inset 3px 3px 7px rgba(255,255,255,.5),
-        inset -4px -5px 8px rgba(135,66,0,.35),
-        0 4px 15px rgba(0,0,0,.3);
+        inset -4px -5px 8px rgba(120,55,0,.3);
     }
+
 
     .rank-line {
-      margin-top: 13px;
+
+      margin-top: 11px;
 
       display: flex;
-      align-items: center;
       justify-content: center;
-      gap: 10px;
+      align-items: center;
 
-      font-size: 17px;
-      font-weight: 700;
-      color: rgba(255,255,255,.88);
+      gap: 9px;
+
+      font-size: 16px;
+      font-weight: 800;
+
+      color:
+        rgba(255,255,255,.88);
     }
 
-    .rank-line .rank-number {
-      color: #e6e8f1;
-    }
-
-    .rank-dot {
-      opacity: .65;
-    }
 
     .rank-arrow {
-      font-size: 24px;
-      opacity: .8;
+      font-size: 25px;
+      opacity: .7;
     }
 
+
     /* =========================
-       BIG COIN
+       COIN
     ========================= */
 
     .coin-area {
+
       position: relative;
-      height: min(470px, 55vh);
+
+      height:
+        min(470px,54vh);
 
       display: flex;
       align-items: center;
       justify-content: center;
-
-      margin-top: 5px;
     }
 
+
     .coin-glow {
+
       position: absolute;
 
-      width: 360px;
-      height: 360px;
+      width: 390px;
+      height: 390px;
 
       border-radius: 50%;
 
       background:
         radial-gradient(
           circle,
-          rgba(255, 205, 38, .23),
-          rgba(255, 183, 0, .08) 40%,
-          transparent 70%
+          rgba(255,211,38,.23),
+          rgba(255,186,0,.08) 45%,
+          transparent 72%
         );
 
-      filter: blur(8px);
-      pointer-events: none;
+      filter: blur(9px);
     }
 
+
     .big-coin {
+
       position: relative;
 
-      width: min(335px, 70vw);
-      height: min(335px, 70vw);
+      width:
+        min(335px,72vw);
+
+      height:
+        min(335px,72vw);
 
       border-radius: 50%;
 
@@ -447,173 +546,225 @@
 
       background:
         radial-gradient(
-          circle at 31% 21%,
-          #fff7a6 0%,
-          #ffe043 15%,
-          #ffc515 39%,
-          #ffae00 62%,
-          #db7b00 88%,
-          #b65d00 100%
+          circle at 30% 18%,
+          #fff9aa 0%,
+          #ffe64c 14%,
+          #ffc817 39%,
+          #ffac00 62%,
+          #df7d00 87%,
+          #b65a00 100%
         );
 
-      border: 8px solid #ffbd00;
+      border: 8px solid #ffbd08;
 
       box-shadow:
-        inset 13px 12px 25px rgba(255,255,255,.48),
-        inset -18px -20px 30px rgba(151,67,0,.35),
-        0 14px 30px rgba(0,0,0,.32),
-        0 0 45px rgba(255,191,0,.25);
+        inset 14px 12px 25px rgba(255,255,255,.48),
+        inset -18px -20px 30px rgba(145,62,0,.34),
+        0 16px 32px rgba(0,0,0,.34),
+        0 0 45px rgba(255,193,0,.24);
 
-      transform: translateZ(0);
-      transition: transform .08s ease;
+      transition:
+        transform .08s ease;
     }
 
+
     .big-coin::before {
+
       content: "";
+
       position: absolute;
+
       inset: 13px;
 
       border-radius: 50%;
 
-      border: 3px solid rgba(255,239,125,.7);
+      border: 3px solid
+        rgba(255,241,130,.72);
 
       box-shadow:
-        inset 0 0 10px rgba(173,85,0,.22);
+        inset 0 0 12px
+        rgba(170,80,0,.2);
     }
 
-    .big-coin::after {
-      content: "";
-      position: absolute;
-      left: 20%;
-      top: 12%;
 
-      width: 28%;
+    .big-coin::after {
+
+      content: "";
+
+      position: absolute;
+
+      left: 20%;
+      top: 11%;
+
+      width: 29%;
       height: 12%;
 
       border-radius: 50%;
 
-      background: rgba(255,255,255,.27);
+      background:
+        rgba(255,255,255,.28);
+
       filter: blur(4px);
 
-      transform: rotate(-22deg);
+      transform:
+        rotate(-22deg);
     }
 
+
     .coin-letter {
+
       position: absolute;
+
       inset: 0;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
-      font-size: 145px;
+      z-index: 2;
+
+      font-family: Arial,sans-serif;
+
+      font-size:
+        clamp(105px,28vw,145px);
+
       font-weight: 950;
 
       color: #ffb900;
 
       text-shadow:
-        3px 5px 0 rgba(187,102,0,.2),
-        -3px -3px 5px rgba(255,255,255,.3);
-
-      font-family: Arial, sans-serif;
-
-      z-index: 2;
+        3px 5px 0 rgba(184,93,0,.2),
+        -3px -3px 5px rgba(255,255,255,.28);
     }
+
 
     .big-coin.pressed {
       transform: scale(.94);
     }
 
+
     /* =========================
-       TAP EFFECT
+       TAP FLOAT
     ========================= */
 
     .tap-number {
+
       position: fixed;
-      z-index: 1000;
+
+      z-index: 5000;
 
       pointer-events: none;
 
       font-size: 30px;
-      font-weight: 900;
+      font-weight: 950;
 
-      color: #fff;
+      color: white;
 
       text-shadow:
         0 3px 10px rgba(0,0,0,.6);
 
-      animation: tapFloat .75s ease-out forwards;
+      animation:
+        tapFloat .7s ease-out forwards;
     }
 
+
     @keyframes tapFloat {
+
       0% {
         opacity: 1;
-        transform: translate(-50%, 0) scale(1);
+        transform:
+          translate(-50%,0)
+          scale(1);
       }
 
       100% {
         opacity: 0;
-        transform: translate(-50%, -100px) scale(1.3);
+        transform:
+          translate(-50%,-95px)
+          scale(1.25);
       }
+
     }
+
 
     /* =========================
        ENERGY
     ========================= */
 
     .energy-row {
+
       display: flex;
       align-items: center;
       justify-content: space-between;
 
-      margin-top: -5px;
-      margin-bottom: 9px;
+      margin-bottom: 8px;
 
       text-align: left;
     }
 
+
     .energy-left {
+
       display: flex;
       align-items: center;
-      gap: 7px;
+
+      gap: 6px;
     }
+
 
     .energy-bolt {
-      font-size: 31px;
+      font-size: 30px;
     }
+
 
     .energy-current {
-      font-size: 28px;
-      font-weight: 900;
+
+      font-size: 27px;
+      font-weight: 950;
     }
 
+
     .energy-max {
-      font-size: 17px;
-      color: rgba(255,255,255,.58);
+
+      font-size: 16px;
+
+      color:
+        rgba(255,255,255,.55);
+
       font-weight: 700;
     }
 
+
     .energy-recharge {
+
       font-size: 13px;
-      color: rgba(255,255,255,.58);
+
+      color:
+        rgba(255,255,255,.5);
     }
 
-    .energy-bar {
-      width: 100%;
-      height: 13px;
 
-      background: rgba(255,255,255,.2);
+    .energy-bar {
+
+      width: 100%;
+      height: 12px;
+
+      overflow: hidden;
 
       border-radius: 99px;
-      overflow: hidden;
+
+      background:
+        rgba(255,255,255,.18);
 
       box-shadow:
         inset 0 2px 5px rgba(0,0,0,.25);
     }
 
+
     .energy-fill {
-      height: 100%;
+
       width: 0%;
+      height: 100%;
 
       border-radius: 99px;
 
@@ -625,131 +776,191 @@
         );
 
       box-shadow:
-        0 0 8px rgba(255,255,255,.45);
+        0 0 8px
+        rgba(255,255,255,.5);
 
-      transition: width .2s ease;
+      transition:
+        width .2s ease;
     }
+
 
     /* =========================
        BOTTOM NAV
     ========================= */
 
     .bottom-nav {
+
       position: fixed;
+
       z-index: 100;
 
       left: 50%;
-      bottom: calc(13px + env(safe-area-inset-bottom));
+      bottom:
+        calc(
+          12px +
+          env(safe-area-inset-bottom)
+        );
 
-      transform: translateX(-50%);
+      transform:
+        translateX(-50%);
 
-      width: min(92%, 470px);
-      height: 83px;
+      width:
+        min(94%,490px);
+
+      min-height: 82px;
 
       padding: 7px;
 
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+
+      grid-template-columns:
+        repeat(5,1fr);
+
+      gap: 3px;
+
+      border-radius: 25px;
 
       background:
         linear-gradient(
           135deg,
-          rgba(185,194,233,.83),
-          rgba(128,138,182,.75)
+          rgba(182,191,231,.84),
+          rgba(125,136,182,.76)
         );
 
-      border-radius: 25px;
-
       box-shadow:
-        0 10px 30px rgba(0,0,0,.35),
-        inset 0 1px 1px rgba(255,255,255,.35);
+        0 12px 32px rgba(0,0,0,.38),
+        inset 0 1px 1px
+        rgba(255,255,255,.35);
 
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
+      backdrop-filter:
+        blur(16px);
+
+      -webkit-backdrop-filter:
+        blur(16px);
     }
 
-    .nav-btn {
-      background: transparent;
-      color: rgba(255,255,255,.72);
 
-      border-radius: 19px;
+    .nav-btn {
+
+      min-width: 0;
+
+      background: transparent;
+
+      color:
+        rgba(255,255,255,.68);
+
+      border-radius: 18px;
 
       display: flex;
       flex-direction: column;
+
       align-items: center;
       justify-content: center;
 
       gap: 2px;
 
-      font-size: 14px;
-      font-weight: 800;
+      font-size: 11px;
+      font-weight: 850;
 
-      transition: .15s ease;
+      transition:
+        .15s ease;
     }
 
-    .nav-btn .nav-icon {
-      font-size: 27px;
-      line-height: 30px;
+
+    .nav-icon {
+
+      font-size: 25px;
+
+      line-height: 28px;
     }
+
 
     .nav-btn.active {
-      color: #fff;
+
+      color: white;
 
       background:
-        rgba(255,255,255,.14);
+        rgba(255,255,255,.15);
 
-      transform: translateY(-2px);
+      transform:
+        translateY(-2px);
     }
 
+
     /* =========================
-       OTHER SCREENS
+       PAGES
     ========================= */
 
     .page {
       padding-top: 25px;
     }
 
+
     .page-title {
+
       font-size: 32px;
-      font-weight: 900;
-      margin-bottom: 8px;
+      font-weight: 950;
+
+      margin-bottom: 5px;
     }
+
 
     .page-subtitle {
-      color: rgba(255,255,255,.62);
-      font-size: 15px;
-      margin-bottom: 20px;
+
+      color:
+        rgba(255,255,255,.58);
+
+      font-size: 14px;
+
+      margin-bottom: 18px;
     }
 
+
     .card {
+
+      padding: 17px;
+
+      margin-bottom: 12px;
+
+      border-radius: 22px;
+
       background:
         linear-gradient(
           145deg,
-          rgba(37,39,47,.96),
-          rgba(24,26,34,.96)
+          rgba(39,41,50,.96),
+          rgba(24,26,34,.97)
         );
 
-      border: 1px solid rgba(255,255,255,.06);
-
-      border-radius: 23px;
-
-      padding: 18px;
-
-      margin-bottom: 13px;
+      border:
+        1px solid
+        rgba(255,255,255,.055);
 
       box-shadow:
-        0 8px 25px rgba(0,0,0,.22);
+        0 8px 25px
+        rgba(0,0,0,.22);
     }
 
-    .boost-card {
+
+    /* =========================
+       EARN
+    ========================= */
+
+    .task-card {
+
       display: flex;
+
       align-items: center;
-      gap: 14px;
+
+      gap: 13px;
     }
 
-    .boost-icon {
-      width: 57px;
-      height: 57px;
+
+    .task-icon {
+
+      width: 55px;
+      height: 55px;
+
+      flex-shrink: 0;
 
       border-radius: 17px;
 
@@ -757,163 +968,302 @@
       align-items: center;
       justify-content: center;
 
-      font-size: 30px;
+      font-size: 28px;
 
       background:
         linear-gradient(
           135deg,
-          #ffda48,
-          #e68b00
+          #ffcf32,
+          #df8200
         );
-
-      box-shadow:
-        inset 0 2px 4px rgba(255,255,255,.3);
     }
 
-    .boost-info {
+
+    .task-info {
       flex: 1;
+      min-width: 0;
     }
 
-    .boost-title {
-      font-size: 17px;
-      font-weight: 850;
-    }
 
-    .boost-desc {
-      color: rgba(255,255,255,.55);
-      font-size: 13px;
-      margin-top: 4px;
-    }
-
-    .upgrade-btn {
-      padding: 11px 14px;
-
-      border-radius: 14px;
-
-      color: #fff;
-
-      background:
-        linear-gradient(
-          135deg,
-          #f8b900,
-          #dc7b00
-        );
-
-      font-size: 13px;
-      font-weight: 900;
-
-      white-space: nowrap;
-    }
-
-    .upgrade-btn:disabled {
-      opacity: .35;
-    }
-
-    .daily-card {
-      text-align: center;
-    }
-
-    .daily-icon {
-      font-size: 55px;
-      margin-bottom: 5px;
-    }
-
-    .daily-btn {
-      margin-top: 13px;
-
-      width: 100%;
-      padding: 14px;
-
-      border-radius: 15px;
-
-      color: #fff;
-      background: #e89a00;
+    .task-title {
 
       font-size: 16px;
       font-weight: 900;
     }
 
-    .daily-btn:disabled {
-      opacity: .4;
+
+    .task-desc {
+
+      margin-top: 3px;
+
+      color:
+        rgba(255,255,255,.5);
+
+      font-size: 12px;
     }
+
+
+    .task-btn {
+
+      padding: 11px 13px;
+
+      border-radius: 13px;
+
+      color: white;
+
+      background:
+        #e99a00;
+
+      font-size: 12px;
+      font-weight: 900;
+
+      white-space: nowrap;
+    }
+
+
+    .task-btn.done {
+
+      background:
+        rgba(255,255,255,.09);
+
+      color:
+        rgba(255,255,255,.5);
+    }
+
+
+    /* =========================
+       BOOST
+    ========================= */
+
+    .boost-card {
+
+      display: flex;
+      align-items: center;
+
+      gap: 13px;
+    }
+
+
+    .boost-icon {
+
+      width: 56px;
+      height: 56px;
+
+      flex-shrink: 0;
+
+      border-radius: 17px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 29px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #ffd53c,
+          #e18000
+        );
+    }
+
+
+    .boost-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+
+    .boost-title {
+
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+
+    .boost-desc {
+
+      margin-top: 4px;
+
+      color:
+        rgba(255,255,255,.5);
+
+      font-size: 12px;
+    }
+
+
+    .upgrade-btn {
+
+      padding: 11px 13px;
+
+      border-radius: 13px;
+
+      color: white;
+
+      background:
+        linear-gradient(
+          135deg,
+          #f7b700,
+          #d77a00
+        );
+
+      font-size: 12px;
+      font-weight: 900;
+
+      white-space: nowrap;
+    }
+
+
+    .upgrade-btn:disabled {
+      opacity: .3;
+    }
+
+
+    /* =========================
+       DAILY
+    ========================= */
+
+    .daily-card {
+      text-align: center;
+    }
+
+
+    .daily-icon {
+      font-size: 52px;
+    }
+
+
+    .daily-btn {
+
+      width: 100%;
+
+      margin-top: 13px;
+
+      padding: 14px;
+
+      border-radius: 15px;
+
+      color: white;
+
+      background:
+        #e99a00;
+
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+
+    .daily-btn:disabled {
+      opacity: .35;
+    }
+
 
     /* =========================
        FRIENDS
     ========================= */
 
     .ref-box {
-      padding: 20px;
       text-align: center;
     }
 
+
     .ref-icon {
-      font-size: 55px;
+      font-size: 52px;
     }
+
 
     .ref-title {
-      font-size: 22px;
-      font-weight: 900;
+
       margin-top: 5px;
+
+      font-size: 21px;
+      font-weight: 950;
     }
+
 
     .ref-desc {
-      color: rgba(255,255,255,.62);
-      font-size: 14px;
-      line-height: 1.5;
+
       margin-top: 7px;
+
+      color:
+        rgba(255,255,255,.58);
+
+      font-size: 13px;
+
+      line-height: 1.5;
     }
 
+
     .ref-link {
-      margin-top: 16px;
 
       width: 100%;
+
+      margin-top: 15px;
+
       padding: 13px;
 
       border-radius: 13px;
 
-      background: rgba(255,255,255,.08);
+      background:
+        rgba(255,255,255,.07);
 
-      color: rgba(255,255,255,.75);
+      color:
+        rgba(255,255,255,.65);
 
-      font-size: 12px;
+      font-size: 11px;
 
       overflow: hidden;
+
       white-space: nowrap;
+
       text-overflow: ellipsis;
     }
 
+
     .copy-btn {
-      margin-top: 10px;
 
       width: 100%;
+
+      margin-top: 10px;
+
       padding: 14px;
 
       border-radius: 15px;
 
-      background: #f1ad00;
-      color: #fff;
+      background:
+        #eda700;
 
-      font-weight: 900;
+      color: white;
+
       font-size: 15px;
+      font-weight: 900;
     }
+
 
     .friend-row,
     .rank-row {
+
       display: flex;
       align-items: center;
-      gap: 12px;
 
-      padding: 12px 0;
+      gap: 10px;
 
-      border-bottom: 1px solid rgba(255,255,255,.06);
+      padding: 11px 0;
+
+      border-bottom:
+        1px solid
+        rgba(255,255,255,.06);
     }
+
 
     .friend-row:last-child,
     .rank-row:last-child {
       border-bottom: 0;
     }
 
+
     .row-avatar {
+
       width: 43px;
       height: 43px;
 
@@ -921,61 +1271,145 @@
 
       border-radius: 14px;
 
-      background:
-        linear-gradient(
-          135deg,
-          #ffc72b,
-          #dc8200
-        );
-
       display: flex;
       align-items: center;
       justify-content: center;
 
-      font-weight: 900;
-
       overflow: hidden;
+
+      background:
+        linear-gradient(
+          135deg,
+          #ffce2c,
+          #dd8000
+        );
+
+      font-weight: 900;
     }
 
+
     .row-avatar img {
+
       width: 100%;
       height: 100%;
+
       object-fit: cover;
     }
 
+
     .row-name {
+
       flex: 1;
       min-width: 0;
 
-      font-weight: 800;
+      font-size: 14px;
+      font-weight: 850;
 
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
     }
 
+
     .row-balance {
-      color: #ffd33c;
-      font-weight: 850;
+
+      color:
+        #ffd33a;
+
+      font-size: 13px;
+      font-weight: 900;
     }
+
+
+    /* =========================
+       RANK
+    ========================= */
+
+    .league-big {
+
+      text-align: center;
+
+      padding: 22px;
+    }
+
+
+    .league-big-icon {
+      font-size: 67px;
+    }
+
+
+    .league-big-name {
+
+      margin-top: 3px;
+
+      font-size: 28px;
+      font-weight: 950;
+    }
+
+
+    .league-row {
+
+      display: flex;
+      align-items: center;
+
+      gap: 12px;
+
+      padding: 13px 3px;
+
+      border-bottom:
+        1px solid
+        rgba(255,255,255,.06);
+    }
+
+
+    .league-row:last-child {
+      border-bottom: 0;
+    }
+
+
+    .league-row-icon {
+      font-size: 27px;
+    }
+
+
+    .league-row-name {
+
+      flex: 1;
+
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+
+    .league-row-min {
+
+      color:
+        rgba(255,255,255,.45);
+
+      font-size: 12px;
+    }
+
 
     /* =========================
        PROFILE
     ========================= */
 
     .profile-top {
+
       text-align: center;
 
-      padding: 25px 10px 20px;
+      padding: 24px 10px;
     }
 
+
     .profile-avatar {
-      width: 110px;
-      height: 110px;
+
+      width: 112px;
+      height: 112px;
 
       margin: auto;
 
-      border-radius: 33px;
+      border-radius: 34px;
 
       overflow: hidden;
 
@@ -983,117 +1417,94 @@
       align-items: center;
       justify-content: center;
 
-      font-size: 43px;
-      font-weight: 900;
-
       background:
         linear-gradient(
           135deg,
-          #ffd73d,
-          #e48600
+          #ffd638,
+          #e48300
         );
 
+      font-size: 44px;
+      font-weight: 950;
+
       box-shadow:
-        0 10px 35px rgba(0,0,0,.3),
-        inset 0 2px 8px rgba(255,255,255,.3);
+        0 10px 35px
+        rgba(0,0,0,.3);
     }
 
+
     .profile-avatar img {
+
       display: none;
 
       width: 100%;
       height: 100%;
+
       object-fit: cover;
     }
 
-    .profile-name {
-      margin-top: 14px;
 
-      font-size: 25px;
-      font-weight: 900;
+    .profile-name {
+
+      margin-top: 13px;
+
+      font-size: 24px;
+      font-weight: 950;
     }
+
 
     .profile-username {
+
       margin-top: 3px;
 
-      color: rgba(255,255,255,.5);
-      font-size: 14px;
+      color:
+        rgba(255,255,255,.5);
+
+      font-size: 13px;
     }
 
+
     .profile-stat {
+
       display: flex;
       align-items: center;
       justify-content: space-between;
 
-      padding: 14px 0;
+      padding: 13px 0;
 
-      border-bottom: 1px solid rgba(255,255,255,.07);
+      border-bottom:
+        1px solid
+        rgba(255,255,255,.06);
     }
+
 
     .profile-stat:last-child {
       border-bottom: 0;
     }
 
+
     .stat-name {
-      color: rgba(255,255,255,.58);
+
+      color:
+        rgba(255,255,255,.55);
+
+      font-size: 14px;
     }
+
 
     .stat-value {
-      font-weight: 850;
-    }
 
-    /* =========================
-       LEAGUE
-    ========================= */
-
-    .league-big {
-      text-align: center;
-      padding: 25px;
-    }
-
-    .league-big-icon {
-      font-size: 70px;
-    }
-
-    .league-big-name {
-      font-size: 30px;
+      font-size: 14px;
       font-weight: 900;
-      margin-top: 4px;
     }
 
-    .league-list {
-      margin-top: 20px;
-    }
-
-    .league-row {
-      display: flex;
-      align-items: center;
-      gap: 13px;
-
-      padding: 14px 5px;
-
-      border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-
-    .league-row-icon {
-      font-size: 28px;
-    }
-
-    .league-row-name {
-      flex: 1;
-      font-weight: 850;
-    }
-
-    .league-row-min {
-      color: rgba(255,255,255,.48);
-      font-size: 13px;
-    }
 
     /* =========================
        SUBSCRIPTION
     ========================= */
 
     #subscriptionOverlay {
+
       display: none;
 
       position: fixed;
@@ -1104,36 +1515,42 @@
       background:
         radial-gradient(
           circle at 50% 40%,
-          #30375e,
-          #090b13 65%
+          #303866,
+          #080a12 68%
         );
-
-      padding: 25px;
     }
 
+
     .subscription-box {
-      width: min(430px, 100%);
 
       position: absolute;
+
+      width:
+        min(420px,90%);
+
       left: 50%;
       top: 50%;
 
-      transform: translate(-50%, -50%);
+      transform:
+        translate(-50%,-50%);
+
+      padding: 28px 20px;
 
       text-align: center;
 
-      padding: 30px 20px;
-
-      border-radius: 28px;
+      border-radius: 27px;
 
       background:
-        rgba(29,31,40,.97);
+        rgba(29,31,40,.98);
 
       box-shadow:
-        0 20px 60px rgba(0,0,0,.45);
+        0 20px 60px
+        rgba(0,0,0,.45);
     }
 
+
     .subscription-coin {
+
       width: 82px;
       height: 82px;
 
@@ -1146,81 +1563,100 @@
       justify-content: center;
 
       font-size: 43px;
-      font-weight: 900;
+      font-weight: 950;
 
       background:
         radial-gradient(
-          circle at 30% 25%,
-          #fff5a0,
-          #ffc91e 40%,
-          #df8200
+          circle at 30% 20%,
+          #fff7a0,
+          #ffd01d 40%,
+          #df8000
         );
 
       box-shadow:
-        0 0 30px rgba(255,190,0,.25);
+        0 0 30px
+        rgba(255,190,0,.3);
     }
+
 
     .subscription-title {
-      margin-top: 18px;
+
+      margin-top: 17px;
 
       font-size: 25px;
-      font-weight: 900;
+      font-weight: 950;
     }
+
 
     .subscription-text {
-      margin-top: 10px;
 
-      color: rgba(255,255,255,.63);
-      line-height: 1.5;
+      margin-top: 9px;
+
+      color:
+        rgba(255,255,255,.6);
+
       font-size: 14px;
+
+      line-height: 1.5;
     }
+
 
     .subscribe-btn,
     .check-btn {
+
       width: 100%;
 
       padding: 15px;
 
-      border-radius: 16px;
+      border-radius: 15px;
 
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 900;
     }
 
-    .subscribe-btn {
-      margin-top: 20px;
 
-      color: #fff;
+    .subscribe-btn {
+
+      margin-top: 19px;
+
+      color: white;
 
       background:
         linear-gradient(
           135deg,
-          #ffcc24,
-          #e18a00
+          #ffce2a,
+          #e08300
         );
     }
 
+
     .check-btn {
-      margin-top: 10px;
 
-      color: #fff;
+      margin-top: 9px;
 
-      background: rgba(255,255,255,.09);
+      color: white;
+
+      background:
+        rgba(255,255,255,.08);
     }
+
 
     /* =========================
        TOAST
     ========================= */
 
     #toast {
+
       position: fixed;
+
+      z-index: 20000;
 
       left: 50%;
       bottom: 110px;
 
-      transform: translateX(-50%) translateY(20px);
-
-      z-index: 20000;
+      transform:
+        translateX(-50%)
+        translateY(20px);
 
       max-width: 90%;
 
@@ -1228,32 +1664,42 @@
 
       border-radius: 14px;
 
-      background: rgba(20,20,25,.95);
+      background:
+        rgba(18,19,24,.96);
 
-      color: #fff;
+      color: white;
 
-      font-size: 14px;
-      font-weight: 700;
+      font-size: 13px;
+      font-weight: 800;
 
       opacity: 0;
+
       pointer-events: none;
 
       transition: .25s ease;
 
       box-shadow:
-        0 8px 25px rgba(0,0,0,.35);
+        0 8px 25px
+        rgba(0,0,0,.35);
     }
 
+
     #toast.show {
+
       opacity: 1;
-      transform: translateX(-50%) translateY(0);
+
+      transform:
+        translateX(-50%)
+        translateY(0);
     }
+
 
     /* =========================
        MOBILE
     ========================= */
 
-    @media (max-height: 700px) {
+    @media (max-height:700px) {
+
       .coin-area {
         height: 390px;
       }
@@ -1268,18 +1714,33 @@
       }
 
       .main-balance {
-        margin-top: 22px;
+        margin-top: 18px;
       }
+
     }
 
-    @media (max-width: 360px) {
+
+    @media (max-width:360px) {
+
+      .bottom-nav {
+        height: 75px;
+      }
+
+      .nav-icon {
+        font-size: 22px;
+      }
+
+      .nav-btn {
+        font-size: 10px;
+      }
+
       .top-user {
         min-height: 68px;
       }
 
       .avatar-small {
-        width: 48px;
-        height: 48px;
+        width: 47px;
+        height: 47px;
       }
 
       .user-name {
@@ -1291,2108 +1752,363 @@
       }
 
       .coin-area {
-        height: 380px;
+        height: 370px;
       }
 
       .big-coin {
-        width: 275px;
-        height: 275px;
+        width: 270px;
+        height: 270px;
       }
 
-      .coin-letter {
-        font-size: 115px;
-      }
-
-      .bottom-nav {
-        height: 75px;
-      }
     }
+
   </style>
+
 </head>
+
 
 <body>
 
-  <!-- =========================
-       LOADING
-  ========================= -->
 
-  <div id="loading">
-    <div class="loading-box">
-      <div class="loading-coin">U</div>
-      <div class="loading-text">UZCOIN</div>
+<!-- =====================================================
+     LOADING
+===================================================== -->
+
+<div id="loading">
+
+  <div class="loading-box">
+
+    <div class="loading-coin">
+      U
     </div>
-  </div>
 
-
-  <!-- =========================
-       SUBSCRIPTION
-  ========================= -->
-
-  <div id="subscriptionOverlay">
-
-    <div class="subscription-box">
-
-      <div class="subscription-coin">U</div>
-
-      <div class="subscription-title">
-        UZCOIN
-      </div>
-
-      <div class="subscription-text">
-        O‘yinni davom ettirish uchun
-        rasmiy UZCOIN kanaliga obuna bo‘ling.
-      </div>
-
-      <button
-        class="subscribe-btn"
-        onclick="openChannel()"
-      >
-        📢 Kanalga obuna bo‘lish
-      </button>
-
-      <button
-        class="check-btn"
-        onclick="checkSubscription(true)"
-      >
-        ✅ Tekshirish
-      </button>
-
+    <div class="loading-text">
+      UZCOIN
     </div>
 
   </div>
 
+</div>
 
-  <!-- =========================
-       APP
-  ========================= -->
 
-  <div id="app">
+<!-- =====================================================
+     SUBSCRIPTION
+===================================================== -->
 
-    <div class="app-content">
+<div id="subscriptionOverlay">
 
-      <!-- USER CARD -->
+  <div class="subscription-box">
 
-      <div class="top-user">
+    <div class="subscription-coin">
+      U
+    </div>
 
-        <div class="user-left">
+    <div class="subscription-title">
+      UZCOIN
+    </div>
 
-          <div class="avatar-small">
-            <img id="topAvatarImage" alt="">
-            <span id="topAvatarInitial">U</span>
-          </div>
+    <div class="subscription-text">
+      O‘yinni davom ettirish uchun
+      rasmiy UZCOIN kanaliga obuna bo‘ling.
+    </div>
 
-          <div class="user-info">
+    <button
+      class="subscribe-btn"
+      onclick="openChannel()"
+    >
+      📢 Kanalga obuna bo‘lish
+    </button>
 
-            <div
-              class="user-name"
-              id="topUserName"
-            >
-              Player
-            </div>
+    <button
+      class="check-btn"
+      onclick="checkSubscription(true)"
+    >
+      ✅ Tekshirish
+    </button>
 
-            <div class="user-balance">
-              <span class="tiny-coin">U</span>
-              <span id="topUserBalance">0</span>
-            </div>
+  </div>
 
-          </div>
+</div>
 
-        </div>
 
-        <div class="top-league">
-          <span
-            class="league-icon"
-            id="topLeagueIcon"
+<!-- =====================================================
+     APP
+===================================================== -->
+
+<div id="app">
+
+  <div class="app-content">
+
+
+    <!-- =================================================
+         TOP USER
+    ================================================= -->
+
+    <div class="top-user">
+
+      <div class="user-left">
+
+        <div class="avatar-small">
+
+          <img
+            id="topAvatarImage"
+            alt=""
           >
-            🥉
+
+          <span
+            id="topAvatarInitial"
+          >
+            U
           </span>
 
-          <span id="topLeagueName">
-            BRONZE
-          </span>
+        </div>
+
+
+        <div class="user-info">
+
+          <div
+            class="user-name"
+            id="topUserName"
+          >
+            Player
+          </div>
+
+
+          <div class="user-balance">
+
+            <span class="tiny-coin">
+              U
+            </span>
+
+            <span id="topUserBalance">
+              0
+            </span>
+
+          </div>
+
         </div>
 
       </div>
 
 
-      <!-- =========================
-           HOME
-      ========================= -->
-
-      <section
-        id="homeScreen"
-        class="screen active"
-      >
-
-        <div class="home-screen">
-
-          <div class="main-balance">
-
-            <div class="balance-number">
-
-              <span class="coin-mini">U</span>
-
-              <span id="balance">
-                0
-              </span>
-
-            </div>
-
-            <div class="rank-line">
-
-              <span>🏅</span>
-
-              <span
-                class="rank-number"
-                id="rankNumber"
-              >
-                —
-              </span>
-
-              <span>•</span>
-
-              <span id="leagueText">
-                🥉 BRONZE
-              </span>
-
-              <span class="rank-arrow">
-                ›
-              </span>
-
-            </div>
-
-          </div>
-
-
-          <!-- BIG COIN -->
-
-          <div class="coin-area">
-
-            <div class="coin-glow"></div>
-
-            <div
-              id="bigCoin"
-              class="big-coin"
-              onclick="tapCoin(event)"
-            >
-              <div class="coin-letter">
-                U
-              </div>
-            </div>
-
-          </div>
-
-
-          <!-- ENERGY -->
-
-          <div class="energy-row">
-
-            <div class="energy-left">
-
-              <span class="energy-bolt">
-                ⚡
-              </span>
-
-              <span
-                class="energy-current"
-                id="energy"
-              >
-                300
-              </span>
-
-              <span
-                class="energy-max"
-                id="maxEnergy"
-              >
-                / 300
-              </span>
-
-            </div>
-
-            <div class="energy-recharge">
-              +1 / sec
-            </div>
-
-          </div>
-
-          <div class="energy-bar">
-
-            <div
-              class="energy-fill"
-              id="energyFill"
-            ></div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =========================
-           BOOSTS
-      ========================= -->
-
-      <section
-        id="boostScreen"
-        class="screen"
-      >
-
-        <div class="page">
-
-          <div class="page-title">
-            Boosts 🚀
-          </div>
-
-          <div class="page-subtitle">
-            Kuchingiz va energiyangizni oshiring.
-          </div>
-
-
-          <!-- TAP POWER -->
-
-          <div class="card boost-card">
-
-            <div class="boost-icon">
-              🪙
-            </div>
-
-            <div class="boost-info">
-
-              <div class="boost-title">
-                Tap Power
-              </div>
-
-              <div
-                class="boost-desc"
-                id="tapBoostDesc"
-              >
-                +1 UZCOIN / tap
-              </div>
-
-            </div>
-
-            <button
-              class="upgrade-btn"
-              id="tapUpgradeBtn"
-              onclick="upgradeTap()"
-            >
-              Upgrade
-            </button>
-
-          </div>
-
-
-          <!-- ENERGY -->
-
-          <div class="card boost-card">
-
-            <div class="boost-icon">
-              ⚡
-            </div>
-
-            <div class="boost-info">
-
-              <div class="boost-title">
-                Energy Boost
-              </div>
-
-              <div
-                class="boost-desc"
-                id="energyBoostDesc"
-              >
-                Max: 300
-              </div>
-
-            </div>
-
-            <button
-              class="upgrade-btn"
-              id="energyUpgradeBtn"
-              onclick="upgradeEnergy()"
-            >
-              Upgrade
-            </button>
-
-          </div>
-
-
-          <!-- DAILY -->
-
-          <div class="card daily-card">
-
-            <div class="daily-icon">
-              🎁
-            </div>
-
-            <div class="boost-title">
-              Daily Reward
-            </div>
-
-            <div class="boost-desc">
-              Har kuni +100 UZCOIN
-            </div>
-
-            <button
-              class="daily-btn"
-              id="dailyBtn"
-              onclick="claimDaily()"
-            >
-              Claim +100
-            </button>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =========================
-           EARN / FRIENDS
-      ========================= -->
-
-      <section
-        id="friendsScreen"
-        class="screen"
-      >
-
-        <div class="page">
-
-          <div class="page-title">
-            Friends 👥
-          </div>
-
-          <div class="page-subtitle">
-            Do‘stlaringizni taklif qiling va bonus oling.
-          </div>
-
-
-          <div class="card ref-box">
-
-            <div class="ref-icon">
-              🫂
-            </div>
-
-            <div class="ref-title">
-              Invite friends
-            </div>
-
-            <div class="ref-desc">
-              Har bir taklif qilingan do‘st uchun
-              sizga <b>+500 UZCOIN</b> beriladi.
-            </div>
-
-            <div
-              class="ref-link"
-              id="refLink"
-            >
-              Referral link...
-            </div>
-
-            <button
-              class="copy-btn"
-              onclick="copyReferral()"
-            >
-              🔗 Copy referral link
-            </button>
-
-          </div>
-
-
-          <div class="card">
-
-            <div
-              style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                margin-bottom:8px;
-              "
-            >
-
-              <strong>
-                Your friends
-              </strong>
-
-              <span
-                id="referralCount"
-                style="color:#ffd33c;font-weight:900;"
-              >
-                0
-              </span>
-
-            </div>
-
-            <div id="friendsList">
-              <div
-                style="
-                  text-align:center;
-                  padding:20px;
-                  color:rgba(255,255,255,.45);
-                "
-              >
-                Hali do‘stlar yo‘q
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =========================
-           RANK
-      ========================= -->
-
-      <section
-        id="rankScreen"
-        class="screen"
-      >
-
-        <div class="page">
-
-          <div class="page-title">
-            Rank 🏆
-          </div>
-
-          <div class="page-subtitle">
-            UZCOIN reytingidagi o‘rningiz.
-          </div>
-
-
-          <div class="card league-big">
-
-            <div
-              class="league-big-icon"
-              id="rankLeagueIcon"
-            >
-              🥉
-            </div>
-
-            <div
-              class="league-big-name"
-              id="rankLeagueName"
-            >
-              BRONZE
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div
-              id="rankList"
-            >
-              <div
-                style="
-                  text-align:center;
-                  padding:20px;
-                  color:rgba(255,255,255,.45);
-                "
-              >
-                Loading...
-              </div>
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div
-              style="
-                font-weight:900;
-                margin-bottom:10px;
-              "
-            >
-              Leagues
-            </div>
-
-            <div id="leagueList"></div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =========================
-           PROFILE
-      ========================= -->
-
-      <section
-        id="profileScreen"
-        class="screen"
-      >
-
-        <div class="page">
-
-          <div class="page-title">
-            Profile
-          </div>
-
-
-          <div class="card profile-top">
-
-            <div
-              class="profile-avatar"
-              id="profileAvatar"
-            >
-
-              <img
-                id="profileImage"
-                alt=""
-              >
-
-              <span id="profileInitial">
-                U
-              </span>
-
-            </div>
-
-            <div
-              class="profile-name"
-              id="profileName"
-            >
-              Player
-            </div>
-
-            <div
-              class="profile-username"
-              id="profileUsername"
-            >
-              @username
-            </div>
-
-          </div>
-
-
-          <div class="card">
-
-            <div class="profile-stat">
-
-              <span class="stat-name">
-                🪙 Balance
-              </span>
-
-              <span
-                class="stat-value"
-                id="profileBalance"
-              >
-                0
-              </span>
-
-            </div>
-
-            <div class="profile-stat">
-
-              <span class="stat-name">
-                🏆 League
-              </span>
-
-              <span
-                class="stat-value"
-                id="profileLeague"
-              >
-                🥉 BRONZE
-              </span>
-
-            </div>
-
-            <div class="profile-stat">
-
-              <span class="stat-name">
-                👥 Referrals
-              </span>
-
-              <span
-                class="stat-value"
-                id="profileReferrals"
-              >
-                0
-              </span>
-
-            </div>
-
-            <div class="profile-stat">
-
-              <span class="stat-name">
-                🪙 Tap Power
-              </span>
-
-              <span
-                class="stat-value"
-                id="profilePower"
-              >
-                1
-              </span>
-
-            </div>
-
-            <div class="profile-stat">
-
-              <span class="stat-name">
-                ⚡ Energy
-              </span>
-
-              <span
-                class="stat-value"
-                id="profileEnergy"
-              >
-                300 / 300
-              </span>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
+      <div class="top-league">
+
+        <span
+          class="league-icon"
+          id="topLeagueIcon"
+        >
+          🥉
+        </span>
+
+        <span id="topLeagueName">
+          BRONZE
+        </span>
+
+      </div>
 
     </div>
 
 
-    <!-- =========================
-         BOTTOM NAV
-    ========================= -->
+    <!-- =================================================
+         HOME
+    ================================================= -->
 
-    <nav class="bottom-nav">
+    <section
+      id="homeScreen"
+      class="screen active"
+    >
 
-      <button
-        class="nav-btn"
-        id="friendsNav"
-        onclick="showScreen('friends')"
-      >
-        <span class="nav-icon">🧸</span>
-        <span>Friends</span>
-      </button>
+      <div class="home-screen">
 
-      <button
-        class="nav-btn active"
-        id="earnNav"
-        onclick="showScreen('home')"
-      >
-        <span class="nav-icon">🪙</span>
-        <span>Earn</span>
-      </button>
 
-      <button
-        class="nav-btn"
-        id="boostNav"
-        onclick="showScreen('boost')"
-      >
-        <span class="nav-icon">🚀</span>
-        <span>Boosts</span>
-      </button>
+        <div class="main-balance">
 
-    </nav>
+          <div class="balance-number">
 
-  </div>
+            <span class="coin-mini">
+              U
+            </span>
 
+            <span id="balance">
+              0
+            </span>
 
-  <!-- TOAST -->
+          </div>
 
-  <div id="toast"></div>
 
+          <div class="rank-line">
 
-  <script>
+            <span>
+              🏅
+            </span>
 
-    /* =====================================
-       TELEGRAM
-    ===================================== */
+            <span id="rankNumber">
+              —
+            </span>
 
-    const tg = window.Telegram.WebApp;
+            <span>
+              •
+            </span>
 
-    tg.ready();
-    tg.expand();
+            <span id="leagueText">
+              🥉 BRONZE
+            </span>
 
-    try {
-      tg.setHeaderColor("#080a12");
-      tg.setBackgroundColor("#080a12");
-    } catch (e) {}
+            <span class="rank-arrow">
+              ›
+            </span>
 
+          </div>
 
-    /* =====================================
-       STATE
-    ===================================== */
+        </div>
 
-    let telegramId = null;
-    let initData = "";
 
-    let balance = 0;
+        <div class="coin-area">
 
-    let energy = 300;
-    let maxEnergy = 300;
+          <div class="coin-glow"></div>
 
-    let power = 1;
-    let tapLevel = 1;
-    let energyLevel = 1;
 
-    let referrals = 0;
+          <div
+            class="big-coin"
+            id="bigCoin"
+            onclick="tapCoin(event)"
+          >
 
-    let league = {
-      name: "BRONZE",
-      icon: "🥉"
-    };
-
-    let photoUrl = null;
-    let firstName = "Player";
-    let username = "";
-
-    let tapQueue = 0;
-    let tapTimer = null;
-
-    let lastServerSync = Date.now();
-
-
-    /* =====================================
-       HELPERS
-    ===================================== */
-
-    function formatNumber(number) {
-      return Number(number || 0).toLocaleString("en-US");
-    }
-
-    function showToast(message) {
-
-      const toast =
-        document.getElementById("toast");
-
-      toast.textContent = message;
-
-      toast.classList.add("show");
-
-      clearTimeout(
-        window.toastTimer
-      );
-
-      window.toastTimer =
-        setTimeout(() => {
-          toast.classList.remove("show");
-        }, 2200);
-    }
-
-
-    function escapeHtml(value) {
-
-      return String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-
-    /* =====================================
-       PROFILE PHOTO
-    ===================================== */
-
-    function setAvatar(
-      imageElement,
-      initialElement,
-      url,
-      name
-    ) {
-
-      const initial =
-        (name || "U")
-          .trim()
-          .charAt(0)
-          .toUpperCase() || "U";
-
-      if (initialElement) {
-        initialElement.textContent = initial;
-      }
-
-      if (!imageElement) return;
-
-      if (url) {
-
-        imageElement.src = url;
-
-        imageElement.onload = function () {
-
-          imageElement.style.display =
-            "block";
-
-          if (initialElement) {
-            initialElement.style.display =
-              "none";
-          }
-        };
-
-        imageElement.onerror = function () {
-
-          imageElement.style.display =
-            "none";
-
-          if (initialElement) {
-            initialElement.style.display =
-              "block";
-          }
-        };
-
-      } else {
-
-        imageElement.style.display =
-          "none";
-
-        if (initialElement) {
-          initialElement.style.display =
-            "block";
-        }
-      }
-    }
-
-
-    function updateAvatars() {
-
-      setAvatar(
-        document.getElementById("topAvatarImage"),
-        document.getElementById("topAvatarInitial"),
-        photoUrl,
-        firstName
-      );
-
-      setAvatar(
-        document.getElementById("profileImage"),
-        document.getElementById("profileInitial"),
-        photoUrl,
-        firstName
-      );
-    }
-
-
-    /* =====================================
-       SCREEN
-    ===================================== */
-
-    function showScreen(screen) {
-
-      const screens = [
-        "home",
-        "boost",
-        "friends",
-        "rank",
-        "profile"
-      ];
-
-      screens.forEach(name => {
-
-        const element =
-          document.getElementById(
-            name + "Screen"
-          );
-
-        if (!element) return;
-
-        element.classList.toggle(
-          "active",
-          name === screen
-        );
-      });
-
-
-      document
-        .querySelectorAll(".nav-btn")
-        .forEach(btn => {
-          btn.classList.remove("active");
-        });
-
-
-      if (screen === "home") {
-
-        document
-          .getElementById("earnNav")
-          .classList.add("active");
-
-      }
-
-      if (screen === "boost") {
-
-        document
-          .getElementById("boostNav")
-          .classList.add("active");
-
-      }
-
-      if (screen === "friends") {
-
-        document
-          .getElementById("friendsNav")
-          .classList.add("active");
-
-        loadFriends();
-
-      }
-
-      if (screen === "rank") {
-        loadRank();
-      }
-
-      if (screen === "profile") {
-        updateProfile();
-      }
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-    }
-
-
-    /* =====================================
-       SUBSCRIPTION
-    ===================================== */
-
-    async function checkSubscription(
-      showMessages = true
-    ) {
-
-      if (!telegramId || !initData) {
-        return false;
-      }
-
-      try {
-
-        const response =
-          await fetch(
-            "/api/check-subscription",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
-
-              body: JSON.stringify({
-                initData
-              })
-            }
-          );
-
-        const data =
-          await response.json();
-
-        if (data.subscribed) {
-
-          hideSubscription();
-
-          return true;
-
-        } else {
-
-          showSubscription();
-
-          if (showMessages) {
-            showToast(
-              "Avval kanalga obuna bo‘ling."
-            );
-          }
-
-          return false;
-        }
-
-      } catch (error) {
-
-        console.error(error);
-
-        if (showMessages) {
-          showToast(
-            "Tekshirishda xatolik."
-          );
-        }
-
-        return false;
-      }
-    }
-
-
-    function showSubscription() {
-
-      document
-        .getElementById(
-          "subscriptionOverlay"
-        )
-        .style.display = "block";
-
-      document
-        .getElementById("app")
-        .style.display = "none";
-    }
-
-
-    function hideSubscription() {
-
-      document
-        .getElementById(
-          "subscriptionOverlay"
-        )
-        .style.display = "none";
-
-      document
-        .getElementById("app")
-        .style.display = "block";
-    }
-
-
-    function openChannel() {
-
-      try {
-
-        tg.openTelegramLink(
-          "https://t.me/uzcoin_officiall"
-        );
-
-      } catch (e) {
-
-        window.open(
-          "https://t.me/uzcoin_officiall",
-          "_blank"
-        );
-
-      }
-    }
-
-
-    /* =====================================
-       LOAD USER
-    ===================================== */
-
-    async function loadUser() {
-
-      if (!telegramId) return;
-
-      try {
-
-        const response =
-          await fetch(
-            `/api/user/${telegramId}`
-          );
-
-        if (!response.ok) {
-          throw new Error(
-            "User loading failed"
-          );
-        }
-
-        const user =
-          await response.json();
-
-        applyUser(user);
-
-      } catch (error) {
-
-        console.error(error);
-
-      }
-    }
-
-
-    function applyUser(user) {
-
-      balance =
-        Number(user.balance || 0);
-
-      energy =
-        Number(user.energy || 0);
-
-      maxEnergy =
-        Number(user.maxEnergy || 300);
-
-      power =
-        Number(user.power || 1);
-
-      tapLevel =
-        Number(user.tapLevel || 1);
-
-      energyLevel =
-        Number(user.energyLevel || 1);
-
-      referrals =
-        Number(user.referrals || 0);
-
-      league =
-        user.league || {
-          name: "BRONZE",
-          icon: "🥉"
-        };
-
-
-      if (user.firstName) {
-        firstName = user.firstName;
-      }
-
-      if (user.username) {
-        username = user.username;
-      }
-
-      if (user.photoUrl) {
-        photoUrl = user.photoUrl;
-      }
-
-
-      lastServerSync =
-        Date.now();
-
-
-      updateAll();
-    }
-
-
-    /* =====================================
-       UI UPDATE
-    ===================================== */
-
-    function updateAll() {
-
-      updateHome();
-      updateTopUser();
-      updateBoosts();
-      updateProfile();
-      updateAvatars();
-
-    }
-
-
-    function updateTopUser() {
-
-      document
-        .getElementById("topUserName")
-        .textContent =
-        firstName || "Player";
-
-      document
-        .getElementById("topUserBalance")
-        .textContent =
-        formatNumber(balance);
-
-      document
-        .getElementById("topLeagueIcon")
-        .textContent =
-        league.icon || "🥉";
-
-      document
-        .getElementById("topLeagueName")
-        .textContent =
-        league.name || "BRONZE";
-    }
-
-
-    function updateHome() {
-
-      document
-        .getElementById("balance")
-        .textContent =
-        formatNumber(balance);
-
-      document
-        .getElementById("energy")
-        .textContent =
-        formatNumber(energy);
-
-      document
-        .getElementById("maxEnergy")
-        .textContent =
-        " / " + formatNumber(maxEnergy);
-
-
-      const percentage =
-        maxEnergy > 0
-          ? Math.max(
-              0,
-              Math.min(
-                100,
-                (energy / maxEnergy) * 100
-              )
-            )
-          : 0;
-
-      document
-        .getElementById("energyFill")
-        .style.width =
-        percentage + "%";
-
-
-      document
-        .getElementById("leagueText")
-        .textContent =
-        `${league.icon || "🥉"} ${
-          league.name || "BRONZE"
-        }`;
-    }
-
-
-    function updateBoosts() {
-
-      const tapBtn =
-        document.getElementById(
-          "tapUpgradeBtn"
-        );
-
-      const energyBtn =
-        document.getElementById(
-          "energyUpgradeBtn"
-        );
-
-
-      if (tapBtn) {
-
-        const cost =
-          getTapUpgradeCost(
-            tapLevel
-          );
-
-        tapBtn.textContent =
-          `🪙 ${formatNumber(cost)}`;
-
-        tapBtn.disabled =
-          balance < cost;
-
-      }
-
-
-      if (energyBtn) {
-
-        const cost =
-          getEnergyUpgradeCost(
-            energyLevel
-          );
-
-        energyBtn.textContent =
-          `🪙 ${formatNumber(cost)}`;
-
-        energyBtn.disabled =
-          balance < cost;
-
-      }
-
-
-      document
-        .getElementById(
-          "tapBoostDesc"
-        )
-        .textContent =
-        `Level ${tapLevel} • +${power} UZCOIN / tap`;
-
-
-      document
-        .getElementById(
-          "energyBoostDesc"
-        )
-        .textContent =
-        `Level ${energyLevel} • Max: ${formatNumber(maxEnergy)}`;
-    }
-
-
-    function updateProfile() {
-
-      document
-        .getElementById("profileName")
-        .textContent =
-        firstName || "Player";
-
-
-      document
-        .getElementById("profileUsername")
-        .textContent =
-        username
-          ? "@" + username
-          : "Telegram user";
-
-
-      document
-        .getElementById("profileBalance")
-        .textContent =
-        formatNumber(balance);
-
-
-      document
-        .getElementById("profileLeague")
-        .textContent =
-        `${league.icon || "🥉"} ${
-          league.name || "BRONZE"
-        }`;
-
-
-      document
-        .getElementById("profileReferrals")
-        .textContent =
-        formatNumber(referrals);
-
-
-      document
-        .getElementById("profilePower")
-        .textContent =
-        power;
-
-
-      document
-        .getElementById("profileEnergy")
-        .textContent =
-        `${formatNumber(energy)} / ${formatNumber(maxEnergy)}`;
-    }
-
-
-    /* =====================================
-       COSTS
-    ===================================== */
-
-    function getTapUpgradeCost(level) {
-
-      return Math.floor(
-        500 *
-        Math.pow(
-          1.8,
-          level - 1
-        )
-      );
-    }
-
-
-    function getEnergyUpgradeCost(level) {
-
-      const costs = [
-        1000,
-        5000,
-        25000,
-        100000,
-        500000,
-        2500000,
-        10000000
-      ];
-
-      return costs[
-        Math.min(
-          level - 1,
-          costs.length - 1
-        )
-      ];
-    }
-
-
-    /* =====================================
-       TAP
-    ===================================== */
-
-    function tapCoin(event) {
-
-      if (energy <= 0) {
-
-        showToast(
-          "⚡ Energy tugadi!"
-        );
-
-        return;
-      }
-
-
-      const coin =
-        document.getElementById(
-          "bigCoin"
-        );
-
-      coin.classList.add("pressed");
-
-      setTimeout(() => {
-        coin.classList.remove(
-          "pressed"
-        );
-      }, 80);
-
-
-      balance += power;
-      energy -= 1;
-
-      tapQueue += 1;
-
-      createTapEffect(
-        event.clientX,
-        event.clientY,
-        power
-      );
-
-      updateAll();
-
-
-      if (!tapTimer) {
-
-        tapTimer =
-          setTimeout(
-            sendTaps,
-            250
-          );
-      }
-    }
-
-
-    function createTapEffect(
-      x,
-      y,
-      amount
-    ) {
-
-      const element =
-        document.createElement("div");
-
-      element.className =
-        "tap-number";
-
-      element.textContent =
-        "+" + amount;
-
-
-      element.style.left =
-        x + "px";
-
-      element.style.top =
-        y + "px";
-
-
-      document.body.appendChild(
-        element
-      );
-
-
-      setTimeout(() => {
-
-        element.remove();
-
-      }, 800);
-    }
-
-
-    async function sendTaps() {
-
-      clearTimeout(tapTimer);
-      tapTimer = null;
-
-
-      const taps =
-        tapQueue;
-
-      tapQueue = 0;
-
-
-      if (
-        taps <= 0 ||
-        !initData
-      ) {
-        return;
-      }
-
-
-      try {
-
-        const response =
-          await fetch(
-            "/api/tap",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
-
-              body: JSON.stringify({
-                initData,
-                taps
-              })
-            }
-          );
-
-
-        const data =
-          await response.json();
-
-
-        if (
-          !response.ok ||
-          data.error
-        ) {
-
-          if (
-            data.error ===
-            "NOT_SUBSCRIBED"
-          ) {
-
-            showSubscription();
-
-          }
-
-          await loadUser();
-
-          return;
-        }
-
-
-        if (data.user) {
-
-          applyUser(
-            data.user
-          );
-
-        }
-
-      } catch (error) {
-
-        console.error(
-          "Tap error:",
-          error
-        );
-
-        await loadUser();
-      }
-    }
-
-
-    /* =====================================
-       UPGRADES
-    ===================================== */
-
-    async function upgradeTap() {
-
-      if (!initData) return;
-
-
-      const cost =
-        getTapUpgradeCost(
-          tapLevel
-        );
-
-
-      if (balance < cost) {
-
-        showToast(
-          "🪙 UZCOIN yetarli emas."
-        );
-
-        return;
-      }
-
-
-      await upgrade(
-        "tap"
-      );
-    }
-
-
-    async function upgradeEnergy() {
-
-      if (!initData) return;
-
-
-      const cost =
-        getEnergyUpgradeCost(
-          energyLevel
-        );
-
-
-      if (balance < cost) {
-
-        showToast(
-          "🪙 UZCOIN yetarli emas."
-        );
-
-        return;
-      }
-
-
-      await upgrade(
-        "energy"
-      );
-    }
-
-
-    async function upgrade(type) {
-
-      try {
-
-        const response =
-          await fetch(
-            "/api/upgrade",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
-
-              body: JSON.stringify({
-                initData,
-                type
-              })
-            }
-          );
-
-
-        const data =
-          await response.json();
-
-
-        if (!response.ok) {
-
-          if (
-            data.error ===
-            "NOT_SUBSCRIBED"
-          ) {
-
-            showSubscription();
-
-            return;
-          }
-
-          showToast(
-            data.message ||
-            "Upgrade amalga oshmadi."
-          );
-
-          return;
-        }
-
-
-        if (data.user) {
-
-          applyUser(
-            data.user
-          );
-
-          showToast(
-            type === "tap"
-              ? "🪙 Tap Power oshdi!"
-              : "⚡ Energy Boost oshdi!"
-          );
-
-        }
-
-      } catch (error) {
-
-        console.error(error);
-
-        showToast(
-          "Xatolik yuz berdi."
-        );
-      }
-    }
-
-
-    /* =====================================
-       DAILY
-    ===================================== */
-
-    async function claimDaily() {
-
-      try {
-
-        const response =
-          await fetch(
-            "/api/daily",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
-
-              body: JSON.stringify({
-                initData
-              })
-            }
-          );
-
-
-        const data =
-          await response.json();
-
-
-        if (!response.ok) {
-
-          if (
-            data.error ===
-            "NOT_SUBSCRIBED"
-          ) {
-
-            showSubscription();
-
-            return;
-          }
-
-          showToast(
-            data.message ||
-            "Daily reward olinmadi."
-          );
-
-          return;
-        }
-
-
-        if (data.user) {
-
-          applyUser(
-            data.user
-          );
-
-        }
-
-
-        document
-          .getElementById(
-            "dailyBtn"
-          )
-          .disabled = true;
-
-
-        document
-          .getElementById(
-            "dailyBtn"
-          )
-          .textContent =
-          "✅ Claimed";
-
-
-        showToast(
-          "🎁 +100 UZCOIN!"
-        );
-
-      } catch (error) {
-
-        console.error(error);
-
-        showToast(
-          "Xatolik yuz berdi."
-        );
-      }
-    }
-
-
-    /* =====================================
-       REFERRAL
-    ===================================== */
-
-    function updateReferralLink() {
-
-      const botUsername =
-        "UZCoinTapBot";
-
-      if (!telegramId) return;
-
-
-      const link =
-        `https://t.me/${botUsername}?start=ref_${telegramId}`;
-
-
-      document
-        .getElementById(
-          "refLink"
-        )
-        .textContent =
-        link;
-    }
-
-
-    async function copyReferral() {
-
-      const text =
-        document
-          .getElementById(
-            "refLink"
-          )
-          .textContent;
-
-
-      try {
-
-        await navigator.clipboard.writeText(
-          text
-        );
-
-        showToast(
-          "🔗 Referral link nusxalandi!"
-        );
-
-      } catch (error) {
-
-        showToast(
-          "Link: " + text
-        );
-      }
-    }
-
-
-    async function handleReferral() {
-
-      const startParam =
-        tg.initDataUnsafe?.start_param;
-
-
-      if (!startParam) {
-        return;
-      }
-
-
-      if (
-        !startParam.startsWith(
-          "ref_"
-        )
-      ) {
-        return;
-      }
-
-
-      const referrerId =
-        startParam.replace(
-          "ref_",
-          ""
-        );
-
-
-      if (
-        !referrerId ||
-        referrerId ===
-        String(telegramId)
-      ) {
-        return;
-      }
-
-
-      try {
-
-        const response =
-          await fetch(
-            "/api/referral",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
-
-              body: JSON.stringify({
-                initData,
-                referrerId
-              })
-            }
-          );
-
-
-        const data =
-          await response.json();
-
-
-        if (
-          response.ok &&
-          data.success
-        ) {
-
-          showToast(
-            "🎉 Referral bonusi olindi!"
-          );
-
-          await loadUser();
-        }
-
-      } catch (error) {
-
-        console.error(
-          "Referral error:",
-          error
-        );
-      }
-    }
-
-
-    /* =====================================
-       FRIENDS
-    ===================================== */
-
-    async function loadFriends() {
-
-      if (!telegramId) return;
-
-
-      const list =
-        document.getElementById(
-          "friendsList"
-        );
-
-
-      try {
-
-        const response =
-          await fetch(
-            `/api/friends/${telegramId}`
-          );
-
-
-        if (!response.ok) {
-          throw new Error(
-            "Friends error"
-          );
-        }
-
-
-        const friends =
-          await response.json();
-
-
-        document
-          .getElementById(
-            "referralCount"
-          )
-          .textContent =
-          formatNumber(
-            referrals
-          );
-
-
-        if (
-          !Array.isArray(friends) ||
-          friends.length === 0
-        ) {
-
-          list.innerHTML = `
-            <div
-              style="
-                text-align:center;
-                padding:25px;
-                color:rgba(255,255,255,.45);
-              "
-            >
-              Hali do‘stlar yo‘q
+            <div class="coin-letter">
+              U
             </div>
-          `;
 
-          return;
-        }
+          </div>
 
-
-        list.innerHTML =
-          friends.map(
-            friend => {
-
-              const name =
-                friend.first_name ||
-                friend.username ||
-                "Player";
-
-              const initial =
-                name
-                  .charAt(0)
-                  .toUpperCase();
+        </div>
 
 
-              const avatar =
-                friend.photo_url
-                  ? `
-                    <img
-                      src="${escapeHtml(
-                        friend.photo_url
-                      )}"
-                      alt=""
-                    >
-                  `
-                  : initial;
+        <div class="energy-row">
+
+          <div class="energy-left">
+
+            <span class="energy-bolt">
+              ⚡
+            </span>
+
+            <span
+              class="energy-current"
+              id="energy"
+            >
+              300
+            </span>
+
+            <span
+              class="energy-max"
+              id="maxEnergy"
+            >
+              / 300
+            </span>
+
+          </div>
 
 
-              return `
-                <div class="friend-row">
+          <div class="energy-recharge">
+            +1 / sec
+          </div>
 
-                  <div class="row-avatar">
-                    ${avatar}
-                  </div>
+        </div>
 
-                  <div class="row-name">
-                    ${escapeHtml(name)}
-                  </div>
 
-                  <div class="row-balance">
-                    +500
-                  </div>
+        <div class="energy-bar">
 
-                </div>
-              `;
+          <div
+            class="energy-fill"
+            id="energyFill"
+          ></div>
 
-            }
-          ).join("");
+        </div>
 
-      } catch (error) {
+      </div>
 
-        console.error(error);
+    </section>
 
-        list.innerHTML = `
+
+    <!-- =================================================
+         FRIENDS
+    ================================================= -->
+
+    <section
+      id="friendsScreen"
+      class="screen"
+    >
+
+      <div class="page">
+
+        <div class="page-title">
+          Friends
+        </div>
+
+        <div class="page-subtitle">
+          Do‘stlaringizni taklif qiling va UZCOIN oling.
+        </div>
+
+
+        <div class="card ref-box">
+
+          <div class="ref-icon">
+            👥
+          </div>
+
+          <div class="ref-title">
+            Invite friends
+          </div>
+
+          <div class="ref-desc">
+            Har bir yangi do‘st uchun
+            sizga <b>+500 UZCOIN</b>.
+          </div>
+
+
+          <div
+            class="ref-link"
+            id="refLink"
+          >
+            Referral link...
+          </div>
+
+
+          <button
+            class="copy-btn"
+            onclick="copyReferral()"
+          >
+            🔗 Copy referral link
+          </button>
+
+        </div>
+
+
+        <div class="card">
+
           <div
             style="
-              text-align:center;
-              padding:20px;
-              color:rgba(255,255,255,.45);
+              display:flex;
+              justify-content:space-between;
+              margin-bottom:5px;
             "
           >
-            Do‘stlarni yuklashda xatolik
+
+            <strong>
+              Your friends
+            </strong>
+
+            <strong
+              id="referralCount"
+              style="color:#ffd33a;"
+            >
+              0
+            </strong>
+
           </div>
-        `;
-      }
-    }
 
 
-    /* =====================================
-       RANK
-    ===================================== */
+          <div id="friendsList">
 
-    async function loadRank() {
-
-      try {
-
-        const response =
-          await fetch(
-            "/api/rank"
-          );
-
-
-        if (!response.ok) {
-          throw new Error(
-            "Rank error"
-          );
-        }
-
-
-        const data =
-          await response.json();
-
-
-        const users =
-          Array.isArray(data)
-            ? data
-            : (
-              data.users ||
-              data.rank ||
-              []
-            );
-
-
-        const rankList =
-          document.getElementById(
-            "rankList"
-          );
-
-
-        if (
-          !users ||
-          users.length === 0
-        ) {
-
-          rankList.innerHTML = `
             <div
               style="
                 text-align:center;
@@ -3400,356 +2116,2677 @@
                 color:rgba(255,255,255,.45);
               "
             >
-              Reyting hali bo‘sh
+              Hali do‘stlar yo‘q
             </div>
-          `;
 
-        } else {
+          </div>
 
-          rankList.innerHTML =
-            users.map(
-              (user, index) => {
+        </div>
 
-                const name =
-                  user.first_name ||
-                  user.username ||
-                  "Player";
+      </div>
 
-                const initial =
-                  name
+    </section>
+
+
+    <!-- =================================================
+         EARN
+    ================================================= -->
+
+    <section
+      id="earnScreen"
+      class="screen"
+    >
+
+      <div class="page">
+
+        <div class="page-title">
+          Earn
+        </div>
+
+        <div class="page-subtitle">
+          Vazifalarni bajaring va qo‘shimcha UZCOIN oling.
+        </div>
+
+
+        <div class="card task-card">
+
+          <div class="task-icon">
+            📢
+          </div>
+
+          <div class="task-info">
+
+            <div class="task-title">
+              Join UZCOIN Channel
+            </div>
+
+            <div class="task-desc">
+              Rasmiy kanalga obuna bo‘ling
+            </div>
+
+          </div>
+
+          <button
+            class="task-btn"
+            onclick="openChannel()"
+          >
+            Open
+          </button>
+
+        </div>
+
+
+        <div class="card task-card">
+
+          <div class="task-icon">
+            🎁
+          </div>
+
+          <div class="task-info">
+
+            <div class="task-title">
+              Daily Reward
+            </div>
+
+            <div class="task-desc">
+              Har kuni +100 UZCOIN
+            </div>
+
+          </div>
+
+          <button
+            class="task-btn"
+            onclick="claimDaily()"
+          >
+            +100
+          </button>
+
+        </div>
+
+
+        <div class="card task-card">
+
+          <div class="task-icon">
+            👥
+          </div>
+
+          <div class="task-info">
+
+            <div class="task-title">
+              Invite Friends
+            </div>
+
+            <div class="task-desc">
+              Har bir do‘st uchun +500
+            </div>
+
+          </div>
+
+          <button
+            class="task-btn"
+            onclick="showScreen('friends')"
+          >
+            Invite
+          </button>
+
+        </div>
+
+
+        <div class="card">
+
+          <div
+            style="
+              font-weight:900;
+              margin-bottom:8px;
+            "
+          >
+            🎯 More tasks
+          </div>
+
+          <div
+            style="
+              color:rgba(255,255,255,.5);
+              font-size:13px;
+              line-height:1.5;
+            "
+          >
+            Yangi vazifalar keyingi versiyalarda qo‘shiladi.
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         BOOSTS
+    ================================================= -->
+
+    <section
+      id="boostScreen"
+      class="screen"
+    >
+
+      <div class="page">
+
+        <div class="page-title">
+          Boosts
+        </div>
+
+        <div class="page-subtitle">
+          Tap kuchi va energiyani oshiring.
+        </div>
+
+
+        <div class="card boost-card">
+
+          <div class="boost-icon">
+            🪙
+          </div>
+
+          <div class="boost-info">
+
+            <div class="boost-title">
+              Tap Power
+            </div>
+
+            <div
+              class="boost-desc"
+              id="tapBoostDesc"
+            >
+              Level 1 • +1 / tap
+            </div>
+
+          </div>
+
+          <button
+            class="upgrade-btn"
+            id="tapUpgradeBtn"
+            onclick="upgradeTap()"
+          >
+            Upgrade
+          </button>
+
+        </div>
+
+
+        <div class="card boost-card">
+
+          <div class="boost-icon">
+            ⚡
+          </div>
+
+          <div class="boost-info">
+
+            <div class="boost-title">
+              Energy Boost
+            </div>
+
+            <div
+              class="boost-desc"
+              id="energyBoostDesc"
+            >
+              Level 1 • Max 300
+            </div>
+
+          </div>
+
+          <button
+            class="upgrade-btn"
+            id="energyUpgradeBtn"
+            onclick="upgradeEnergy()"
+          >
+            Upgrade
+          </button>
+
+        </div>
+
+
+        <div class="card daily-card">
+
+          <div class="daily-icon">
+            🎁
+          </div>
+
+          <div class="boost-title">
+            Daily Reward
+          </div>
+
+          <div class="boost-desc">
+            Kuniga bir marta +100 UZCOIN
+          </div>
+
+          <button
+            class="daily-btn"
+            id="dailyBtn"
+            onclick="claimDaily()"
+          >
+            Claim +100
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         RANK
+    ================================================= -->
+
+    <section
+      id="rankScreen"
+      class="screen"
+    >
+
+      <div class="page">
+
+        <div class="page-title">
+          Rank
+        </div>
+
+        <div class="page-subtitle">
+          UZCOIN reytingi va ligalar.
+        </div>
+
+
+        <div class="card league-big">
+
+          <div
+            class="league-big-icon"
+            id="rankLeagueIcon"
+          >
+            🥉
+          </div>
+
+          <div
+            class="league-big-name"
+            id="rankLeagueName"
+          >
+            BRONZE
+          </div>
+
+        </div>
+
+
+        <div class="card">
+
+          <div
+            style="
+              font-size:17px;
+              font-weight:900;
+              margin-bottom:4px;
+            "
+          >
+            🏆 Leaderboard
+          </div>
+
+
+          <div id="rankList">
+
+            <div
+              style="
+                text-align:center;
+                padding:20px;
+                color:rgba(255,255,255,.45);
+              "
+            >
+              Loading...
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="card">
+
+          <div
+            style="
+              font-weight:900;
+              margin-bottom:5px;
+            "
+          >
+            🏅 Leagues
+          </div>
+
+          <div id="leagueList"></div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         PROFILE
+    ================================================= -->
+
+    <section
+      id="profileScreen"
+      class="screen"
+    >
+
+      <div class="page">
+
+        <div class="page-title">
+          Profile
+        </div>
+
+
+        <div class="card profile-top">
+
+          <div
+            class="profile-avatar"
+          >
+
+            <img
+              id="profileImage"
+              alt=""
+            >
+
+            <span
+              id="profileInitial"
+            >
+              U
+            </span>
+
+          </div>
+
+
+          <div
+            class="profile-name"
+            id="profileName"
+          >
+            Player
+          </div>
+
+
+          <div
+            class="profile-username"
+            id="profileUsername"
+          >
+            Telegram user
+          </div>
+
+        </div>
+
+
+        <div class="card">
+
+          <div class="profile-stat">
+
+            <span class="stat-name">
+              🪙 Balance
+            </span>
+
+            <span
+              class="stat-value"
+              id="profileBalance"
+            >
+              0
+            </span>
+
+          </div>
+
+
+          <div class="profile-stat">
+
+            <span class="stat-name">
+              🏆 League
+            </span>
+
+            <span
+              class="stat-value"
+              id="profileLeague"
+            >
+              🥉 BRONZE
+            </span>
+
+          </div>
+
+
+          <div class="profile-stat">
+
+            <span class="stat-name">
+              🏅 Rank
+            </span>
+
+            <span
+              class="stat-value"
+              id="profileRank"
+            >
+              —
+            </span>
+
+          </div>
+
+
+          <div class="profile-stat">
+
+            <span class="stat-name">
+              👥 Referrals
+            </span>
+
+            <span
+              class="stat-value"
+              id="profileReferrals"
+            >
+              0
+            </span>
+
+          </div>
+
+
+          <div class="profile-stat">
+
+            <span class="stat-name">
+              🪙 Tap Power
+            </span>
+
+            <span
+              class="stat-value"
+              id="profilePower"
+            >
+              1
+            </span>
+
+          </div>
+
+
+          <div class="profile-stat">
+
+            <span class="stat-name">
+              ⚡ Energy
+            </span>
+
+            <span
+              class="stat-value"
+              id="profileEnergy"
+            >
+              300 / 300
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <!-- =================================================
+       BOTTOM NAV
+  ================================================= -->
+
+  <nav class="bottom-nav">
+
+    <button
+      class="nav-btn"
+      id="friendsNav"
+      onclick="showScreen('friends')"
+    >
+
+      <span class="nav-icon">
+        👥
+      </span>
+
+      <span>
+        Friends
+      </span>
+
+    </button>
+
+
+    <button
+      class="nav-btn active"
+      id="homeNav"
+      onclick="showScreen('home')"
+    >
+
+      <span class="nav-icon">
+        🏠
+      </span>
+
+      <span>
+        Home
+      </span>
+
+    </button>
+
+
+    <button
+      class="nav-btn"
+      id="earnNav"
+      onclick="showScreen('earn')"
+    >
+
+      <span class="nav-icon">
+        🪙
+      </span>
+
+      <span>
+        Earn
+      </span>
+
+    </button>
+
+
+    <button
+      class="nav-btn"
+      id="boostNav"
+      onclick="showScreen('boost')"
+    >
+
+      <span class="nav-icon">
+        🚀
+      </span>
+
+      <span>
+        Boosts
+      </span>
+
+    </button>
+
+
+    <button
+      class="nav-btn"
+      id="profileNav"
+      onclick="showScreen('profile')"
+    >
+
+      <span class="nav-icon">
+        👤
+      </span>
+
+      <span>
+        Profile
+      </span>
+
+    </button>
+
+  </nav>
+
+</div>
+
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
+
+<div id="toast"></div>
+
+
+<script>
+
+
+/* =====================================================
+   TELEGRAM
+===================================================== */
+
+const tg =
+  window.Telegram.WebApp;
+
+tg.ready();
+tg.expand();
+
+
+try {
+
+  tg.setHeaderColor(
+    "#080a12"
+  );
+
+  tg.setBackgroundColor(
+    "#080a12"
+  );
+
+} catch (e) {}
+
+
+/* =====================================================
+   STATE
+===================================================== */
+
+let telegramId = null;
+
+let initData = "";
+
+let balance = 0;
+
+let energy = 300;
+
+let maxEnergy = 300;
+
+let power = 1;
+
+let tapLevel = 1;
+
+let energyLevel = 1;
+
+let referrals = 0;
+
+let rank = null;
+
+let league = {
+  name: "BRONZE",
+  icon: "🥉",
+  level: 1
+};
+
+let photoUrl = null;
+
+let firstName = "Player";
+
+let username = "";
+
+let tapQueue = 0;
+
+let tapTimer = null;
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function formatNumber(
+  value
+) {
+
+  return Number(
+    value || 0
+  ).toLocaleString(
+    "en-US"
+  );
+}
+
+
+function showToast(
+  message
+) {
+
+  const toast =
+    document.getElementById(
+      "toast"
+    );
+
+
+  toast.textContent =
+    message;
+
+
+  toast.classList.add(
+    "show"
+  );
+
+
+  clearTimeout(
+    window.toastTimer
+  );
+
+
+  window.toastTimer =
+    setTimeout(
+      () => {
+
+        toast.classList.remove(
+          "show"
+        );
+
+      },
+      2300
+    );
+}
+
+
+function escapeHtml(
+  value
+) {
+
+  return String(
+    value || ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+}
+
+
+/* =====================================================
+   AVATAR
+===================================================== */
+
+function setAvatar(
+  image,
+  initial,
+  url,
+  name
+) {
+
+  const letter =
+    (
+      name ||
+      "U"
+    )
+      .trim()
+      .charAt(0)
+      .toUpperCase() ||
+      "U";
+
+
+  if (initial) {
+
+    initial.textContent =
+      letter;
+  }
+
+
+  if (!image) return;
+
+
+  if (!url) {
+
+    image.style.display =
+      "none";
+
+    if (initial) {
+
+      initial.style.display =
+        "block";
+    }
+
+    return;
+  }
+
+
+  image.src =
+    url;
+
+
+  image.onload =
+    function () {
+
+      image.style.display =
+        "block";
+
+      if (initial) {
+
+        initial.style.display =
+          "none";
+      }
+
+    };
+
+
+  image.onerror =
+    function () {
+
+      image.style.display =
+        "none";
+
+      if (initial) {
+
+        initial.style.display =
+          "block";
+      }
+
+    };
+}
+
+
+function updateAvatars() {
+
+  setAvatar(
+
+    document.getElementById(
+      "topAvatarImage"
+    ),
+
+    document.getElementById(
+      "topAvatarInitial"
+    ),
+
+    photoUrl,
+
+    firstName
+  );
+
+
+  setAvatar(
+
+    document.getElementById(
+      "profileImage"
+    ),
+
+    document.getElementById(
+      "profileInitial"
+    ),
+
+    photoUrl,
+
+    firstName
+  );
+}
+
+
+/* =====================================================
+   SCREENS
+===================================================== */
+
+function showScreen(
+  screen
+) {
+
+  const screens = [
+    "home",
+    "friends",
+    "earn",
+    "boost",
+    "rank",
+    "profile"
+  ];
+
+
+  screens.forEach(
+    name => {
+
+      const element =
+        document.getElementById(
+          name + "Screen"
+        );
+
+
+      if (!element) return;
+
+
+      element.classList.toggle(
+        "active",
+        name === screen
+      );
+
+    }
+  );
+
+
+  document
+    .querySelectorAll(
+      ".nav-btn"
+    )
+    .forEach(
+      button => {
+
+        button.classList.remove(
+          "active"
+        );
+
+      }
+    );
+
+
+  if (
+    screen === "home"
+  ) {
+
+    document
+      .getElementById(
+        "homeNav"
+      )
+      .classList.add(
+        "active"
+      );
+  }
+
+
+  if (
+    screen === "friends"
+  ) {
+
+    document
+      .getElementById(
+        "friendsNav"
+      )
+      .classList.add(
+        "active"
+      );
+
+    loadFriends();
+  }
+
+
+  if (
+    screen === "earn"
+  ) {
+
+    document
+      .getElementById(
+        "earnNav"
+      )
+      .classList.add(
+        "active"
+      );
+  }
+
+
+  if (
+    screen === "boost"
+  ) {
+
+    document
+      .getElementById(
+        "boostNav"
+      )
+      .classList.add(
+        "active"
+      );
+  }
+
+
+  if (
+    screen === "rank"
+  ) {
+
+    loadRank();
+  }
+
+
+  if (
+    screen === "profile"
+  ) {
+
+    updateProfile();
+  }
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+
+/* =====================================================
+   SUBSCRIPTION
+===================================================== */
+
+async function checkSubscription(
+  showMessages = true
+) {
+
+  if (
+    !telegramId ||
+    !initData
+  ) {
+    return false;
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/check-subscription",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            initData
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      data.subscribed
+    ) {
+
+      hideSubscription();
+
+      return true;
+    }
+
+
+    showSubscription();
+
+
+    if (showMessages) {
+
+      showToast(
+        "Avval kanalga obuna bo‘ling."
+      );
+    }
+
+
+    return false;
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    if (showMessages) {
+
+      showToast(
+        "Tekshirishda xatolik."
+      );
+    }
+
+
+    return false;
+  }
+}
+
+
+function showSubscription() {
+
+  document
+    .getElementById(
+      "subscriptionOverlay"
+    )
+    .style.display =
+    "block";
+
+
+  document
+    .getElementById(
+      "app"
+    )
+    .style.display =
+    "none";
+}
+
+
+function hideSubscription() {
+
+  document
+    .getElementById(
+      "subscriptionOverlay"
+    )
+    .style.display =
+    "none";
+
+
+  document
+    .getElementById(
+      "app"
+    )
+    .style.display =
+    "block";
+}
+
+
+function openChannel() {
+
+  try {
+
+    tg.openTelegramLink(
+      "https://t.me/uzcoin_officiall"
+    );
+
+  } catch (error) {
+
+    window.open(
+      "https://t.me/uzcoin_officiall",
+      "_blank"
+    );
+  }
+}
+
+
+/* =====================================================
+   LOAD ME
+===================================================== */
+
+async function loadUser() {
+
+  if (!initData) {
+    return;
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/me",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            initData
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      data.error ===
+      "NOT_SUBSCRIBED"
+    ) {
+
+      showSubscription();
+
+      return;
+    }
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        "User loading failed"
+      );
+    }
+
+
+    applyUser(
+      data
+    );
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+  }
+}
+
+
+/* =====================================================
+   APPLY USER
+===================================================== */
+
+function applyUser(
+  user
+) {
+
+  balance =
+    Number(
+      user.balance || 0
+    );
+
+
+  energy =
+    Number(
+      user.energy || 0
+    );
+
+
+  maxEnergy =
+    Number(
+      user.maxEnergy || 300
+    );
+
+
+  power =
+    Number(
+      user.power || 1
+    );
+
+
+  tapLevel =
+    Number(
+      user.tapLevel || 1
+    );
+
+
+  energyLevel =
+    Number(
+      user.energyLevel || 1
+    );
+
+
+  referrals =
+    Number(
+      user.referrals || 0
+    );
+
+
+  rank =
+    user.rank || null;
+
+
+  if (user.league) {
+
+    league =
+      user.league;
+  }
+
+
+  if (user.firstName) {
+
+    firstName =
+      user.firstName;
+  }
+
+
+  if (user.username) {
+
+    username =
+      user.username;
+  }
+
+
+  if (user.photoUrl) {
+
+    photoUrl =
+      user.photoUrl;
+  }
+
+
+  updateAll();
+}
+
+
+/* =====================================================
+   UPDATE ALL
+===================================================== */
+
+function updateAll() {
+
+  updateTop();
+
+  updateHome();
+
+  updateBoosts();
+
+  updateProfile();
+
+  updateAvatars();
+}
+
+
+/* =====================================================
+   TOP
+===================================================== */
+
+function updateTop() {
+
+  document
+    .getElementById(
+      "topUserName"
+    )
+    .textContent =
+    firstName || "Player";
+
+
+  document
+    .getElementById(
+      "topUserBalance"
+    )
+    .textContent =
+    formatNumber(
+      balance
+    );
+
+
+  document
+    .getElementById(
+      "topLeagueIcon"
+    )
+    .textContent =
+    league.icon ||
+    "🥉";
+
+
+  document
+    .getElementById(
+      "topLeagueName"
+    )
+    .textContent =
+    league.name ||
+    "BRONZE";
+}
+
+
+/* =====================================================
+   HOME
+===================================================== */
+
+function updateHome() {
+
+  document
+    .getElementById(
+      "balance"
+    )
+    .textContent =
+    formatNumber(
+      balance
+    );
+
+
+  document
+    .getElementById(
+      "energy"
+    )
+    .textContent =
+    formatNumber(
+      energy
+    );
+
+
+  document
+    .getElementById(
+      "maxEnergy"
+    )
+    .textContent =
+    " / " +
+    formatNumber(
+      maxEnergy
+    );
+
+
+  document
+    .getElementById(
+      "rankNumber"
+    )
+    .textContent =
+    rank
+      ? formatNumber(rank)
+      : "—";
+
+
+  document
+    .getElementById(
+      "leagueText"
+    )
+    .textContent =
+    `${
+      league.icon || "🥉"
+    } ${
+      league.name || "BRONZE"
+    }`;
+
+
+  const percent =
+    maxEnergy > 0
+      ? (
+          energy /
+          maxEnergy
+        ) * 100
+      : 0;
+
+
+  document
+    .getElementById(
+      "energyFill"
+    )
+    .style.width =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        percent
+      )
+    ) + "%";
+}
+
+
+/* =====================================================
+   BOOSTS
+===================================================== */
+
+function getTapUpgradeCost(
+  level
+) {
+
+  return Math.floor(
+    500 *
+    Math.pow(
+      1.8,
+      level - 1
+    )
+  );
+}
+
+
+function getEnergyUpgradeCost(
+  level
+) {
+
+  const costs = [
+    1000,
+    5000,
+    25000,
+    100000,
+    500000,
+    2500000,
+    10000000
+  ];
+
+
+  return costs[
+    Math.min(
+      level - 1,
+      costs.length - 1
+    )
+  ];
+}
+
+
+function updateBoosts() {
+
+  const tapCost =
+    getTapUpgradeCost(
+      tapLevel
+    );
+
+
+  const energyCost =
+    getEnergyUpgradeCost(
+      energyLevel
+    );
+
+
+  const tapButton =
+    document.getElementById(
+      "tapUpgradeBtn"
+    );
+
+
+  const energyButton =
+    document.getElementById(
+      "energyUpgradeBtn"
+    );
+
+
+  tapButton.textContent =
+    `🪙 ${formatNumber(
+      tapCost
+    )}`;
+
+
+  energyButton.textContent =
+    `🪙 ${formatNumber(
+      energyCost
+    )}`;
+
+
+  tapButton.disabled =
+    balance < tapCost;
+
+
+  energyButton.disabled =
+    balance < energyCost;
+
+
+  document
+    .getElementById(
+      "tapBoostDesc"
+    )
+    .textContent =
+    `Level ${tapLevel} • +${power} / tap`;
+
+
+  document
+    .getElementById(
+      "energyBoostDesc"
+    )
+    .textContent =
+    `Level ${energyLevel} • Max ${formatNumber(
+      maxEnergy
+    )}`;
+}
+
+
+/* =====================================================
+   PROFILE
+===================================================== */
+
+function updateProfile() {
+
+  document
+    .getElementById(
+      "profileName"
+    )
+    .textContent =
+    firstName ||
+    "Player";
+
+
+  document
+    .getElementById(
+      "profileUsername"
+    )
+    .textContent =
+    username
+      ? "@" + username
+      : "Telegram user";
+
+
+  document
+    .getElementById(
+      "profileBalance"
+    )
+    .textContent =
+    formatNumber(
+      balance
+    );
+
+
+  document
+    .getElementById(
+      "profileLeague"
+    )
+    .textContent =
+    `${
+      league.icon || "🥉"
+    } ${
+      league.name || "BRONZE"
+    }`;
+
+
+  document
+    .getElementById(
+      "profileRank"
+    )
+    .textContent =
+    rank
+      ? "#" +
+        formatNumber(rank)
+      : "—";
+
+
+  document
+    .getElementById(
+      "profileReferrals"
+    )
+    .textContent =
+    formatNumber(
+      referrals
+    );
+
+
+  document
+    .getElementById(
+      "profilePower"
+    )
+    .textContent =
+    power;
+
+
+  document
+    .getElementById(
+      "profileEnergy"
+    )
+    .textContent =
+    `${formatNumber(
+      energy
+    )} / ${formatNumber(
+      maxEnergy
+    )}`;
+}
+
+
+/* =====================================================
+   TAP
+===================================================== */
+
+function tapCoin(
+  event
+) {
+
+  if (
+    energy <= 0
+  ) {
+
+    showToast(
+      "⚡ Energy tugadi!"
+    );
+
+    return;
+  }
+
+
+  const coin =
+    document.getElementById(
+      "bigCoin"
+    );
+
+
+  coin.classList.add(
+    "pressed"
+  );
+
+
+  setTimeout(
+    () => {
+
+      coin.classList.remove(
+        "pressed"
+      );
+
+    },
+    80
+  );
+
+
+  balance += power;
+
+  energy -= 1;
+
+  tapQueue += 1;
+
+
+  createTapEffect(
+    event.clientX,
+    event.clientY,
+    power
+  );
+
+
+  updateAll();
+
+
+  if (!tapTimer) {
+
+    tapTimer =
+      setTimeout(
+        sendTaps,
+        250
+      );
+  }
+}
+
+
+/* =====================================================
+   TAP EFFECT
+===================================================== */
+
+function createTapEffect(
+  x,
+  y,
+  amount
+) {
+
+  const element =
+    document.createElement(
+      "div"
+    );
+
+
+  element.className =
+    "tap-number";
+
+
+  element.textContent =
+    "+" + amount;
+
+
+  element.style.left =
+    x + "px";
+
+
+  element.style.top =
+    y + "px";
+
+
+  document.body.appendChild(
+    element
+  );
+
+
+  setTimeout(
+    () => {
+
+      element.remove();
+
+    },
+    800
+  );
+}
+
+
+/* =====================================================
+   SEND TAPS
+===================================================== */
+
+async function sendTaps() {
+
+  clearTimeout(
+    tapTimer
+  );
+
+  tapTimer = null;
+
+
+  const taps =
+    tapQueue;
+
+
+  tapQueue = 0;
+
+
+  if (
+    taps <= 0
+  ) {
+    return;
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/tap",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            initData,
+            taps
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      data.error ===
+      "NOT_SUBSCRIBED"
+    ) {
+
+      showSubscription();
+
+      return;
+    }
+
+
+    if (
+      !response.ok
+    ) {
+
+      await loadUser();
+
+      return;
+    }
+
+
+    if (data.user) {
+
+      applyUser(
+        data.user
+      );
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "Tap error:",
+      error
+    );
+
+    await loadUser();
+  }
+}
+
+
+/* =====================================================
+   UPGRADE
+===================================================== */
+
+async function upgradeTap() {
+
+  const cost =
+    getTapUpgradeCost(
+      tapLevel
+    );
+
+
+  if (
+    balance < cost
+  ) {
+
+    showToast(
+      "🪙 Coin yetarli emas."
+    );
+
+    return;
+  }
+
+
+  await upgrade(
+    "tap"
+  );
+}
+
+
+async function upgradeEnergy() {
+
+  const cost =
+    getEnergyUpgradeCost(
+      energyLevel
+    );
+
+
+  if (
+    balance < cost
+  ) {
+
+    showToast(
+      "🪙 Coin yetarli emas."
+    );
+
+    return;
+  }
+
+
+  await upgrade(
+    "energy"
+  );
+}
+
+
+async function upgrade(
+  type
+) {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/upgrade",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            initData,
+            type
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      data.error ===
+      "NOT_SUBSCRIBED"
+    ) {
+
+      showSubscription();
+
+      return;
+    }
+
+
+    if (
+      data.error ===
+      "NOT_ENOUGH_BALANCE"
+    ) {
+
+      showToast(
+        "🪙 Coin yetarli emas."
+      );
+
+      return;
+    }
+
+
+    if (!response.ok) {
+
+      showToast(
+        "Upgrade amalga oshmadi."
+      );
+
+      return;
+    }
+
+
+    if (data.user) {
+
+      applyUser(
+        data.user
+      );
+    }
+
+
+    showToast(
+      type === "tap"
+        ? "🪙 Tap Power oshdi!"
+        : "⚡ Energy Boost oshdi!"
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast(
+      "Xatolik yuz berdi."
+    );
+  }
+}
+
+
+/* =====================================================
+   DAILY
+===================================================== */
+
+async function claimDaily() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/daily",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            initData
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      data.error ===
+      "NOT_SUBSCRIBED"
+    ) {
+
+      showSubscription();
+
+      return;
+    }
+
+
+    if (
+      data.error ===
+      "ALREADY_CLAIMED"
+    ) {
+
+      showToast(
+        "🎁 Bugungi reward olingan."
+      );
+
+      return;
+    }
+
+
+    if (!response.ok) {
+
+      showToast(
+        "Daily reward olinmadi."
+      );
+
+      return;
+    }
+
+
+    if (data.user) {
+
+      applyUser(
+        data.user
+      );
+    }
+
+
+    showToast(
+      "🎁 +100 UZCOIN!"
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast(
+      "Xatolik yuz berdi."
+    );
+  }
+}
+
+
+/* =====================================================
+   REFERRAL
+===================================================== */
+
+function updateReferralLink() {
+
+  if (!telegramId) {
+    return;
+  }
+
+
+  const link =
+    `https://t.me/UZCoinTapBot?start=ref_${telegramId}`;
+
+
+  document
+    .getElementById(
+      "refLink"
+    )
+    .textContent =
+    link;
+}
+
+
+async function copyReferral() {
+
+  const text =
+    document
+      .getElementById(
+        "refLink"
+      )
+      .textContent;
+
+
+  try {
+
+    await navigator.clipboard.writeText(
+      text
+    );
+
+
+    showToast(
+      "🔗 Referral link nusxalandi!"
+    );
+
+  } catch (error) {
+
+    showToast(
+      text
+    );
+  }
+}
+
+
+/* =====================================================
+   FRIENDS
+===================================================== */
+
+async function loadFriends() {
+
+  if (!telegramId) {
+    return;
+  }
+
+
+  const list =
+    document.getElementById(
+      "friendsList"
+    );
+
+
+  try {
+
+    const response =
+      await fetch(
+        `/api/friends/${telegramId}`
+      );
+
+
+    const friends =
+      await response.json();
+
+
+    document
+      .getElementById(
+        "referralCount"
+      )
+      .textContent =
+      formatNumber(
+        referrals
+      );
+
+
+    if (
+      !Array.isArray(friends) ||
+      friends.length === 0
+    ) {
+
+      list.innerHTML = `
+        <div
+          style="
+            text-align:center;
+            padding:25px;
+            color:rgba(255,255,255,.45);
+          "
+        >
+          Hali do‘stlar yo‘q
+        </div>
+      `;
+
+      return;
+    }
+
+
+    list.innerHTML =
+      friends
+        .map(
+          friend => {
+
+            const name =
+              friend.first_name ||
+              friend.username ||
+              "Player";
+
+
+            const initial =
+              name
+                .charAt(0)
+                .toUpperCase();
+
+
+            const avatar =
+              friend.photo_url
+                ? `
+                  <img
+                    src="${escapeHtml(
+                      friend.photo_url
+                    )}"
+                    alt=""
+                  >
+                `
+                : initial;
+
+
+            return `
+              <div class="friend-row">
+
+                <div class="row-avatar">
+                  ${avatar}
+                </div>
+
+                <div class="row-name">
+                  ${escapeHtml(
+                    name
+                  )}
+                </div>
+
+                <div class="row-balance">
+                  +500
+                </div>
+
+              </div>
+            `;
+          }
+        )
+        .join("");
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+  }
+}
+
+
+/* =====================================================
+   RANK
+===================================================== */
+
+async function loadRank() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/rank"
+      );
+
+
+    const data =
+      await response.json();
+
+
+    const users =
+      data.users || [];
+
+
+    const list =
+      document.getElementById(
+        "rankList"
+      );
+
+
+    if (
+      users.length === 0
+    ) {
+
+      list.innerHTML = `
+        <div
+          style="
+            text-align:center;
+            padding:20px;
+            color:rgba(255,255,255,.45);
+          "
+        >
+          Reyting hali bo‘sh
+        </div>
+      `;
+
+      return;
+    }
+
+
+    list.innerHTML =
+      users
+        .map(
+          user => {
+
+            const name =
+              user.firstName ||
+              user.username ||
+              "Player";
+
+
+            const avatar =
+              user.photoUrl
+                ? `
+                  <img
+                    src="${escapeHtml(
+                      user.photoUrl
+                    )}"
+                    alt=""
+                  >
+                `
+                : name
                     .charAt(0)
                     .toUpperCase();
 
 
-                const avatar =
-                  user.photo_url
-                    ? `
-                      <img
-                        src="${escapeHtml(
-                          user.photo_url
-                        )}"
-                        alt=""
-                      >
-                    `
-                    : initial;
+            return `
+              <div class="rank-row">
 
-
-                const userRank =
-                  Number(
-                    user.rank ||
-                    index + 1
-                  );
-
-
-                return `
-                  <div class="rank-row">
-
-                    <div
-                      style="
-                        width:30px;
-                        text-align:center;
-                        font-weight:900;
-                      "
-                    >
-                      ${userRank}
-                    </div>
-
-                    <div class="row-avatar">
-                      ${avatar}
-                    </div>
-
-                    <div class="row-name">
-                      ${escapeHtml(name)}
-                    </div>
-
-                    <div class="row-balance">
-                      ${formatNumber(
-                        user.balance
-                      )}
-                    </div>
-
-                  </div>
-                `;
-
-              }
-            ).join("");
-        }
-
-
-        if (data.league) {
-
-          document
-            .getElementById(
-              "rankLeagueIcon"
-            )
-            .textContent =
-            data.league.icon ||
-            "🥉";
-
-          document
-            .getElementById(
-              "rankLeagueName"
-            )
-            .textContent =
-            data.league.name ||
-            "BRONZE";
-        }
-
-
-      } catch (error) {
-
-        console.error(error);
-
-      }
-
-
-      loadLeagues();
-    }
-
-
-    async function loadLeagues() {
-
-      try {
-
-        const response =
-          await fetch(
-            "/api/leagues"
-          );
-
-
-        if (!response.ok) return;
-
-
-        const data =
-          await response.json();
-
-
-        const leagues =
-          Array.isArray(data)
-            ? data
-            : (
-              data.leagues ||
-              []
-            );
-
-
-        const container =
-          document.getElementById(
-            "leagueList"
-          );
-
-
-        if (
-          !Array.isArray(leagues)
-        ) return;
-
-
-        container.innerHTML =
-          leagues.map(
-            item => {
-
-              return `
-                <div class="league-row">
-
-                  <div class="league-row-icon">
-                    ${item.icon || "🏆"}
-                  </div>
-
-                  <div class="league-row-name">
-                    ${escapeHtml(
-                      item.name ||
-                      "League"
-                    )}
-                  </div>
-
-                  <div class="league-row-min">
-                    ${formatNumber(
-                      item.min || 0
-                    )}+
-                  </div>
-
+                <div
+                  style="
+                    width:27px;
+                    text-align:center;
+                    font-weight:900;
+                  "
+                >
+                  ${user.rank}
                 </div>
-              `;
 
-            }
-          ).join("");
+                <div class="row-avatar">
+                  ${avatar}
+                </div>
 
-      } catch (error) {
+                <div class="row-name">
+                  ${escapeHtml(
+                    name
+                  )}
+                </div>
 
-        console.error(
-          "League error:",
-          error
+                <div class="row-balance">
+                  ${formatNumber(
+                    user.balance
+                  )}
+                </div>
+
+              </div>
+            `;
+
+          }
+        )
+        .join("");
+
+
+  } catch (error) {
+
+    console.error(
+      "Rank error:",
+      error
+    );
+  }
+
+
+  loadLeagues();
+}
+
+
+/* =====================================================
+   LEAGUES
+===================================================== */
+
+async function loadLeagues() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/leagues"
+      );
+
+
+    const data =
+      await response.json();
+
+
+    const leagues =
+      data.leagues || [];
+
+
+    const container =
+      document.getElementById(
+        "leagueList"
+      );
+
+
+    container.innerHTML =
+      leagues
+        .map(
+          item => {
+
+            const active =
+              Number(
+                item.level
+              ) ===
+              Number(
+                league.level || 1
+              );
+
+
+            return `
+              <div
+                class="league-row"
+                style="
+                  opacity:${
+                    active ? "1" : ".62"
+                  };
+                "
+              >
+
+                <div class="league-row-icon">
+                  ${item.icon}
+                </div>
+
+                <div class="league-row-name">
+                  ${item.name}
+
+                  ${
+                    active
+                      ? " ✓"
+                      : ""
+                  }
+                </div>
+
+                <div class="league-row-min">
+                  ${formatNumber(
+                    item.min
+                  )}+
+                </div>
+
+              </div>
+            `;
+
+          }
+        )
+        .join("");
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+  }
+}
+
+
+/* =====================================================
+   ENERGY +1 / SEC
+===================================================== */
+
+setInterval(
+  function () {
+
+    if (
+      energy < maxEnergy
+    ) {
+
+      energy =
+        Math.min(
+          maxEnergy,
+          energy + 1
         );
-      }
+
+
+      updateHome();
+
+      updateProfile();
+    }
+
+  },
+  1000
+);
+
+
+/* =====================================================
+   SERVER SYNC
+===================================================== */
+
+setInterval(
+  async function () {
+
+    if (!initData) {
+      return;
     }
 
 
-    /* =====================================
-       ENERGY REGENERATION
-       LOCAL +1 PER SECOND
-    ===================================== */
+    /*
+      Tap navbatda bo‘lsa,
+      avval serverga yuboriladi.
+    */
 
-    setInterval(
-      function () {
-
-        if (
-          energy < maxEnergy
-        ) {
-
-          energy =
-            Math.min(
-              maxEnergy,
-              energy + 1
-            );
-
-          updateHome();
-          updateProfile();
-        }
-
-      },
-      1000
-    );
-
-
-    /* =====================================
-       SERVER SYNC
-    ===================================== */
-
-    setInterval(
-      async function () {
-
-        if (!telegramId) {
-          return;
-        }
-
-
-        await loadUser();
-
-      },
-      10000
-    );
-
-
-    /* =====================================
-       INIT
-    ===================================== */
-
-    async function init() {
-
-      try {
-
-        const tgUser =
-          tg.initDataUnsafe?.user;
-
-
-        if (!tgUser) {
-
-          showToast(
-            "Telegram user topilmadi."
-          );
-
-          return;
-        }
-
-
-        telegramId =
-          tgUser.id;
-
-        initData =
-          tg.initData;
-
-
-        firstName =
-          tgUser.first_name ||
-          "Player";
-
-        username =
-          tgUser.username ||
-          "";
-
-        photoUrl =
-          tgUser.photo_url ||
-          null;
-
-
-        updateAvatars();
-
-
-        const subscribed =
-          await checkSubscription(
-            false
-          );
-
-
-        if (!subscribed) {
-
-          document
-            .getElementById(
-              "loading"
-            )
-            .style.display =
-            "none";
-
-          showSubscription();
-
-          return;
-        }
-
-
-        await loadUser();
-
-        updateReferralLink();
-
-        await loadFriends();
-
-        await loadRank();
-
-        await handleReferral();
-
-
-        document
-          .getElementById(
-            "loading"
-          )
-          .style.display =
-          "none";
-
-        document
-          .getElementById(
-            "app"
-          )
-          .style.display =
-          "block";
-
-
-      } catch (error) {
-
-        console.error(
-          "INIT ERROR:",
-          error
-        );
-
-        document
-          .getElementById(
-            "loading"
-          )
-          .style.display =
-          "none";
-
-        showToast(
-          "Ilovani yuklashda xatolik."
-        );
-      }
+    if (
+      tapQueue > 0
+    ) {
+      await sendTaps();
     }
 
 
-    /* =====================================
-       START
-    ===================================== */
+    await loadUser();
 
-    init();
+  },
+  10000
+);
 
-  </script>
+
+/* =====================================================
+   INIT
+===================================================== */
+
+async function init() {
+
+  try {
+
+    const telegramUser =
+      tg.initDataUnsafe?.user;
+
+
+    if (!telegramUser) {
+
+      document
+        .getElementById(
+          "loading"
+        )
+        .style.display =
+        "none";
+
+
+      showToast(
+        "Telegram user topilmadi."
+      );
+
+
+      return;
+    }
+
+
+    telegramId =
+      telegramUser.id;
+
+
+    initData =
+      tg.initData;
+
+
+    firstName =
+      telegramUser.first_name ||
+      "Player";
+
+
+    username =
+      telegramUser.username ||
+      "";
+
+
+    photoUrl =
+      telegramUser.photo_url ||
+      null;
+
+
+    updateAvatars();
+
+
+    const subscribed =
+      await checkSubscription(
+        false
+      );
+
+
+    if (!subscribed) {
+
+      document
+        .getElementById(
+          "loading"
+        )
+        .style.display =
+        "none";
+
+
+      showSubscription();
+
+      return;
+    }
+
+
+    await loadUser();
+
+
+    updateReferralLink();
+
+
+    await loadFriends();
+
+
+    document
+      .getElementById(
+        "loading"
+      )
+      .style.display =
+      "none";
+
+
+    document
+      .getElementById(
+        "app"
+      )
+      .style.display =
+      "block";
+
+
+  } catch (error) {
+
+    console.error(
+      "INIT ERROR:",
+      error
+    );
+
+
+    document
+      .getElementById(
+        "loading"
+      )
+      .style.display =
+      "none";
+
+
+    showToast(
+      "Ilovani yuklashda xatolik."
+    );
+  }
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+init();
+
+</script>
 
 </body>
   </html>
