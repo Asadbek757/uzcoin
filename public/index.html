@@ -697,12 +697,13 @@
 
   if (data.user) {
   balance = Number(data.user.balance) || 0;
-  energy = Number(data.user.energy) || 100;
+  energy = Number(data.user.energy);
   maxEnergy = Number(data.user.max_energy) || 100;
   }
 
-  updateBalance();
+  updateBalance();    
   updateLevel();
+  updateEnergy();   
 }
 
     function updateBalance() {
