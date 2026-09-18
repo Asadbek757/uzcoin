@@ -1713,12 +1713,89 @@
     ================================================== */
 
     coin.addEventListener(
-      "click",
-      async (event) => {
+  "click",
+  (event) => {
 
-        if (energy <= 0) {
-          return;
-        }
+    if (energy <= 0) {
+      return;
+    }
+
+    const localTapPower = tapPower;
+
+    // UI DARHOL o'zgaradi
+    balance += localTapPower;
+    energy--;
+
+    showTapEffect(
+      localTapPower,
+      event.clientX,
+      event.clientY
+    );
+
+    updateBalance();
+    updateEnergyUI();
+    updateLevelUI();
+
+    // Serverga saqlash
+    fetch("/api/tap", {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        telegramId: telegramId,
+        initData: initData
+      })
+    })
+    .then(async (response) => {
+
+      const data =
+        await response.json();
+
+      if (!data.success) {
+
+        console.log(
+          "Server tap xatosi:",
+          data.message
+        );
+
+        return;
+      }
+
+      // Serverdagi haqiqiy qiymatni olamiz
+      balance =
+        Number(data.balance);
+
+      energy =
+        Number(data.energy);
+
+      maxEnergy =
+        Number(data.maxEnergy);
+
+      level =
+        Number(data.level);
+
+      tapPower =
+        Number(data.tapPower);
+
+      updateBalance();
+      updateLevelUI();
+      updateEnergyUI();
+      updateTapPowerUI();
+
+    })
+    .catch((error) => {
+
+      console.error(
+        "TAP SERVER ERROR:",
+        error
+      );
+
+    });
+  }
+);
 
         coin.disabled = true;
 
