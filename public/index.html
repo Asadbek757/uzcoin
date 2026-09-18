@@ -5,7 +5,7 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, user-scalable=no"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   >
 
   <title>UZCOIN</title>
@@ -13,541 +13,877 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
+
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
       -webkit-tap-highlight-color: transparent;
     }
 
     html,
     body {
+      margin: 0;
+      padding: 0;
       width: 100%;
       min-height: 100%;
-      background: #10131a;
-      color: white;
-      font-family: Arial, sans-serif;
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      background: #070914;
+      color: #ffffff;
+      overflow-x: hidden;
+      user-select: none;
     }
 
     body {
-      overflow-x: hidden;
+      min-height: 100vh;
+      background:
+        radial-gradient(
+          circle at 50% -10%,
+          rgba(84, 58, 180, .35),
+          transparent 35%
+        ),
+        radial-gradient(
+          circle at 0% 50%,
+          rgba(0, 180, 255, .10),
+          transparent 35%
+        ),
+        #070914;
     }
 
     button {
-      font-family: inherit;
+      font: inherit;
+      border: 0;
+      outline: 0;
     }
 
-    .app {
+    /* =========================
+       LOADING
+    ========================= */
+
+    #loading {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(89, 64, 180, .30),
+          transparent 45%
+        ),
+        #070914;
+
+      transition: opacity .25s ease;
+    }
+
+    #loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-logo {
+      width: 82px;
+      height: 82px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 50%;
+
+      background:
+        linear-gradient(
+          145deg,
+          #ffe56b,
+          #ffae00 55%,
+          #ff7300
+        );
+
+      box-shadow:
+        0 0 25px rgba(255, 190, 40, .5),
+        inset 0 3px 8px rgba(255,255,255,.5),
+        inset 0 -8px 15px rgba(120,50,0,.35);
+
+      font-size: 38px;
+
+      animation: loadingPulse 1.2s infinite;
+    }
+
+    .loading-title {
+      margin-top: 22px;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .loading-subtitle {
+      margin-top: 8px;
+      color: #8d95ad;
+      font-size: 13px;
+    }
+
+    @keyframes loadingPulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.08);
+      }
+    }
+
+    /* =========================
+       APP
+    ========================= */
+
+    #app {
       width: 100%;
+      max-width: 520px;
       min-height: 100vh;
-      padding-bottom: 105px;
+      margin: auto;
+      padding-bottom: 92px;
     }
-
-    /* ================= HEADER ================= */
-
-    .header {
-      width: 100%;
-      text-align: center;
-      padding: 22px 15px 0;
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: 900;
-      letter-spacing: 1px;
-    }
-
-    .balance {
-      margin-top: 14px;
-      font-size: 34px;
-      font-weight: 900;
-    }
-
-    .level {
-      margin-top: 7px;
-      font-size: 15px;
-      font-weight: bold;
-      opacity: 0.85;
-    }
-
-    /* ================= PAGES ================= */
 
     .page {
       display: none;
-      width: 100%;
+      padding: 16px;
     }
 
     .page.active {
       display: block;
     }
 
-    /* ================= HOME ================= */
+    /* =========================
+       HEADER
+    ========================= */
 
-    .home-page {
-      min-height: calc(100vh - 105px);
-      display: none;
-      flex-direction: column;
-    }
-
-    .home-page.active {
-      display: flex;
-    }
-
-    .coin-area {
-      flex: 1;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 25px 15px 10px;
-    }
-
-    .coin {
-      width: min(270px, 70vw);
-      height: min(270px, 70vw);
-
-      border: none;
-      border-radius: 50%;
-
-      background: #f5b800;
-
-      box-shadow:
-        0 0 0 10px rgba(245, 184, 0, 0.10),
-        0 0 50px rgba(245, 184, 0, 0.35);
-
-      font-size: 100px;
-
-      cursor: pointer;
-      user-select: none;
-
-      transition:
-        transform 0.08s,
-        box-shadow 0.15s;
-    }
-
-    .coin:active {
-      transform: scale(0.91);
-    }
-
-    .coin.disabled {
-      opacity: 0.45;
-      transform: none;
-    }
-
-    .tap-text {
-      margin-top: 17px;
-      font-size: 14px;
-      opacity: 0.55;
-      letter-spacing: 2px;
-    }
-
-    .tap-power {
-      margin-top: 8px;
-      font-size: 16px;
-      font-weight: 800;
-    }
-
-    .energy {
-      margin-top: 9px;
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    /* ================= SKIN BUTTON ================= */
-
-    .skin-button {
-      margin-top: 17px;
-      padding: 12px 25px;
-
-      border: none;
-      border-radius: 14px;
-
-      background: #252b36;
-      color: white;
-
-      font-size: 15px;
-      font-weight: bold;
-
-      cursor: pointer;
-    }
-
-    .skin-button:active {
-      transform: scale(0.96);
-    }
-
-    /* ================= SKIN PANEL ================= */
-
-    .skin-panel {
-      display: none;
-
-      width: 92%;
-      max-width: 380px;
-
-      max-height: 330px;
-
-      margin-top: 12px;
-      padding: 15px;
-
-      background: #191d26;
-
-      border: 1px solid #303641;
-      border-radius: 18px;
-
-      overflow-y: auto;
-      overflow-x: hidden;
-
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-y;
-    }
-
-    .skin-panel.show {
-      display: block;
-    }
-
-    .skin-title {
-      text-align: center;
-      font-size: 18px;
-      font-weight: 900;
-      margin-bottom: 12px;
-    }
-
-    .skin-option {
-      width: 100%;
-      min-height: 64px;
-
-      margin-top: 8px;
-      padding: 12px;
-
-      border: 1px solid transparent;
-      border-radius: 13px;
-
-      background: #252b36;
-      color: white;
-
+    .topbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-
-      text-align: left;
-
-      cursor: pointer;
+      gap: 12px;
+      margin-bottom: 18px;
     }
 
-    .skin-option:active {
-      transform: scale(0.985);
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .skin-option.locked {
-      opacity: 0.42;
-    }
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
 
-    .skin-option.selected {
-      border: 2px solid white;
-    }
-
-    .skin-name {
-      font-size: 15px;
-      font-weight: 900;
-    }
-
-    .skin-info {
-      text-align: right;
-      font-size: 12px;
-      line-height: 18px;
-      opacity: 0.82;
-    }
-
-    /* ================= TAP EFFECT ================= */
-
-    .tap-effect {
-      position: fixed;
-
-      transform: translate(-50%, -50%);
-
-      color: white;
-      font-size: 38px;
-      font-weight: 900;
-
-      pointer-events: none;
-
-      z-index: 9999;
-
-      animation: tapEffect 0.7s ease forwards;
-    }
-
-    @keyframes tapEffect {
-      0% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-      }
-
-      100% {
-        opacity: 0;
-        transform: translate(-50%, -115%) scale(1.25);
-      }
-    }
-
-    /* ================= POPUP ================= */
-
-    .level-popup {
-      position: fixed;
-      inset: 0;
-
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
-
-      padding: 20px;
-
-      background: rgba(0, 0, 0, 0.78);
-
-      z-index: 10000;
-    }
-
-    .level-popup.show {
-      display: flex;
-    }
-
-    .level-popup-box {
-      width: 90%;
-      max-width: 350px;
-
-      padding: 28px 20px;
-
-      border-radius: 24px;
-
-      text-align: center;
 
       background:
         linear-gradient(
           145deg,
-          #15152b,
-          #24245a
+          #ffe36a,
+          #ffb300 55%,
+          #ff7a00
         );
 
-      border: 2px solid #ffd700;
-
       box-shadow:
-        0 0 35px rgba(255, 215, 0, 0.4);
+        0 5px 20px rgba(255, 170, 0, .25);
 
-      animation: popupIn 0.3s ease;
+      font-size: 22px;
     }
 
-    @keyframes popupIn {
-      from {
-        opacity: 0;
-        transform: scale(0.75);
+    .brand-name {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: .5px;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: #777f98;
+      margin-top: 2px;
+    }
+
+    .mini-level {
+      padding: 8px 12px;
+      border-radius: 14px;
+
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+
+      text-align: right;
+    }
+
+    .mini-level-label {
+      color: #777f98;
+      font-size: 10px;
+    }
+
+    .mini-level-value {
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    /* =========================
+       BALANCE
+    ========================= */
+
+    .balance-card {
+      position: relative;
+      overflow: hidden;
+
+      padding: 20px;
+      border-radius: 25px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255,255,255,.09),
+          rgba(255,255,255,.035)
+        );
+
+      border: 1px solid rgba(255,255,255,.08);
+
+      box-shadow:
+        0 18px 45px rgba(0,0,0,.25);
+    }
+
+    .balance-card::before {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      right: -90px;
+      top: -100px;
+
+      background: rgba(255,190,40,.12);
+      filter: blur(30px);
+      border-radius: 50%;
+    }
+
+    .balance-label {
+      color: #8991a9;
+      font-size: 12px;
+    }
+
+    .balance {
+      margin-top: 5px;
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -.8px;
+    }
+
+    .balance-unit {
+      color: #ffca28;
+      font-size: 14px;
+      font-weight: 800;
+      margin-left: 4px;
+    }
+
+    .progress-wrap {
+      margin-top: 17px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      color: #8d95ad;
+      font-size: 11px;
+      margin-bottom: 7px;
+    }
+
+    .progress {
+      width: 100%;
+      height: 7px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(255,255,255,.07);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+
+      background:
+        linear-gradient(
+          90deg,
+          #ffb300,
+          #ffe16b
+        );
+
+      box-shadow:
+        0 0 12px rgba(255,193,7,.35);
+
+      transition: width .3s ease;
+    }
+
+    /* =========================
+       COIN AREA
+    ========================= */
+
+    .coin-section {
+      min-height: 425px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+
+      position: relative;
+    }
+
+    .coin-halo {
+      position: absolute;
+
+      width: 330px;
+      height: 330px;
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle,
+          rgba(255,193,7,.15),
+          rgba(255,193,7,.04) 45%,
+          transparent 70%
+        );
+
+      filter: blur(2px);
+      pointer-events: none;
+    }
+
+    .coin {
+      position: relative;
+      z-index: 2;
+
+      width: 225px;
+      height: 225px;
+
+      border-radius: 50%;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      cursor: pointer;
+
+      background:
+        radial-gradient(
+          circle at 35% 25%,
+          #fff4a8 0%,
+          #ffd740 20%,
+          #ffb300 48%,
+          #e88700 75%,
+          #a84f00 100%
+        );
+
+      border: 7px solid rgba(255,255,255,.20);
+
+      box-shadow:
+        0 0 0 8px rgba(255,193,7,.07),
+        0 0 45px rgba(255,177,0,.40),
+        0 25px 55px rgba(0,0,0,.42),
+        inset 0 7px 10px rgba(255,255,255,.55),
+        inset 0 -16px 25px rgba(130,55,0,.35);
+
+      transition:
+        transform .08s ease,
+        filter .15s ease;
+    }
+
+    .coin::before {
+      content: "";
+
+      position: absolute;
+      inset: 13px;
+
+      border-radius: 50%;
+
+      border: 2px solid rgba(255,255,255,.32);
+
+      box-shadow:
+        inset 0 0 0 3px rgba(130,70,0,.12),
+        inset 0 0 20px rgba(255,255,255,.15);
+    }
+
+    .coin::after {
+      content: "";
+
+      position: absolute;
+      width: 65%;
+      height: 20%;
+
+      top: 17%;
+      left: 18%;
+
+      border-radius: 50%;
+
+      background: rgba(255,255,255,.25);
+
+      filter: blur(8px);
+
+      transform: rotate(-18deg);
+    }
+
+    .coin:active {
+      transform: scale(.91);
+      filter: brightness(1.1);
+    }
+
+    .coin-inner {
+      position: relative;
+      z-index: 3;
+
+      width: 73%;
+      height: 73%;
+
+      border-radius: 50%;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 2px solid rgba(255,255,255,.30);
+
+      color: rgba(125,65,0,.65);
+
+      font-size: 70px;
+      font-weight: 1000;
+
+      text-shadow:
+        2px 3px 0 rgba(255,255,255,.25),
+        -2px -2px 0 rgba(130,60,0,.12);
+
+      box-shadow:
+        inset 0 0 18px rgba(100,40,0,.14);
+    }
+
+    .coin.disabled {
+      filter: grayscale(.7) brightness(.65);
+    }
+
+    .coin.tap-animation {
+      animation: coinTap .12s ease;
+    }
+
+    @keyframes coinTap {
+      0% {
+        transform: scale(1);
       }
 
-      to {
-        opacity: 1;
+      50% {
+        transform: scale(.90) rotate(-2deg);
+      }
+
+      100% {
         transform: scale(1);
       }
     }
 
-    .level-popup-icon {
-      font-size: 58px;
-      margin-bottom: 8px;
-    }
+    .tap-hint {
+      position: relative;
+      z-index: 4;
 
-    .level-popup-title {
-      color: #ffd700;
-      font-size: 23px;
-      font-weight: 900;
-    }
-
-    .level-popup-text {
-      margin-top: 10px;
-      font-size: 18px;
-      font-weight: 800;
-      line-height: 1.5;
-    }
-
-    .level-popup-button {
       margin-top: 20px;
 
-      border: none;
-      border-radius: 14px;
+      color: #8991a9;
+      font-size: 12px;
+    }
 
-      padding: 12px 25px;
+    /* =========================
+       TAP EFFECT
+    ========================= */
 
-      background: #ffd700;
-      color: #111;
+    .tap-number {
+      position: fixed;
+      z-index: 9998;
 
-      font-size: 15px;
+      pointer-events: none;
+
+      color: #ffe16b;
+      font-size: 23px;
       font-weight: 900;
 
-      cursor: pointer;
+      text-shadow:
+        0 2px 12px rgba(255,180,0,.55);
+
+      animation: tapFloat .65s ease forwards;
     }
 
-    /* ================= GENERAL PAGE ================= */
+    @keyframes tapFloat {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(.8);
+      }
 
-    .page-container {
-      width: 92%;
-      max-width: 500px;
-
-      margin: 20px auto 0;
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -75px) scale(1.15);
+      }
     }
 
-    .page-title {
-      text-align: center;
+    /* =========================
+       ENERGY
+    ========================= */
 
-      font-size: 24px;
-      font-weight: 900;
+    .energy-card {
+      margin-top: -5px;
 
-      margin-bottom: 18px;
-    }
-
-    .card {
-      background: #191d26;
-
-      border: 1px solid #292e38;
+      padding: 14px 16px;
 
       border-radius: 18px;
 
-      padding: 18px;
-
-      margin-bottom: 12px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.07);
     }
 
-    /* ================= RANK ================= */
+    .energy-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .energy-value {
+      color: #75d9ff;
+    }
+
+    .energy-bar {
+      margin-top: 9px;
+
+      height: 8px;
+
+      border-radius: 10px;
+      overflow: hidden;
+
+      background: rgba(255,255,255,.07);
+    }
+
+    .energy-fill {
+      height: 100%;
+      width: 0%;
+
+      border-radius: inherit;
+
+      background:
+        linear-gradient(
+          90deg,
+          #00a8ff,
+          #63e6ff
+        );
+
+      box-shadow:
+        0 0 12px rgba(0,190,255,.45);
+
+      transition: width .2s ease;
+    }
+
+    /* =========================
+       SKINS
+    ========================= */
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      margin: 20px 0 11px;
+
+      font-size: 17px;
+      font-weight: 850;
+    }
+
+    .section-sub {
+      color: #777f98;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .skins {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .skin {
+      position: relative;
+
+      min-height: 105px;
+
+      padding: 13px;
+
+      border-radius: 18px;
+
+      text-align: left;
+
+      color: white;
+
+      background:
+        rgba(255,255,255,.045);
+
+      border: 1px solid rgba(255,255,255,.07);
+
+      cursor: pointer;
+
+      transition:
+        transform .15s ease,
+        border-color .15s ease,
+        background .15s ease;
+    }
+
+    .skin:active {
+      transform: scale(.97);
+    }
+
+    .skin.selected {
+      border-color: rgba(255,211,79,.65);
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255,193,7,.13),
+          rgba(255,255,255,.045)
+        );
+
+      box-shadow:
+        0 0 20px rgba(255,193,7,.08);
+    }
+
+    .skin.locked {
+      opacity: .43;
+      filter: saturate(.4);
+    }
+
+    .skin-icon {
+      font-size: 25px;
+    }
+
+    .skin-name {
+      margin-top: 7px;
+      font-weight: 850;
+      font-size: 14px;
+    }
+
+    .skin-info {
+      margin-top: 4px;
+      color: #9299af;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .skin-lock {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+
+      font-size: 13px;
+    }
+
+    /* =========================
+       OTHER CARDS
+    ========================= */
+
+    .card {
+      padding: 17px;
+
+      border-radius: 20px;
+
+      background:
+        rgba(255,255,255,.045);
+
+      border: 1px solid rgba(255,255,255,.07);
+
+      margin-bottom: 11px;
+    }
 
     .rank-row {
       display: flex;
       align-items: center;
+      gap: 11px;
 
-      padding: 13px 5px;
+      padding: 12px 0;
 
-      border-bottom: 1px solid #292e38;
+      border-bottom: 1px solid rgba(255,255,255,.05);
     }
 
     .rank-row:last-child {
-      border-bottom: none;
+      border-bottom: 0;
     }
 
     .rank-position {
-      width: 42px;
-
-      font-size: 17px;
+      width: 30px;
+      text-align: center;
       font-weight: 900;
+      color: #ffcf4a;
     }
 
-    .rank-avatar {
+    .avatar {
       width: 40px;
       height: 40px;
 
-      border-radius: 50%;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
-      background: #252b36;
-
-      margin-right: 10px;
-    }
-
-    .rank-name {
-      flex: 1;
-
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    .rank-balance {
-      font-size: 13px;
-      font-weight: bold;
-      text-align: right;
-    }
-
-    /* ================= FRIENDS ================= */
-
-    .friends-icon {
-      text-align: center;
-      font-size: 65px;
-      margin-bottom: 10px;
-    }
-
-    .friends-text {
-      text-align: center;
-
-      font-size: 15px;
-      line-height: 1.5;
-
-      opacity: 0.8;
-    }
-
-    .referral-box {
-      margin-top: 18px;
-
-      padding: 13px;
 
       border-radius: 13px;
 
-      background: #252b36;
+      background:
+        linear-gradient(
+          145deg,
+          #303750,
+          #161a28
+        );
 
-      text-align: center;
-
-      font-size: 13px;
-
-      word-break: break-all;
+      font-weight: 900;
     }
 
-    /* ================= PROFILE ================= */
+    .rank-user {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .rank-name {
+      font-weight: 750;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .rank-level {
+      color: #777f98;
+      font-size: 10px;
+      margin-top: 2px;
+    }
+
+    .rank-balance {
+      font-weight: 850;
+      font-size: 12px;
+    }
+
+    .profile-head {
+      text-align: center;
+      padding: 20px 0;
+    }
 
     .profile-avatar {
-      width: 85px;
-      height: 85px;
+      width: 78px;
+      height: 78px;
 
-      margin: 0 auto 14px;
-
-      border-radius: 50%;
+      margin: auto;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
-      font-size: 40px;
+      border-radius: 25px;
 
-      background: #252b36;
+      font-size: 32px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #333b5a,
+          #151927
+        );
+
+      box-shadow:
+        0 12px 30px rgba(0,0,0,.3);
     }
 
     .profile-name {
-      text-align: center;
-
-      font-size: 21px;
+      margin-top: 12px;
+      font-size: 20px;
       font-weight: 900;
     }
 
     .profile-username {
-      text-align: center;
-
       margin-top: 4px;
-
-      font-size: 14px;
-      opacity: 0.6;
+      color: #777f98;
+      font-size: 12px;
     }
 
-    .profile-stat {
-      display: flex;
-      justify-content: space-between;
-
-      padding: 13px 0;
-
-      border-bottom: 1px solid #292e38;
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
     }
 
-    .profile-stat:last-child {
-      border-bottom: none;
+    .stat {
+      padding: 15px;
+
+      border-radius: 16px;
+
+      background:
+        rgba(255,255,255,.04);
+
+      border: 1px solid rgba(255,255,255,.06);
     }
 
-    .profile-stat-value {
-      font-weight: 900;
+    .stat-label {
+      color: #777f98;
+      font-size: 10px;
     }
 
-    /* ================= BOTTOM NAV ================= */
+    .stat-value {
+      margin-top: 5px;
+      font-size: 17px;
+      font-weight: 850;
+    }
+
+    .referral-box {
+      word-break: break-word;
+
+      padding: 15px;
+
+      border-radius: 16px;
+
+      background:
+        rgba(255,255,255,.035);
+
+      color: #aeb5c9;
+
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .copy-btn {
+      width: 100%;
+
+      margin-top: 12px;
+      padding: 13px;
+
+      border-radius: 14px;
+
+      color: #111;
+
+      background:
+        linear-gradient(
+          135deg,
+          #ffe16b,
+          #ffb300
+        );
+
+      font-weight: 850;
+
+      cursor: pointer;
+    }
+
+    /* =========================
+       NAVIGATION
+    ========================= */
 
     .bottom-nav {
       position: fixed;
@@ -557,423 +893,556 @@
 
       transform: translateX(-50%);
 
-      width: 94%;
-      max-width: 500px;
-
-      height: 75px;
-
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-
-      background: #191d26;
-
-      border: 1px solid #303641;
-
-      border-radius: 20px;
-
-      padding: 5px;
-
       z-index: 5000;
+
+      width: calc(100% - 24px);
+      max-width: 496px;
+
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+
+      padding: 7px;
+
+      border-radius: 22px;
+
+      background:
+        rgba(16,19,32,.90);
+
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+
+      border: 1px solid rgba(255,255,255,.08);
+
+      box-shadow:
+        0 15px 45px rgba(0,0,0,.45);
     }
 
-    .nav-button {
-      flex: 1;
+    .nav-btn {
+      padding: 9px 5px;
 
-      height: 65px;
+      border-radius: 16px;
 
-      background: none;
-      border: none;
-
-      color: #7e8795;
-
-      font-size: 11px;
-      font-weight: bold;
+      background: transparent;
+      color: #70788f;
 
       cursor: pointer;
-
-      border-radius: 14px;
     }
 
-    .nav-button span {
+    .nav-btn.active {
+      color: #ffe16b;
+
+      background:
+        rgba(255,193,7,.10);
+    }
+
+    .nav-icon {
+      display: block;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .nav-text {
       display: block;
 
-      font-size: 23px;
+      margin-top: 4px;
 
-      margin-bottom: 3px;
+      font-size: 9px;
+      font-weight: 700;
     }
 
-    .nav-button.active {
-      color: white;
-      background: #252b36;
-    }
+    /* =========================
+       POPUP
+    ========================= */
 
-    /* ================= LOADING ================= */
-
-    .loading {
+    .popup {
       position: fixed;
-
       inset: 0;
 
-      display: flex;
+      z-index: 10000;
+
+      display: none;
+
       align-items: center;
       justify-content: center;
 
-      background: #10131a;
+      padding: 25px;
 
-      z-index: 20000;
+      background: rgba(0,0,0,.62);
 
-      font-size: 18px;
-      font-weight: bold;
+      backdrop-filter: blur(7px);
     }
 
-    .loading.hidden {
-      display: none;
+    .popup.show {
+      display: flex;
     }
 
-    /* ================= SMALL SCREEN ================= */
+    .popup-card {
+      width: 100%;
+      max-width: 330px;
 
-    @media (max-height: 700px) {
-      .header {
-        padding-top: 12px;
+      padding: 28px 22px;
+
+      border-radius: 27px;
+
+      text-align: center;
+
+      background:
+        linear-gradient(
+          145deg,
+          #171b2c,
+          #0d1020
+        );
+
+      border: 1px solid rgba(255,255,255,.10);
+
+      box-shadow:
+        0 25px 80px rgba(0,0,0,.65);
+
+      animation: popupIn .25s ease;
+    }
+
+    .popup-icon {
+      font-size: 58px;
+    }
+
+    .popup-title {
+      margin-top: 10px;
+      font-size: 25px;
+      font-weight: 950;
+    }
+
+    .popup-text {
+      margin-top: 7px;
+      color: #858da5;
+      font-size: 13px;
+    }
+
+    .popup-btn {
+      width: 100%;
+
+      margin-top: 20px;
+      padding: 14px;
+
+      border-radius: 15px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #ffe16b,
+          #ffae00
+        );
+
+      color: #17100a;
+      font-weight: 900;
+
+      cursor: pointer;
+    }
+
+    @keyframes popupIn {
+      from {
+        opacity: 0;
+        transform: scale(.85);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* =========================
+       EMPTY / ERROR
+    ========================= */
+
+    .empty {
+      padding: 35px 15px;
+      text-align: center;
+      color: #70788f;
+      font-size: 13px;
+    }
+
+    /* =========================
+       SMALL PHONES
+    ========================= */
+
+    @media (max-width: 360px) {
+
+      .coin {
+        width: 195px;
+        height: 195px;
+      }
+
+      .coin-inner {
+        font-size: 60px;
+      }
+
+      .coin-section {
+        min-height: 390px;
       }
 
       .balance {
-        margin-top: 7px;
-        font-size: 28px;
+        font-size: 29px;
       }
 
-      .coin {
-        width: 215px;
-        height: 215px;
-        font-size: 80px;
-      }
-
-      .coin-area {
-        padding-top: 10px;
-      }
-
-      .skin-panel {
-        max-height: 235px;
-      }
-
-      .bottom-nav {
-        bottom: 5px;
-        height: 70px;
-      }
-
-      .nav-button {
-        height: 60px;
+      .skin {
+        min-height: 98px;
       }
     }
+
   </style>
 </head>
 
 <body>
 
-  <!-- ================= LOADING ================= -->
+  <!-- =========================
+       LOADING
+  ========================= -->
 
-  <div id="loading" class="loading">
-    🪙 UZCOIN yuklanmoqda...
-  </div>
+  <div id="loading">
 
-  <!-- ================= LEVEL POPUP ================= -->
-
-  <div id="levelPopup" class="level-popup">
-    <div class="level-popup-box">
-
-      <div id="levelPopupIcon" class="level-popup-icon">
-        🎉
-      </div>
-
-      <div class="level-popup-title">
-        NEW LEVEL!
-      </div>
-
-      <div id="levelPopupText" class="level-popup-text">
-        Level ochildi!
-      </div>
-
-      <button
-        id="levelPopupButton"
-        class="level-popup-button"
-      >
-        DAVOM ETISH
-      </button>
-
+    <div class="loading-logo">
+      🪙
     </div>
+
+    <div class="loading-title">
+      UZCOIN
+    </div>
+
+    <div class="loading-subtitle">
+      Yuklanmoqda...
+    </div>
+
   </div>
 
-  <div class="app">
 
-    <!-- ================= HOME ================= -->
+  <!-- =========================
+       APP
+  ========================= -->
+
+  <div id="app">
+
+    <!-- HOME -->
 
     <section
       id="homePage"
-      class="page home-page active"
+      class="page active"
     >
 
-      <div class="header">
+      <div class="topbar">
 
-        <div class="logo">
-          🪙 UZCOIN
+        <div class="brand">
+
+          <div class="brand-icon">
+            🪙
+          </div>
+
+          <div>
+
+            <div class="brand-name">
+              UZCOIN
+            </div>
+
+            <div class="brand-sub">
+              Tap • Earn • Level Up
+            </div>
+
+          </div>
+
         </div>
 
-        <div
-          id="balance"
-          class="balance"
-        >
-          0 🪙
-        </div>
+        <div class="mini-level">
 
-        <div
-          id="level"
-          class="level"
-        >
-          ⭐ Level 1
+          <div class="mini-level-label">
+            LEVEL
+          </div>
+
+          <div
+            id="headerLevel"
+            class="mini-level-value"
+          >
+            1
+          </div>
+
         </div>
 
       </div>
 
-      <div class="coin-area">
+
+      <!-- BALANCE -->
+
+      <div class="balance-card">
+
+        <div class="balance-label">
+          Sizning balansingiz
+        </div>
+
+        <div>
+
+          <span
+            id="balance"
+            class="balance"
+          >
+            0
+          </span>
+
+          <span class="balance-unit">
+            UZC
+          </span>
+
+        </div>
+
+        <div class="progress-wrap">
+
+          <div class="progress-info">
+
+            <span>
+              Level progress
+            </span>
+
+            <span id="levelProgressText">
+              0 / 2,000
+            </span>
+
+          </div>
+
+          <div class="progress">
+
+            <div
+              id="levelProgress"
+              class="progress-fill"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- COIN -->
+
+      <div class="coin-section">
+
+        <div class="coin-halo"></div>
 
         <button
           id="coin"
           class="coin"
-          aria-label="Tap"
+          type="button"
         >
-          🪙
+
+          <div
+            id="coinInner"
+            class="coin-inner"
+          >
+            ₿
+          </div>
+
         </button>
 
-        <div class="tap-text">
+        <div class="tap-hint">
           TAP TO EARN
         </div>
 
-        <div
-          id="tapPower"
-          class="tap-power"
-        >
-          ⚡ +1 TAP
+      </div>
+
+
+      <!-- ENERGY -->
+
+      <div class="energy-card">
+
+        <div class="energy-top">
+
+          <span>
+            ⚡ Energy
+          </span>
+
+          <span
+            id="energyText"
+            class="energy-value"
+          >
+            100 / 100
+          </span>
+
         </div>
 
-        <div
-          id="energy"
-          class="energy"
-        >
-          🔋 100 / 100
-        </div>
+        <div class="energy-bar">
 
-        <button
-          id="skinButton"
-          class="skin-button"
-        >
-          🎨 SKINLAR
-        </button>
-
-        <div
-          id="skinPanel"
-          class="skin-panel"
-        >
-
-          <div class="skin-title">
-            🎨 UZCOIN SKINLARI
-          </div>
-
-          <!-- LEVEL 1 -->
-
-          <button
-            class="skin-option"
-            data-skin="classic"
-          >
-            <div class="skin-name">
-              🟡 Classic
-            </div>
-
-            <div class="skin-info">
-              Level 1<br>
-              +1 TAP • 100 ⚡
-            </div>
-          </button>
-
-          <!-- LEVEL 2 -->
-
-          <button
-            class="skin-option"
-            data-skin="ocean"
-          >
-            <div class="skin-name">
-              🔵 Ocean
-            </div>
-
-            <div class="skin-info">
-              Level 2<br>
-              +3 TAP • 200 ⚡
-            </div>
-          </button>
-
-          <!-- LEVEL 3 -->
-
-          <button
-            class="skin-option"
-            data-skin="nebula"
-          >
-            <div class="skin-name">
-              🟣 Nebula
-            </div>
-
-            <div class="skin-info">
-              Level 3<br>
-              +5 TAP • 300 ⚡
-            </div>
-          </button>
-
-          <!-- LEVEL 4 -->
-
-          <button
-            class="skin-option"
-            data-skin="emerald"
-          >
-            <div class="skin-name">
-              🟢 Emerald
-            </div>
-
-            <div class="skin-info">
-              Level 4<br>
-              +8 TAP • 400 ⚡
-            </div>
-          </button>
-
-          <!-- LEVEL 5 -->
-
-          <button
-            class="skin-option"
-            data-skin="inferno"
-          >
-            <div class="skin-name">
-              🔴 Inferno
-            </div>
-
-            <div class="skin-info">
-              Level 5<br>
-              +12 TAP • 500 ⚡
-            </div>
-          </button>
-
-          <!-- LEVEL 6 -->
-
-          <button
-            class="skin-option"
-            data-skin="cyber"
-          >
-            <div class="skin-name">
-              🔷 Cyber
-            </div>
-
-            <div class="skin-info">
-              Level 6<br>
-              +16 TAP • 600 ⚡
-            </div>
-          </button>
-
-          <!-- LEVEL 7 -->
-
-          <button
-            class="skin-option"
-            data-skin="immortal"
-          >
-            <div class="skin-name">
-              🔮 Immortal
-            </div>
-
-            <div class="skin-info">
-              Level 7<br>
-              +20 TAP • 700 ⚡
-            </div>
-          </button>
+          <div
+            id="energyFill"
+            class="energy-fill"
+          ></div>
 
         </div>
 
       </div>
 
+
+      <!-- SKINS -->
+
+      <div class="section-title">
+
+        <span>
+          🎨 Skins
+        </span>
+
+        <span
+          id="tapPowerText"
+          class="section-sub"
+        >
+          +1 TAP
+        </span>
+
+      </div>
+
+      <div
+        id="skins"
+        class="skins"
+      ></div>
+
     </section>
 
-    <!-- ================= RANK ================= -->
+
+    <!-- RANK -->
 
     <section
       id="rankPage"
       class="page"
     >
 
-      <div class="page-container">
+      <div class="topbar">
 
-        <div class="page-title">
-          🏆 RANK
+        <div class="brand">
+
+          <div class="brand-icon">
+            🏆
+          </div>
+
+          <div>
+
+            <div class="brand-name">
+              Rank
+            </div>
+
+            <div class="brand-sub">
+              Top UZCOIN players
+            </div>
+
+          </div>
+
         </div>
 
-        <div
-          id="rankList"
-          class="card"
-        >
-          Yuklanmoqda...
+      </div>
+
+      <div
+        id="rankList"
+        class="card"
+      >
+
+        <div class="empty">
+          Reyting yuklanmoqda...
         </div>
 
       </div>
 
     </section>
 
-    <!-- ================= FRIENDS ================= -->
+
+    <!-- FRIENDS -->
 
     <section
       id="friendsPage"
       class="page"
     >
 
-      <div class="page-container">
+      <div class="topbar">
 
-        <div class="page-title">
-          👥 FRIENDS
-        </div>
+        <div class="brand">
 
-        <div class="card">
-
-          <div class="friends-icon">
+          <div class="brand-icon">
             👥
           </div>
 
-          <div class="friends-text">
-            Do‘stlaringni UZCOIN'ga taklif qil
-            va loyihani birga rivojlantiring! 🚀
-          </div>
+          <div>
 
-          <div
-            id="referralBox"
-            class="referral-box"
-          >
-            Referral ma'lumotlari yuklanmoqda...
+            <div class="brand-name">
+              Friends
+            </div>
+
+            <div class="brand-sub">
+              Do‘stlaringizni taklif qiling
+            </div>
+
           </div>
 
         </div>
 
       </div>
 
+      <div class="card">
+
+        <div class="section-title">
+          👥 Referral
+        </div>
+
+        <div
+          id="referralBox"
+          class="referral-box"
+        >
+          Yuklanmoqda...
+        </div>
+
+        <button
+          id="copyReferral"
+          class="copy-btn"
+        >
+          🔗 Linkni nusxalash
+        </button>
+
+      </div>
+
     </section>
 
-    <!-- ================= PROFILE ================= -->
+
+    <!-- PROFILE -->
 
     <section
       id="profilePage"
       class="page"
     >
 
-      <div class="page-container">
+      <div class="topbar">
 
-        <div class="page-title">
-          👤 PROFILE
+        <div class="brand">
+
+          <div class="brand-icon">
+            👤
+          </div>
+
+          <div>
+
+            <div class="brand-name">
+              Profile
+            </div>
+
+            <div class="brand-sub">
+              Sizning profilingiz
+            </div>
+
+          </div>
+
         </div>
 
-        <div class="card">
+      </div>
 
-          <div class="profile-avatar">
+      <div class="card">
+
+        <div class="profile-head">
+
+          <div
+            id="profileAvatar"
+            class="profile-avatar"
+          >
             👤
           </div>
 
@@ -993,71 +1462,66 @@
 
         </div>
 
-        <div class="card">
+        <div class="stats-grid">
 
-          <div class="profile-stat">
-            <span>
-              🪙 Balance
-            </span>
+          <div class="stat">
 
-            <span
+            <div class="stat-label">
+              BALANCE
+            </div>
+
+            <div
               id="profileBalance"
-              class="profile-stat-value"
+              class="stat-value"
             >
-              0
-            </span>
+              0 UZC
+            </div>
+
           </div>
 
-          <div class="profile-stat">
-            <span>
-              ⭐ Level
-            </span>
+          <div class="stat">
 
-            <span
+            <div class="stat-label">
+              LEVEL
+            </div>
+
+            <div
               id="profileLevel"
-              class="profile-stat-value"
+              class="stat-value"
             >
-              1
-            </span>
+              Level 1
+            </div>
+
           </div>
 
-          <div class="profile-stat">
-            <span>
-              ⚡ Energy
-            </span>
+          <div class="stat">
 
-            <span
-              id="profileEnergy"
-              class="profile-stat-value"
-            >
-              100 / 100
-            </span>
-          </div>
+            <div class="stat-label">
+              SKIN
+            </div>
 
-          <div class="profile-stat">
-            <span>
-              🎨 Skin
-            </span>
-
-            <span
+            <div
               id="profileSkin"
-              class="profile-stat-value"
+              class="stat-value"
             >
               Classic
-            </span>
+            </div>
+
           </div>
 
-          <div class="profile-stat">
-            <span>
-              👥 Referrals
-            </span>
+          <div class="stat">
 
-            <span
-              id="profileReferrals"
-              class="profile-stat-value"
+            <div class="stat-label">
+              FRIENDS
+            </div>
+
+            <div
+              id="profileFriends"
+              class="stat-value"
             >
               0
-            </span>
+            </div>
+
           </div>
 
         </div>
@@ -1068,82 +1532,139 @@
 
   </div>
 
-  <!-- ================= BOTTOM NAV ================= -->
+
+  <!-- =========================
+       NAV
+  ========================= -->
 
   <nav class="bottom-nav">
 
     <button
-      class="nav-button active"
+      class="nav-btn active"
       data-page="homePage"
     >
-      <span>🏠</span>
-      Home
+
+      <span class="nav-icon">
+        🪙
+      </span>
+
+      <span class="nav-text">
+        Home
+      </span>
+
     </button>
 
     <button
-      class="nav-button"
+      class="nav-btn"
       data-page="rankPage"
     >
-      <span>🏆</span>
-      Rank
+
+      <span class="nav-icon">
+        🏆
+      </span>
+
+      <span class="nav-text">
+        Rank
+      </span>
+
     </button>
 
     <button
-      class="nav-button"
+      class="nav-btn"
       data-page="friendsPage"
     >
-      <span>👥</span>
-      Friends
+
+      <span class="nav-icon">
+        👥
+      </span>
+
+      <span class="nav-text">
+        Friends
+      </span>
+
     </button>
 
     <button
-      class="nav-button"
+      class="nav-btn"
       data-page="profilePage"
     >
-      <span>👤</span>
-      Profile
+
+      <span class="nav-icon">
+        👤
+      </span>
+
+      <span class="nav-text">
+        Profile
+      </span>
+
     </button>
 
   </nav>
 
+
+  <!-- =========================
+       LEVEL POPUP
+  ========================= -->
+
+  <div
+    id="levelPopup"
+    class="popup"
+  >
+
+    <div class="popup-card">
+
+      <div
+        id="popupIcon"
+        class="popup-icon"
+      >
+        🎉
+      </div>
+
+      <div
+        id="popupTitle"
+        class="popup-title"
+      >
+        Level Up!
+      </div>
+
+      <div
+        id="popupText"
+        class="popup-text"
+      >
+        Yangi level ochildi!
+      </div>
+
+      <button
+        id="popupClose"
+        class="popup-btn"
+      >
+        Davom etish
+      </button>
+
+    </div>
+
+  </div>
+
+
   <script>
+
     /* ==================================================
        TELEGRAM
     ================================================== */
 
-    const tg = window.Telegram.WebApp;
+    const tg =
+      window.Telegram?.WebApp || null;
 
-    tg.ready();
-    tg.expand();
+    if (tg) {
+      tg.ready();
+      tg.expand();
 
-    const telegramUser =
-      tg.initDataUnsafe?.user;
+      try {
+        tg.setHeaderColor("#070914");
+        tg.setBackgroundColor("#070914");
+      } catch (e) {}
+    }
 
-    const telegramId =
-      telegramUser?.id;
-
-    const initData =
-      tg.initData || "";
-
-    /* ==================================================
-       GLOBAL STATE
-    ================================================== */
-
-    let balance = 0;
-
-    let level = 1;
-
-    let energy = 100;
-
-    let maxEnergy = 100;
-
-    let tapPower = 1;
-
-    let selectedSkin = "classic";
-
-    let skins = {};
-
-    let lastLevel = 1;
 
     /* ==================================================
        ELEMENTS
@@ -1152,89 +1673,161 @@
     const loading =
       document.getElementById("loading");
 
-    const balanceElement =
-      document.getElementById("balance");
-
-    const levelElement =
-      document.getElementById("level");
-
-    const energyElement =
-      document.getElementById("energy");
-
-    const tapPowerElement =
-      document.getElementById("tapPower");
-
     const coin =
       document.getElementById("coin");
 
-    const skinButton =
-      document.getElementById("skinButton");
+    const coinInner =
+      document.getElementById("coinInner");
 
-    const skinPanel =
-      document.getElementById("skinPanel");
+    const balanceEl =
+      document.getElementById("balance");
 
-    const skinOptions =
-      document.querySelectorAll(
-        ".skin-option"
-      );
+    const headerLevel =
+      document.getElementById("headerLevel");
+
+    const levelProgress =
+      document.getElementById("levelProgress");
+
+    const levelProgressText =
+      document.getElementById("levelProgressText");
+
+    const energyText =
+      document.getElementById("energyText");
+
+    const energyFill =
+      document.getElementById("energyFill");
+
+    const tapPowerText =
+      document.getElementById("tapPowerText");
+
+    const skinsBox =
+      document.getElementById("skins");
+
+    const rankList =
+      document.getElementById("rankList");
+
+    const referralBox =
+      document.getElementById("referralBox");
+
+    const copyReferral =
+      document.getElementById("copyReferral");
+
+    const levelPopup =
+      document.getElementById("levelPopup");
+
+    const popupIcon =
+      document.getElementById("popupIcon");
+
+    const popupTitle =
+      document.getElementById("popupTitle");
+
+    const popupText =
+      document.getElementById("popupText");
+
+    const popupClose =
+      document.getElementById("popupClose");
+
 
     /* ==================================================
-       LEVEL DATA
+       TELEGRAM USER
+    ================================================== */
+
+    let telegramUser =
+      tg?.initDataUnsafe?.user || null;
+
+    let telegramId =
+      telegramUser?.id
+        ? String(telegramUser.id)
+        : "";
+
+    let initData =
+      tg?.initData || "";
+
+
+    /* ==================================================
+       STATE
+    ================================================== */
+
+    let balance = 0;
+    let level = 1;
+    let lastLevel = 1;
+
+    let energy = 100;
+    let maxEnergy = 100;
+
+    let tapPower = 1;
+
+    let selectedSkin = "classic";
+
+    let skins = {};
+
+    let serverBalance = 0;
+
+    let pendingTaps = 0;
+
+    let tapQueue = Promise.resolve();
+
+
+    /* ==================================================
+       LEVELS
     ================================================== */
 
     const LEVELS = {
+
       1: {
         min: 0,
-        skin: "classic",
-        icon: "🟡",
-        name: "Classic"
+        max: 2000,
+        name: "Beginner",
+        skin: "classic"
       },
 
       2: {
         min: 2000,
-        skin: "ocean",
-        icon: "🔵",
-        name: "Ocean"
+        max: 5000,
+        name: "Rookie",
+        skin: "ocean"
       },
 
       3: {
         min: 5000,
-        skin: "nebula",
-        icon: "🟣",
-        name: "Nebula"
+        max: 10000,
+        name: "Pro",
+        skin: "nebula"
       },
 
       4: {
         min: 10000,
-        skin: "emerald",
-        icon: "🟢",
-        name: "Emerald"
+        max: 50000,
+        name: "Master",
+        skin: "emerald"
       },
 
       5: {
         min: 50000,
-        skin: "inferno",
-        icon: "🔴",
-        name: "Inferno"
+        max: 100000,
+        name: "Legend",
+        skin: "inferno"
       },
 
       6: {
         min: 100000,
-        skin: "cyber",
-        icon: "🔷",
-        name: "Cyber"
+        max: 1000000,
+        name: "Cyber",
+        skin: "cyber"
       },
 
       7: {
         min: 1000000,
-        skin: "immortal",
-        icon: "🔮",
-        name: "Immortal"
+        max: Infinity,
+        name: "Immortal",
+        skin: "immortal"
       }
+
     };
 
+
     /* ==================================================
-       GET LEVEL
+       LEVEL FUNCTION
     ================================================== */
 
     function getLevelFromBalance(value) {
@@ -1269,6 +1862,7 @@
       return 1;
     }
 
+
     /* ==================================================
        FORMAT
     ================================================== */
@@ -1279,21 +1873,17 @@
         .toLocaleString("uz-UZ");
     }
 
+
     /* ==================================================
        BALANCE UI
     ================================================== */
 
     function updateBalance() {
 
-      balanceElement.textContent =
-        formatNumber(balance) +
-        " 🪙";
-
-      document.getElementById(
-        "profileBalance"
-      ).textContent =
+      balanceEl.textContent =
         formatNumber(balance);
     }
+
 
     /* ==================================================
        LEVEL UI
@@ -1301,38 +1891,58 @@
 
     function updateLevelUI() {
 
-      const newLevel =
+      const current =
         getLevelFromBalance(balance);
 
-      if (newLevel > lastLevel) {
+      level = current;
 
-        const data =
-          LEVELS[newLevel];
+      headerLevel.textContent =
+        "LV " + level;
 
-        if (data) {
+      const data =
+        LEVELS[level];
 
-          showLevelPopup(
-            newLevel,
-            data.name,
-            data.icon
-          );
-        }
+      if (!data) {
+        return;
       }
 
-      level = newLevel;
+      const min =
+        data.min;
 
-      lastLevel = newLevel;
+      const max =
+        data.max;
 
-      levelElement.textContent =
-        "⭐ Level " + level;
+      if (max === Infinity) {
 
-      document.getElementById(
-        "profileLevel"
-      ).textContent =
-        level;
+        levelProgress.style.width =
+          "100%";
 
-      updateSkinLocks();
+        levelProgressText.textContent =
+          "MAX LEVEL";
+
+        return;
+      }
+
+      const progress =
+        Math.max(
+          0,
+          Math.min(
+            100,
+            ((balance - min) /
+              (max - min)) *
+              100
+          )
+        );
+
+      levelProgress.style.width =
+        progress + "%";
+
+      levelProgressText.textContent =
+        formatNumber(balance) +
+        " / " +
+        formatNumber(max);
     }
+
 
     /* ==================================================
        ENERGY UI
@@ -1340,224 +1950,252 @@
 
     function updateEnergyUI() {
 
-      energyElement.textContent =
-        "🔋 " +
-        energy +
-        " / " +
-        maxEnergy;
+      energy =
+        Math.max(
+          0,
+          Math.min(
+            Number(maxEnergy) || 100,
+            Number(energy) || 0
+          )
+        );
 
-      document.getElementById(
-        "profileEnergy"
-      ).textContent =
-        energy +
+      energyText.textContent =
+        Math.floor(energy) +
         " / " +
-        maxEnergy;
+        Math.floor(maxEnergy);
+
+      const percent =
+        maxEnergy > 0
+          ? (energy / maxEnergy) * 100
+          : 0;
+
+      energyFill.style.width =
+        percent + "%";
 
       if (energy <= 0) {
-
-        coin.classList.add(
-          "disabled"
-        );
-
+        coin.classList.add("disabled");
       } else {
-
-        coin.classList.remove(
-          "disabled"
-        );
+        coin.classList.remove("disabled");
       }
     }
 
+
     /* ==================================================
-       TAP POWER UI
+       TAP POWER
     ================================================== */
 
     function updateTapPowerUI() {
 
-      tapPowerElement.textContent =
-        "⚡ +" +
+      tapPowerText.textContent =
+        "+" +
         tapPower +
         " TAP";
     }
 
+
     /* ==================================================
-       APPLY SKIN
+       SKIN RENDER
     ================================================== */
 
-    function applySkin(skinKey) {
+    function renderSkins() {
+
+      skinsBox.innerHTML = "";
+
+      const order = [
+        "classic",
+        "ocean",
+        "nebula",
+        "emerald",
+        "inferno",
+        "cyber",
+        "immortal"
+      ];
+
+      order.forEach((key) => {
+
+        const skin =
+          skins[key];
+
+        if (!skin) {
+          return;
+        }
+
+        const unlocked =
+          level >=
+          Number(skin.level);
+
+        const selected =
+          selectedSkin === key;
+
+        const div =
+          document.createElement("button");
+
+        div.type = "button";
+
+        div.className =
+          "skin" +
+          (selected
+            ? " selected"
+            : "") +
+          (!unlocked
+            ? " locked"
+            : "");
+
+        div.innerHTML = `
+
+          <div class="skin-icon">
+            ${skin.icon}
+          </div>
+
+          <div class="skin-name">
+            ${skin.name}
+          </div>
+
+          <div class="skin-info">
+            Level ${skin.level}
+            <br>
+            +${skin.power} TAP •
+            ${skin.maxEnergy} ⚡
+          </div>
+
+          ${
+            unlocked
+              ? ""
+              : `<div class="skin-lock">🔒</div>`
+          }
+
+        `;
+
+        div.addEventListener(
+          "click",
+          () => {
+
+            if (!unlocked) {
+
+              showPopup(
+                "🔒",
+                "Skin yopiq",
+                "Bu skin uchun Level " +
+                skin.level +
+                " kerak."
+              );
+
+              return;
+            }
+
+            selectSkin(key);
+          }
+        );
+
+        skinsBox.appendChild(div);
+
+      });
+    }
+
+
+    /* ==================================================
+       SELECT SKIN
+    ================================================== */
+
+    async function selectSkin(key) {
 
       const skin =
-        skins[skinKey];
+        skins[key];
 
       if (!skin) {
         return;
       }
 
+      if (
+        level <
+        Number(skin.level)
+      ) {
+        return;
+      }
+
       selectedSkin =
-        skinKey;
+        key;
 
       tapPower =
-        Number(skin.power);
+        Number(skin.power) || 1;
 
       maxEnergy =
-        Number(skin.maxEnergy);
+        Number(skin.maxEnergy) || 100;
 
       coin.style.background =
-        skin.color;
+        `
+        radial-gradient(
+          circle at 35% 25%,
+          #ffffff 0%,
+          ${skin.color} 30%,
+          ${skin.color} 60%,
+          #151515 100%
+        )
+        `;
 
-      coin.style.boxShadow =
-        "0 0 0 10px rgba(255,255,255,0.06), 0 0 50px " +
-        skin.color +
-        "88";
-
-      updateTapPowerUI();
       updateEnergyUI();
+      updateTapPowerUI();
+      renderSkins();
 
-      document.getElementById(
-        "profileSkin"
-      ).textContent =
-        skin.icon +
-        " " +
-        skin.name;
+      try {
 
-      updateSkinLocks();
-    }
+        const response =
+          await fetch(
+            "/api/skin",
+            {
+              method: "POST",
 
-    /* ==================================================
-       SKIN LOCKS
-    ================================================== */
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
 
-    function updateSkinLocks() {
+              body:
+                JSON.stringify({
+                  telegramId:
+                    telegramId,
 
-      skinOptions.forEach(
-        (button) => {
-
-          const key =
-            button.dataset.skin;
-
-          const skin =
-            skins[key];
-
-          if (!skin) {
-            return;
-          }
-
-          const requiredLevel =
-            Number(skin.level);
-
-          const info =
-            button.querySelector(
-              ".skin-info"
-            );
-
-          const unlocked =
-            level >= requiredLevel;
-
-          button.classList.toggle(
-            "locked",
-            !unlocked
+                  skin:
+                    key
+                })
+            }
           );
 
-          button.classList.toggle(
-            "selected",
-            key === selectedSkin
+        const data =
+          await response.json();
+
+        if (!data.success) {
+
+          throw new Error(
+            data.message ||
+            "Skin tanlanmadi"
           );
-
-          if (!unlocked) {
-
-            info.innerHTML =
-              "🔒 Level " +
-              requiredLevel +
-              "<br>+" +
-              skin.power +
-              " TAP • " +
-              skin.maxEnergy +
-              " ⚡";
-
-          } else if (
-            key === selectedSkin
-          ) {
-
-            info.innerHTML =
-              "✅ EQUIPPED<br>+" +
-              skin.power +
-              " TAP • " +
-              skin.maxEnergy +
-              " ⚡";
-
-          } else {
-
-            info.innerHTML =
-              "Level " +
-              requiredLevel +
-              "<br>+" +
-              skin.power +
-              " TAP • " +
-              skin.maxEnergy +
-              " ⚡";
-          }
         }
-      );
-    }
 
-    /* ==================================================
-       LEVEL POPUP
-    ================================================== */
+        if (data.user) {
 
-    function showLevelPopup(
-      newLevel,
-      skinName,
-      icon
-    ) {
+          energy =
+            Number(
+              data.user.energy
+            );
 
-      const popup =
-        document.getElementById(
-          "levelPopup"
-        );
-
-      const popupIcon =
-        document.getElementById(
-          "levelPopupIcon"
-        );
-
-      const popupText =
-        document.getElementById(
-          "levelPopupText"
-        );
-
-      popupIcon.textContent =
-        icon;
-
-      popupText.innerHTML =
-        "⭐ Level " +
-        newLevel +
-        "<br>" +
-        icon +
-        " " +
-        skinName +
-        " skini ochildi!";
-
-      popup.classList.add(
-        "show"
-      );
-    }
-
-    document
-      .getElementById(
-        "levelPopupButton"
-      )
-      .addEventListener(
-        "click",
-        () => {
-
-          document
-            .getElementById(
-              "levelPopup"
-            )
-            .classList.remove(
-              "show"
+          maxEnergy =
+            Number(
+              data.user.max_energy
             );
         }
-      );
+
+        updateEnergyUI();
+
+      } catch (error) {
+
+        console.error(
+          "SKIN ERROR:",
+          error
+        );
+      }
+    }
+
 
     /* ==================================================
        TAP EFFECT
@@ -1569,410 +2207,48 @@
       y
     ) {
 
-      const effect =
-        document.createElement(
-          "div"
-        );
+      const el =
+        document.createElement("div");
 
-      effect.className =
-        "tap-effect";
+      el.className =
+        "tap-number";
 
-      effect.textContent =
+      el.textContent =
         "+" + amount;
 
-      effect.style.left =
+      el.style.left =
         x + "px";
 
-      effect.style.top =
+      el.style.top =
         y + "px";
 
-      document.body.appendChild(
-        effect
-      );
+      document.body.appendChild(el);
 
-      setTimeout(
-        () => effect.remove(),
-        700
-      );
+      setTimeout(() => {
+        el.remove();
+      }, 700);
     }
 
+
     /* ==================================================
-       LOAD USER
+       SEND TAP
     ================================================== */
 
-    async function loadUser() {
+    function sendTapToServer() {
 
       if (!telegramId) {
-
-        if (!telegramId) {
-
-  loading.classList.add("hidden");
-
-  loading.textContent =
-    "❌ Telegram orqali oching";
-
-  return;
-}
-
-      try {
-
-        const response =
-  await fetch(
-    "/api/user/" + telegramId
-  );
-
-console.log(
-  "USER RESPONSE:",
-  response.status
-);
-
-const data =
-  await response.json();
-
-console.log(
-  "USER DATA:",
-  data
-);
-
-        const data =
-          await response.json();
-
-        if (!data.success) {
-
-          throw new Error(
-            data.message ||
-            "User topilmadi"
-          );
-        }
-
-        const user =
-          data.user;
-
-        skins =
-          data.skins || {};
-
-        balance =
-          Number(user.balance) || 0;
-
-        level =
-          Number(user.level) ||
-          getLevelFromBalance(
-            balance
-          );
-
-        lastLevel =
-          level;
-
-        energy =
-          Number(user.energy) || 0;
-
-        maxEnergy =
-          Number(user.max_energy) || 100;
-
-        selectedSkin =
-          user.skin ||
-          "classic";
-
-        if (
-          !skins[selectedSkin]
-        ) {
-
-          selectedSkin =
-            LEVELS[level]?.skin ||
-            "classic";
-        }
-
-        const selected =
-          skins[selectedSkin];
-
-        if (selected) {
-
-          tapPower =
-            Number(selected.power);
-
-          maxEnergy =
-            Number(selected.maxEnergy);
-
-          coin.style.background =
-            selected.color;
-        }
-
-        updateBalance();
-        updateLevelUI();
-        updateEnergyUI();
-        updateTapPowerUI();
-        updateSkinLocks();
-
-        try {
-  loadProfile(user);
-} catch (e) {
-  console.error("PROFILE ERROR:", e);
-}
-
-try {
-  loadFriends(user);
-} catch (e) {
-  console.error("FRIENDS ERROR:", e);
-}
-
-loading.classList.add("hidden");
-
-      } catch (error) {
-
-        console.error(
-          "LOAD USER ERROR:",
-          error
-        );
-
-        loading.textContent =
-  "❌ Xato: " + error.message;
-
-      }
-    }
-
-    /* ==================================================
-       TAP
-    ================================================== */
-
-    coin.addEventListener(
-  "click",
-  (event) => {
-
-    if (energy <= 0) {
-      return;
-    }
-
-    const localTapPower = tapPower;
-
-    // UI DARHOL o'zgaradi
-    balance += localTapPower;
-    energy--;
-
-    showTapEffect(
-      localTapPower,
-      event.clientX,
-      event.clientY
-    );
-
-    updateBalance();
-    updateEnergyUI();
-    updateLevelUI();
-
-    // Serverga saqlash
-    fetch("/api/tap", {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      body: JSON.stringify({
-        telegramId: telegramId,
-        initData: initData
-      })
-    })
-    .then(async (response) => {
-
-      const data =
-        await response.json();
-
-      if (!data.success) {
-
-        console.log(
-          "Server tap xatosi:",
-          data.message
-        );
-
         return;
       }
 
-      // Serverdagi haqiqiy qiymatni olamiz
-      balance =
-        Number(data.balance);
-
-      energy =
-        Number(data.energy);
-
-      maxEnergy =
-        Number(data.maxEnergy);
-
-      level =
-        Number(data.level);
-
-      tapPower =
-        Number(data.tapPower);
-
-      updateBalance();
-      updateLevelUI();
-      updateEnergyUI();
-      updateTapPowerUI();
-
-    })
-    .catch((error) => {
-
-      console.error(
-        "TAP SERVER ERROR:",
-        error
-      );
-
-    });
-  }
-);
-
-        coin.disabled = true;
-
-        showTapEffect(
-          tapPower,
-          event.clientX,
-          event.clientY
-        );
-
-        try {
-
-          const response =
-            await fetch(
-              "/api/tap",
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json"
-                },
-
-                body: JSON.stringify({
-                  telegramId:
-                    telegramId,
-
-                  initData:
-                    initData
-                })
-              }
-            );
-
-          const data =
-            await response.json();
-
-          if (!data.success) {
-
-            console.log(
-              data.message
-            );
-
-            if (
-              data.energy !== undefined
-            ) {
-
-              energy =
-                Number(
-                  data.energy
-                );
-
-              updateEnergyUI();
-            }
-
-            return;
-          }
-
-          balance =
-            Number(data.balance);
-
-          energy =
-            Number(data.energy);
-
-          maxEnergy =
-            Number(data.maxEnergy);
-
-          level =
-            Number(data.level);
-
-          tapPower =
-            Number(
-              data.tapPower
-            );
-
-          updateBalance();
-
-          updateLevelUI();
-
-          updateEnergyUI();
-
-          updateTapPowerUI();
-
-        } catch (error) {
-
-          console.error(
-            "TAP ERROR:",
-            error
-          );
-
-        } finally {
-
-          coin.disabled = false;
-        }
-      }
-    );
-
-    /* ==================================================
-       SKIN PANEL
-    ================================================== */
-
-    skinButton.addEventListener(
-      "click",
-      () => {
-
-        skinPanel.classList.toggle(
-          "show"
-        );
-      }
-    );
-
-    /* ==================================================
-       SKIN SELECT
-    ================================================== */
-
-    skinOptions.forEach(
-      (button) => {
-
-        button.addEventListener(
-          "click",
-          async () => {
-
-            const skinKey =
-              button.dataset.skin;
-
-            const skin =
-              skins[skinKey];
-
-            if (!skin) {
-              return;
-            }
-
-            const requiredLevel =
-              Number(skin.level);
-
-            if (
-              level <
-              requiredLevel
-            ) {
-
-              alert(
-                "🔒 Bu skin uchun Level " +
-                requiredLevel +
-                " kerak!"
-              );
-
-              return;
-            }
+      tapQueue =
+        tapQueue
+          .then(async () => {
 
             try {
 
-              button.disabled =
-                true;
-
               const response =
                 await fetch(
-                  "/api/skin",
+                  "/api/tap",
                   {
                     method: "POST",
 
@@ -1981,13 +2257,14 @@ loading.classList.add("hidden");
                         "application/json"
                     },
 
-                    body: JSON.stringify({
-                      telegramId:
-                        telegramId,
+                    body:
+                      JSON.stringify({
+                        telegramId:
+                          telegramId,
 
-                      skin:
-                        skinKey
-                    })
+                        initData:
+                          initData
+                      })
                   }
                 );
 
@@ -1996,139 +2273,251 @@ loading.classList.add("hidden");
 
               if (!data.success) {
 
-                alert(
-                  data.message ||
-                  "Skin tanlashda xatolik"
+                console.log(
+                  "Tap server error:",
+                  data.message
                 );
 
                 return;
               }
 
-              selectedSkin =
-                skinKey;
-
-              tapPower =
-                Number(
-                  data.skinData.power
+              pendingTaps =
+                Math.max(
+                  0,
+                  pendingTaps - 1
                 );
 
-              maxEnergy =
-                Number(
-                  data.skinData.maxEnergy
-                );
+              serverBalance =
+                Number(data.balance);
+
+              /*
+               * Server javobi kelganda
+               * qolgan pending taplarni
+               * yana UI ga qo‘shamiz.
+               */
+
+              balance =
+                serverBalance +
+                pendingTaps *
+                tapPower;
 
               energy =
-                Number(
-                  data.user.energy
-                );
+                Number(data.energy) +
+                pendingTaps;
 
-              applySkin(
-                selectedSkin
-              );
+              maxEnergy =
+                Number(data.maxEnergy);
 
-              skinPanel.classList.remove(
-                "show"
-              );
+              level =
+                Number(data.level);
+
+              updateBalance();
+              updateLevelUI();
+              updateEnergyUI();
 
             } catch (error) {
 
               console.error(
-                "SKIN ERROR:",
+                "TAP SERVER ERROR:",
                 error
               );
 
-              alert(
-                "❌ Skinni saqlashda xatolik"
-              );
-
-            } finally {
-
-              button.disabled =
-                false;
+              pendingTaps =
+                Math.max(
+                  0,
+                  pendingTaps - 1
+                );
             }
-          }
-        );
-      }
-    );
+
+          });
+    }
+
 
     /* ==================================================
-       NAVIGATION
+       FAST TAP
     ================================================== */
 
-    const navButtons =
-      document.querySelectorAll(
-        ".nav-button"
-      );
+    coin.addEventListener(
+      "click",
+      (event) => {
 
-    const pages =
-      document.querySelectorAll(
-        ".page"
-      );
+        if (energy < 1) {
+          return;
+        }
 
-    navButtons.forEach(
-      (button) => {
+        const power =
+          Number(tapPower) || 1;
 
-        button.addEventListener(
-          "click",
-          () => {
+        /*
+         * UI DARHOL o‘zgaradi.
+         */
 
-            const pageId =
-              button.dataset.page;
+        balance +=
+          power;
 
-            pages.forEach(
-              (page) => {
+        energy -= 1;
 
-                page.classList.remove(
-                  "active"
-                );
-              }
-            );
+        pendingTaps += 1;
 
-            navButtons.forEach(
-              (item) => {
-
-                item.classList.remove(
-                  "active"
-                );
-              }
-            );
-
-            document
-              .getElementById(
-                pageId
-              )
-              .classList.add(
-                "active"
-              );
-
-            button.classList.add(
-              "active"
-            );
-
-            if (
-              pageId === "rankPage"
-            ) {
-
-              loadRank();
-            }
-          }
+        coin.classList.remove(
+          "tap-animation"
         );
+
+        void coin.offsetWidth;
+
+        coin.classList.add(
+          "tap-animation"
+        );
+
+        showTapEffect(
+          power,
+          event.clientX,
+          event.clientY
+        );
+
+        updateBalance();
+        updateLevelUI();
+        updateEnergyUI();
+
+        /*
+         * Serverni kutmaydi.
+         */
+
+        sendTapToServer();
+
       }
     );
+
+
+    /* ==================================================
+       PROFILE
+    ================================================== */
+
+    function renderProfile(user) {
+
+      const name =
+        user.first_name ||
+        user.username ||
+        "UZCOIN User";
+
+      document.getElementById(
+        "profileName"
+      ).textContent = name;
+
+      document.getElementById(
+        "profileUsername"
+      ).textContent =
+        user.username
+          ? "@" + user.username
+          : "Telegram user";
+
+      document.getElementById(
+        "profileBalance"
+      ).textContent =
+        formatNumber(
+          user.balance
+        ) +
+        " UZC";
+
+      document.getElementById(
+        "profileLevel"
+      ).textContent =
+        "Level " +
+        user.level;
+
+      const skin =
+        skins[user.skin];
+
+      document.getElementById(
+        "profileSkin"
+      ).textContent =
+        skin
+          ? skin.icon +
+            " " +
+            skin.name
+          : user.skin;
+
+      document.getElementById(
+        "profileFriends"
+      ).textContent =
+        user.referrals || 0;
+    }
+
+
+    /* ==================================================
+       FRIENDS
+    ================================================== */
+
+    function renderFriends(user) {
+
+      /*
+       * Keyinchalik bot username'ni
+       * o‘zingning haqiqiy username'ingga
+       * almashtiramiz.
+       */
+
+      const botUsername =
+        "UZCOIN_BOT";
+
+      const referralLink =
+        "https://t.me/" +
+        botUsername +
+        "?start=" +
+        user.telegram_id;
+
+      referralBox.innerHTML = `
+
+        <div>
+          👥 Taklif qilinganlar:
+          <b>${user.referrals || 0}</b>
+        </div>
+
+        <br>
+
+        <div>
+          🔗 Sizning referral linkingiz:
+        </div>
+
+        <br>
+
+        <div>
+          ${escapeHTML(referralLink)}
+        </div>
+
+      `;
+
+      copyReferral.onclick =
+        async () => {
+
+          try {
+
+            await navigator.clipboard.writeText(
+              referralLink
+            );
+
+            copyReferral.textContent =
+              "✅ Nusxalandi!";
+
+            setTimeout(() => {
+
+              copyReferral.textContent =
+                "🔗 Linkni nusxalash";
+
+            }, 1500);
+
+          } catch (error) {
+
+            console.error(error);
+          }
+        };
+    }
+
 
     /* ==================================================
        RANK
     ================================================== */
 
     async function loadRank() {
-
-      const rankList =
-        document.getElementById(
-          "rankList"
-        );
-
-      rankList.innerHTML =
-        "⏳ Yuklanmoqda...";
 
       try {
 
@@ -2142,17 +2531,27 @@ loading.classList.add("hidden");
 
         if (
           !data.success ||
-          !data.users.length
+          !Array.isArray(data.users)
+        ) {
+
+          throw new Error(
+            "Rank ma'lumoti noto‘g‘ri"
+          );
+        }
+
+        if (
+          data.users.length === 0
         ) {
 
           rankList.innerHTML =
-            "Hozircha foydalanuvchilar yo‘q.";
+            `<div class="empty">
+              Hozircha foydalanuvchilar yo‘q
+            </div>`;
 
           return;
         }
 
-        rankList.innerHTML =
-          "";
+        rankList.innerHTML = "";
 
         data.users.forEach(
           (user) => {
@@ -2168,40 +2567,45 @@ loading.classList.add("hidden");
             const name =
               user.first_name ||
               user.username ||
-              "User";
+              "Player";
 
-            const username =
-              user.username
-                ? "@" +
-                  user.username
-                : "";
+            const initial =
+              String(name)
+                .charAt(0)
+                .toUpperCase();
 
             row.innerHTML = `
+
               <div class="rank-position">
                 #${user.position}
               </div>
 
-              <div class="rank-avatar">
-                👤
+              <div class="avatar">
+                ${escapeHTML(initial)}
               </div>
 
-              <div class="rank-name">
-                <b>${escapeHTML(name)}</b>
-                <br>
-                <small>${escapeHTML(username)}</small>
+              <div class="rank-user">
+
+                <div class="rank-name">
+                  ${escapeHTML(name)}
+                </div>
+
+                <div class="rank-level">
+                  Level ${user.level}
+                </div>
+
               </div>
 
               <div class="rank-balance">
                 ${formatNumber(user.balance)}
-                🪙
-                <br>
-                ⭐ ${user.level}
               </div>
+
             `;
 
             rankList.appendChild(
               row
             );
+
           }
         );
 
@@ -2213,140 +2617,201 @@ loading.classList.add("hidden");
         );
 
         rankList.innerHTML =
-          "❌ Rank yuklanmadi.";
+          `<div class="empty">
+            ❌ Rank yuklanmadi
+          </div>`;
       }
     }
 
+
     /* ==================================================
-       PROFILE
+       LOAD USER
     ================================================== */
 
-    function loadProfile(user) {
+    async function loadUser() {
 
-      const name =
-        user.first_name ||
-        "UZCOIN User";
+      /*
+       * Telegramdan tashqarida ochilgan bo‘lsa
+       */
 
-      const username =
-        user.username
-          ? "@" + user.username
-          : "Telegram User";
+      if (!telegramId) {
 
-      document.getElementById(
-        "profileName"
-      ).textContent =
-        name;
-
-      document.getElementById(
-        "profileUsername"
-      ).textContent =
-        username;
-
-      document.getElementById(
-        "profileBalance"
-      ).textContent =
-        formatNumber(
-          user.balance
+        loading.classList.add(
+          "hidden"
         );
 
-      document.getElementById(
-        "profileLevel"
-      ).textContent =
-        user.level;
+        alert(
+          "UZCOIN Telegram Mini App orqali ochilishi kerak."
+        );
 
-      document.getElementById(
-        "profileEnergy"
-      ).textContent =
-        user.energy +
-        " / " +
-        user.max_energy;
-
-      const skin =
-        skins[user.skin];
-
-      if (skin) {
-
-        document.getElementById(
-          "profileSkin"
-        ).textContent =
-          skin.icon +
-          " " +
-          skin.name;
+        return;
       }
 
-      document.getElementById(
-        "profileReferrals"
-      ).textContent =
-        user.referrals || 0;
-    }
+      try {
 
-    /* ==================================================
-       FRIENDS
-    ================================================== */
+        const response =
+          await fetch(
+            "/api/user/" +
+            telegramId
+          );
 
-    function loadFriends(user) {
+        if (!response.ok) {
 
-      const box =
-        document.getElementById(
-          "referralBox"
+          throw new Error(
+            "Server javobi: " +
+            response.status
+          );
+        }
+
+        const data =
+          await response.json();
+
+        if (!data.success) {
+
+          throw new Error(
+            data.message ||
+            "Foydalanuvchi topilmadi"
+          );
+        }
+
+        const user =
+          data.user;
+
+        skins =
+          data.skins || {};
+
+        serverBalance =
+          Number(
+            user.balance
+          ) || 0;
+
+        balance =
+          serverBalance;
+
+        pendingTaps = 0;
+
+        level =
+          Number(user.level) ||
+          getLevelFromBalance(
+            balance
+          );
+
+        lastLevel =
+          level;
+
+        energy =
+          Number(user.energy) ||
+          0;
+
+        maxEnergy =
+          Number(user.max_energy) ||
+          100;
+
+        selectedSkin =
+          user.skin ||
+          "classic";
+
+        /*
+         * Skin ma'lumotini olamiz.
+         */
+
+        const selected =
+          skins[selectedSkin];
+
+        if (selected) {
+
+          tapPower =
+            Number(selected.power) || 1;
+
+          maxEnergy =
+            Number(selected.maxEnergy) ||
+            maxEnergy;
+
+          coin.style.background =
+            `
+            radial-gradient(
+              circle at 35% 25%,
+              #ffffff 0%,
+              ${selected.color} 30%,
+              ${selected.color} 60%,
+              #151515 100%
+            )
+            `;
+
+        }
+
+        updateBalance();
+        updateLevelUI();
+        updateEnergyUI();
+        updateTapPowerUI();
+        renderSkins();
+        renderProfile(user);
+        renderFriends(user);
+
+        /*
+         * Loading har qanday holatda
+         * yopiladi.
+         */
+
+        loading.classList.add(
+          "hidden"
         );
 
-      const botUsername =
-        "UZCOIN_BOT";
+      } catch (error) {
 
-      const referralLink =
-        "https://t.me/" +
-        botUsername +
-        "?start=" +
-        user.telegram_id;
-
-      box.innerHTML =
-        "👥 Taklif qilinganlar: <b>" +
-        (user.referrals || 0) +
-        "</b><br><br>" +
-        "🔗 Referral link:<br>" +
-        referralLink;
-    }
-
-    /* ==================================================
-       ESCAPE HTML
-    ================================================== */
-
-    function escapeHTML(
-      value
-    ) {
-
-      return String(value || "")
-        .replace(
-          /&/g,
-          "&amp;"
-        )
-        .replace(
-          /</g,
-          "&lt;"
-        )
-        .replace(
-          />/g,
-          "&gt;"
-        )
-        .replace(
-          /"/g,
-          "&quot;"
-        )
-        .replace(
-          /'/g,
-          "&#039;"
+        console.error(
+          "LOAD USER ERROR:",
+          error
         );
+
+        loading.innerHTML = `
+
+          <div class="loading-logo">
+            ⚠️
+          </div>
+
+          <div class="loading-title">
+            UZCOIN
+          </div>
+
+          <div class="loading-subtitle">
+            ${escapeHTML(
+              error.message ||
+              "Ma'lumot yuklanmadi"
+            )}
+          </div>
+
+        `;
+
+        setTimeout(() => {
+
+          loading.classList.add(
+            "hidden"
+          );
+
+        }, 2500);
+
+      }
     }
 
+
     /* ==================================================
-       ENERGY RELOAD
+       ENERGY REGENERATION
     ================================================== */
 
     setInterval(
       async () => {
 
         if (!telegramId) {
+          return;
+        }
+
+        /*
+         * Pending tap bor paytda serverdan
+         * energy ni majburan qaytarmaymiz.
+         */
+
+        if (pendingTaps > 0) {
           return;
         }
 
@@ -2357,6 +2822,10 @@ loading.classList.add("hidden");
               "/api/user/" +
               telegramId
             );
+
+          if (!response.ok) {
+            return;
+          }
 
           const data =
             await response.json();
@@ -2381,6 +2850,7 @@ loading.classList.add("hidden");
 
               updateEnergyUI();
             }
+
           }
 
         } catch (error) {
@@ -2394,6 +2864,184 @@ loading.classList.add("hidden");
       5000
     );
 
+
+    /* ==================================================
+       NAVIGATION
+    ================================================== */
+
+    document
+      .querySelectorAll(".nav-btn")
+      .forEach((button) => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const pageId =
+              button.dataset.page;
+
+            document
+              .querySelectorAll(".page")
+              .forEach((page) => {
+
+                page.classList.remove(
+                  "active"
+                );
+
+              });
+
+            document
+              .getElementById(pageId)
+              .classList.add(
+                "active"
+              );
+
+            document
+              .querySelectorAll(".nav-btn")
+              .forEach((btn) => {
+
+                btn.classList.remove(
+                  "active"
+                );
+
+              });
+
+            button.classList.add(
+              "active"
+            );
+
+            if (
+              pageId === "rankPage"
+            ) {
+
+              loadRank();
+
+            }
+
+          }
+        );
+
+      });
+
+
+    /* ==================================================
+       POPUP
+    ================================================== */
+
+    function showPopup(
+      icon,
+      title,
+      text
+    ) {
+
+      popupIcon.textContent =
+        icon;
+
+      popupTitle.textContent =
+        title;
+
+      popupText.textContent =
+        text;
+
+      levelPopup.classList.add(
+        "show"
+      );
+    }
+
+    popupClose.addEventListener(
+      "click",
+      () => {
+
+        levelPopup.classList.remove(
+          "show"
+        );
+
+      }
+    );
+
+
+    /* ==================================================
+       LEVEL UP CHECK
+    ================================================== */
+
+    setInterval(
+      () => {
+
+        const current =
+          getLevelFromBalance(
+            balance
+          );
+
+        if (
+          current >
+          lastLevel
+        ) {
+
+          lastLevel =
+            current;
+
+          const data =
+            LEVELS[current];
+
+          if (data) {
+
+            showPopup(
+              current === 7
+                ? "🔮"
+                : "🎉",
+
+              current === 7
+                ? "IMMORTAL!"
+                : "LEVEL UP!",
+
+              "Siz Level " +
+              current +
+              " ga chiqdingiz!"
+            );
+
+          }
+
+          renderSkins();
+
+        }
+
+      },
+      500
+    );
+
+
+    /* ==================================================
+       ESCAPE HTML
+    ================================================== */
+
+    function escapeHTML(value) {
+
+      return String(
+        value ?? ""
+      )
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+        .replace(
+          /</g,
+          "&lt;"
+        )
+        .replace(
+          />/g,
+          "&gt;"
+        )
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+        .replace(
+          /'/g,
+          "&#039;"
+        );
+    }
+
+
     /* ==================================================
        START
     ================================================== */
@@ -2403,4 +3051,4 @@ loading.classList.add("hidden");
   </script>
 
 </body>
-            </html>
+</html>
