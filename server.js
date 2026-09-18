@@ -89,13 +89,27 @@ bot.start(async (ctx) => {
     const user = result.rows[0];
 
     await ctx.reply(
-      `Salom! 👋 ${firstName || ""}\n\n` +
-      `🪙 UZCOIN\n` +
-      `💰 Balans: ${user.balance} UZC\n` +
-      `⭐ Level: ${user.level}\n` +
-      `⚡ Energy: ${user.energy}/${user.max_energy}\n\n` +
-      `Mini App tez orada to‘liq ishga tushadi! 🚀`
-    );
+  `Salom! 👋 ${firstName || ""}\n\n` +
+  `🪙 UZCOIN\n` +
+  `💰 Balans: ${user.balance} UZC\n` +
+  `⭐ Level: ${user.level}\n` +
+  `⚡ Energy: ${user.energy}/${user.max_energy}\n\n` +
+  `UZCOIN Mini App'ni ochish uchun quyidagi tugmani bosing 👇`,
+  {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: "🪙 UZCOIN'ni ochish",
+            web_app: {
+              url: "https://uzcoin.onrender.com"
+            }
+          }
+        ]
+      ]
+    }
+  }
+);
 
     console.log(`Foydalanuvchi kirdi: ${telegramId}`);
 
