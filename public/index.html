@@ -1687,13 +1687,19 @@
         updateTapPowerUI();
         updateSkinLocks();
 
-        loadProfile(user);
+        try {
+  loadProfile(user);
+} catch (e) {
+  console.error("PROFILE ERROR:", e);
+}
 
-        loadFriends(user);
+try {
+  loadFriends(user);
+} catch (e) {
+  console.error("FRIENDS ERROR:", e);
+}
 
-        loading.classList.add(
-          "hidden"
-        );
+loading.classList.add("hidden");
 
       } catch (error) {
 
