@@ -203,7 +203,8 @@ app.post("/api/tap", async (req, res) => {
     await pool.query(
       `UPDATE users
        SET balance = balance + $1,
-           updated_at = CURRENT_TIMESTAMP
+    energy = GREATEST(energy - 1, 0),
+    updated_at = CURRENT_TIMESTAMP
        WHERE telegram_id = $2`,
       [amount, telegramId]
     );
