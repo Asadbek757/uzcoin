@@ -1604,19 +1604,35 @@
 
       if (!telegramId) {
 
-        loading.textContent =
-          "❌ Telegram orqali oching";
+        if (!telegramId) {
 
-        return;
-      }
+  loading.classList.add("hidden");
+
+  loading.textContent =
+    "❌ Telegram orqali oching";
+
+  return;
+}
 
       try {
 
         const response =
-          await fetch(
-            "/api/user/" +
-            telegramId
-          );
+  await fetch(
+    "/api/user/" + telegramId
+  );
+
+console.log(
+  "USER RESPONSE:",
+  response.status
+);
+
+const data =
+  await response.json();
+
+console.log(
+  "USER DATA:",
+  data
+);
 
         const data =
           await response.json();
