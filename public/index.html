@@ -603,7 +603,7 @@
     // =========================
 
     const tg = window.Telegram.WebApp;
-
+    const telegramId = tg.initDataUnsafe?.user?.id;
     if (tg) {
 
       tg.ready();
@@ -618,6 +618,8 @@
     // =========================
 
     let balance = 0;
+
+    let serverBalance = 0;
 
     let level = 1;
 
@@ -687,6 +689,18 @@
   setTimeout(() => {
     effect.remove();
   }, 700);
+}
+
+    async function loadUserData() {
+  const response = await fetch("/api/user/" + telegramId);
+  const data = await response.json();
+
+  if (data.user) {
+    balance = Number(data.user.balance) || 0;
+  }
+
+  updateBalance();
+  updateLevel();
 }
 
     function updateBalance() {
@@ -842,6 +856,16 @@
         showTapEffect(tapPower, event.clientX, event.clientY);
 
         balance += tapPower;
+      fetch("/api/tap", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    telegramId: telegramId,
+    amount: tapPower
+  })
+});
 
         energy--;
 
@@ -994,6 +1018,8 @@
     // =========================
 
     updateBalance();
+
+    loadUserData();
 
     updateLevel();
 
