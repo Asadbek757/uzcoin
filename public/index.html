@@ -663,6 +663,32 @@
     // BALANCE
     // =========================
 
+    function showTapEffect(amount) {
+  const effect = document.createElement("div");
+  effect.textContent = "+" + amount;
+  effect.style.position = "fixed";
+  effect.style.left = "50%";
+  effect.style.top = "45%";
+  effect.style.transform = "translate(-50%, -50%)";
+  effect.style.fontSize = "32px";
+  effect.style.fontWeight = "bold";
+  effect.style.color = "white";
+  effect.style.zIndex = "9999";
+  effect.style.transition = "all 0.7s ease";
+  effect.style.opacity = "1";    
+  effect.style.pointerEvents = "none";
+
+  document.body.appendChild(effect);
+     setTimeout(() => {
+  effect.style.transform = "translate(-50%, -100%)";
+  effect.style.opacity = "0";
+}, 50); 
+
+  setTimeout(() => {
+    effect.remove();
+  }, 700);
+}
+
     function updateBalance() {
 
       balanceElement.textContent =
