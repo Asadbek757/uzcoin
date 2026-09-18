@@ -696,7 +696,9 @@
   const data = await response.json();
 
   if (data.user) {
-    balance = Number(data.user.balance) || 0;
+  balance = Number(data.user.balance) || 0;
+  energy = Number(data.user.energy) || 100;
+  maxEnergy = Number(data.user.max_energy) || 100;
   }
 
   updateBalance();
