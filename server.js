@@ -30,15 +30,17 @@ app.get("/api/status", (req, res) => {
   });
 });
 
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
   console.log(`UZCOIN server ${PORT}-portda ishlayapti`);
+  console.log("Telegram botni ishga tushiryapman...");
 
-  try {
-    await bot.launch();
-    console.log("UZCOIN Telegram bot ishga tushdi!");
-  } catch (err) {
-    console.error("Telegram bot ishga tushmadi:", err);
-  }
+  bot.launch()
+    .then(() => {
+      console.log("UZCOIN Telegram bot ishga tushdi!");
+    })
+    .catch((err) => {
+      console.error("TELEGRAM BOT ERROR:", err);
+    });
 });
 
 process.once("SIGINT", () => bot.stop("SIGINT"));
