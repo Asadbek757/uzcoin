@@ -236,6 +236,16 @@ app.get("/api/status", (req, res) => {
 app.get("/api/user/:telegramId", async (req, res) => {
   try {
     const telegramId = req.params.telegramId;
+    await pool.query(
+  `UPDATE users
+   SET energy = LEAST(
+     max_energy,
+     energy + FLOOR(EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - energy_updated_at)))
+   ),
+   energy_updated_at = CURRENT_TIMESTAMP
+   WHERE telegram_id = $1`,
+  [telegramId]
+);
 
     const result = await pool.query(
       `
