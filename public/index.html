@@ -14,6 +14,10 @@
 
 <style>
 
+/* =====================================================
+   GLOBAL
+===================================================== */
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -33,15 +37,37 @@ body {
 
 body {
   min-height: 100vh;
+
   background:
-    radial-gradient(circle at 50% 18%, rgba(0,180,255,.16), transparent 32%),
-    radial-gradient(circle at 10% 90%, rgba(120,0,255,.12), transparent 30%),
-    linear-gradient(180deg, #07111f 0%, #030812 100%);
+    radial-gradient(
+      circle at 50% 18%,
+      rgba(0,180,255,.14),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 10% 90%,
+      rgba(120,0,255,.10),
+      transparent 30%
+    ),
+    linear-gradient(
+      180deg,
+      #07111f 0%,
+      #030812 100%
+    );
 }
 
-/* =========================
+button {
+  font-family: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+
+/* =====================================================
    LOADING
-========================= */
+===================================================== */
 
 #loading {
   position: fixed;
@@ -54,12 +80,17 @@ body {
   flex-direction: column;
 
   background:
-    radial-gradient(circle, #102b49 0%, #030812 65%);
+    radial-gradient(
+      circle,
+      #102b49 0%,
+      #030812 65%
+    );
 }
 
 .loading-logo {
   font-size: 42px;
   font-weight: 900;
+
   color: #f5b800;
 
   text-shadow:
@@ -77,10 +108,14 @@ body {
 .loading-spinner {
   width: 30px;
   height: 30px;
+
   border: 3px solid rgba(255,255,255,.15);
   border-top-color: #f5b800;
+
   border-radius: 50%;
+
   margin-top: 20px;
+
   animation: spin .8s linear infinite;
 }
 
@@ -90,13 +125,10 @@ body {
   }
 }
 
-.hidden {
-  display: none !important;
-}
 
-/* =========================
+/* =====================================================
    APP
-========================= */
+===================================================== */
 
 #app {
   width: 100%;
@@ -104,9 +136,10 @@ body {
   padding-bottom: 85px;
 }
 
-/* =========================
+
+/* =====================================================
    HEADER
-========================= */
+===================================================== */
 
 .header {
   width: 100%;
@@ -130,18 +163,21 @@ body {
 
 .header-level {
   padding: 7px 12px;
+
   border-radius: 12px;
 
   background: rgba(255,255,255,.07);
+
   border: 1px solid rgba(255,255,255,.08);
 
   font-size: 13px;
   font-weight: bold;
 }
 
-/* =========================
+
+/* =====================================================
    BALANCE
-========================= */
+===================================================== */
 
 .balance-box {
   text-align: center;
@@ -165,9 +201,10 @@ body {
     0 0 20px rgba(255,255,255,.12);
 }
 
-/* =========================
-   LEVEL PROGRESS
-========================= */
+
+/* =====================================================
+   LEVEL
+===================================================== */
 
 .level-progress {
   width: calc(100% - 40px);
@@ -193,6 +230,7 @@ body {
   background: rgba(255,255,255,.08);
 
   border-radius: 20px;
+
   overflow: hidden;
 }
 
@@ -202,21 +240,24 @@ body {
 
   border-radius: 20px;
 
-  background: linear-gradient(
-    90deg,
-    #f5b800,
-    #ffdb55
-  );
+  background:
+    linear-gradient(
+      90deg,
+      #f5b800,
+      #ffdb55
+    );
 
   box-shadow:
     0 0 12px rgba(245,184,0,.45);
 
-  transition: width .25s ease;
+  transition:
+    width .25s ease;
 }
 
-/* =========================
-   HOME
-========================= */
+
+/* =====================================================
+   PAGES
+===================================================== */
 
 .page {
   display: none;
@@ -226,9 +267,10 @@ body {
   display: block;
 }
 
-/* =========================
+
+/* =====================================================
    ENERGY
-========================= */
+===================================================== */
 
 .energy-box {
   width: calc(100% - 50px);
@@ -245,6 +287,7 @@ body {
   border-radius: 14px;
 
   background: rgba(255,255,255,.055);
+
   border: 1px solid rgba(255,255,255,.07);
 }
 
@@ -268,9 +311,10 @@ body {
   font-weight: 800;
 }
 
-/* =========================
+
+/* =====================================================
    COIN AREA
-========================= */
+===================================================== */
 
 .coin-area {
   min-height: 350px;
@@ -282,41 +326,49 @@ body {
   position: relative;
 
   overflow: hidden;
+
+  isolation: isolate;
 }
 
-/* decorative circles */
+/* Large soft halo */
 
 .coin-area::before {
   content: "";
 
   position: absolute;
 
-  width: 270px;
-  height: 270px;
+  width: 285px;
+  height: 285px;
 
   border-radius: 50%;
 
   border: 1px solid rgba(255,255,255,.045);
 
   box-shadow:
-    0 0 70px rgba(0,170,255,.06);
+    0 0 70px rgba(0,170,255,.06),
+    inset 0 0 60px rgba(255,255,255,.025);
 
   pointer-events: none;
 }
+
+/* rotating ring */
 
 .coin-area::after {
   content: "";
 
   position: absolute;
 
-  width: 190px;
-  height: 190px;
+  width: 245px;
+  height: 245px;
 
   border-radius: 50%;
 
-  border: 1px dashed rgba(255,255,255,.04);
+  border:
+    1px dashed
+    rgba(255,255,255,.045);
 
-  animation: rotateCircle 25s linear infinite;
+  animation:
+    rotateCircle 25s linear infinite;
 
   pointer-events: none;
 }
@@ -327,19 +379,22 @@ body {
   }
 }
 
-/* =========================
-   COIN
-========================= */
+
+/* =====================================================
+   MAIN COIN
+===================================================== */
 
 .coin {
   position: relative;
 
-  width: 190px;
-  height: 190px;
+  width: 200px;
+  height: 200px;
+
+  padding: 0;
+
+  border: 0;
 
   border-radius: 50%;
-
-  border: none;
 
   cursor: pointer;
 
@@ -348,29 +403,97 @@ body {
 
   outline: none;
 
-  transition:
-    transform .08s ease,
-    filter .2s ease;
-
   z-index: 5;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  box-shadow:
-    0 18px 45px rgba(0,0,0,.45);
+  transition:
+    transform .08s ease,
+    filter .2s ease;
+
+  animation:
+    coinFloat 3.5s ease-in-out infinite;
 }
 
 .coin:active {
-  transform: scale(.91);
+  transform: scale(.90);
 }
 
-/* inner coin */
+@keyframes coinFloat {
+
+  0%,
+  100% {
+    translate: 0 0;
+  }
+
+  50% {
+    translate: 0 -3px;
+  }
+}
+
+
+/* Outer metallic rim */
+
+.coin::before {
+  content: "";
+
+  position: absolute;
+
+  inset: -2px;
+
+  border-radius: 50%;
+
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(255,255,255,.75),
+      transparent 12%,
+      rgba(0,0,0,.45) 25%,
+      rgba(255,255,255,.55) 39%,
+      rgba(0,0,0,.45) 53%,
+      rgba(255,255,255,.55) 68%,
+      rgba(0,0,0,.35) 82%,
+      rgba(255,255,255,.7)
+    );
+
+  z-index: -1;
+
+  opacity: .75;
+}
+
+
+/* Coin shadow */
+
+.coin::after {
+  content: "";
+
+  position: absolute;
+
+  width: 150px;
+  height: 24px;
+
+  left: 25px;
+  bottom: -20px;
+
+  border-radius: 50%;
+
+  background: rgba(0,0,0,.55);
+
+  filter: blur(13px);
+
+  z-index: -2;
+}
+
+
+/* =====================================================
+   INNER COIN
+===================================================== */
 
 .coin-inner {
-  width: 158px;
-  height: 158px;
+  width: 174px;
+  height: 174px;
 
   border-radius: 50%;
 
@@ -380,274 +503,456 @@ body {
 
   position: relative;
 
-  border: 3px solid rgba(255,255,255,.25);
-
   overflow: hidden;
+
+  border: 3px solid rgba(255,255,255,.30);
+
+  box-shadow:
+    inset 0 0 0 4px rgba(0,0,0,.16),
+    inset 0 0 28px rgba(0,0,0,.32),
+    0 4px 8px rgba(0,0,0,.28);
 }
+
+
+/* inner circular engraved line */
 
 .coin-inner::before {
   content: "";
 
   position: absolute;
 
-  inset: 9px;
+  inset: 10px;
 
   border-radius: 50%;
 
-  border: 2px solid rgba(255,255,255,.18);
+  border:
+    2px solid
+    rgba(255,255,255,.20);
+
+  box-shadow:
+    inset 0 0 0 1px
+    rgba(0,0,0,.15);
 }
+
+
+/* metallic reflection */
 
 .coin-inner::after {
   content: "";
 
   position: absolute;
 
-  width: 80px;
-  height: 30px;
+  width: 105px;
+  height: 34px;
 
-  top: 22px;
-  left: 22px;
-
-  background: rgba(255,255,255,.22);
+  top: 17px;
+  left: 28px;
 
   border-radius: 50%;
 
-  transform: rotate(-35deg);
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.38),
+      transparent
+    );
+
+  transform:
+    rotate(-35deg);
 
   filter: blur(4px);
+
+  z-index: 5;
+
+  pointer-events: none;
 }
+
+
+/* =====================================================
+   UZCOIN SYMBOL
+===================================================== */
 
 .coin-symbol {
   position: relative;
 
-  z-index: 3;
+  z-index: 4;
 
-  font-size: 60px;
+  width: 94px;
+  height: 94px;
 
-  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  color: rgba(255,255,255,.9);
+  border-radius: 50%;
+
+  font-size: 47px;
+  font-weight: 1000;
+
+  letter-spacing: -4px;
+
+  color: rgba(255,255,255,.94);
 
   text-shadow:
-    2px 3px 0 rgba(0,0,0,.2),
-    0 0 15px rgba(255,255,255,.15);
+    2px 3px 0 rgba(0,0,0,.25),
+    0 0 12px rgba(255,255,255,.20);
+
+  filter:
+    drop-shadow(0 3px 2px rgba(0,0,0,.35));
+
+  transition:
+    transform .2s ease,
+    font-size .2s ease;
 }
 
-/* =========================
-   COIN MATERIALS
-========================= */
 
-/* CLASSIC / BRONZE */
+/* =====================================================
+   CLASSIC
+===================================================== */
 
 .coin.skin-classic {
-  background:
-    radial-gradient(
-      circle at 35% 28%,
-      #ffe89a 0%,
-      #e6a91b 25%,
-      #a96708 60%,
-      #603300 100%
-    );
 
-  box-shadow:
-    0 0 0 7px rgba(170,100,10,.15),
-    0 0 40px rgba(245,184,0,.35),
-    inset 0 0 25px rgba(255,255,255,.25);
-}
-
-.coin.skin-classic .coin-inner {
-  background:
-    repeating-radial-gradient(
-      circle,
-      rgba(255,255,255,.05) 0 2px,
-      rgba(0,0,0,.05) 3px 5px
-    ),
-    linear-gradient(
-      145deg,
-      #ffd96a,
-      #b8760c
-    );
-}
-
-/* OCEAN */
-
-.coin.skin-ocean {
-  background:
-    radial-gradient(
-      circle at 30% 25%,
-      #b9f4ff,
-      #23a8e8 30%,
-      #075d9e 65%,
-      #032f59
-    );
-
-  box-shadow:
-    0 0 45px rgba(33,150,243,.45),
-    inset 0 0 30px rgba(255,255,255,.2);
-}
-
-.coin.skin-ocean .coin-inner {
-  background:
-    repeating-linear-gradient(
-      135deg,
-      rgba(255,255,255,.1) 0 3px,
-      transparent 3px 9px
-    ),
-    linear-gradient(
-      145deg,
-      #68ddff,
-      #0868a8
-    );
-}
-
-/* NEBULA */
-
-.coin.skin-nebula {
-  background:
-    radial-gradient(
-      circle at 35% 25%,
-      #f2a5ff,
-      #a93bd2 30%,
-      #54209a 65%,
-      #241044
-    );
-
-  box-shadow:
-    0 0 55px rgba(156,39,176,.6),
-    inset 0 0 30px rgba(255,255,255,.2);
-}
-
-.coin.skin-nebula .coin-inner {
-  background:
-    radial-gradient(circle at 70% 25%, #e9a4ff 0 5%, transparent 6%),
-    radial-gradient(circle at 30% 70%, #d15cff 0 4%, transparent 5%),
-    linear-gradient(
-      145deg,
-      #d85df3,
-      #5c1d9e
-    );
-}
-
-/* EMERALD */
-
-.coin.skin-emerald {
-  background:
-    radial-gradient(
-      circle at 32% 24%,
-      #baffd5,
-      #28c76f 30%,
-      #087c43 65%,
-      #033b23
-    );
-
-  box-shadow:
-    0 0 50px rgba(76,175,80,.5),
-    inset 0 0 30px rgba(255,255,255,.2);
-}
-
-.coin.skin-emerald .coin-inner {
-  background:
-    linear-gradient(
-      135deg,
-      #79ffb2,
-      #07964e 55%,
-      #03582d
-    );
-}
-
-/* INFERNO */
-
-.coin.skin-inferno {
-  background:
-    radial-gradient(
-      circle at 32% 24%,
-      #ffe4b0,
-      #ff7b22 25%,
-      #e52d16 60%,
-      #5d0904
-    );
-
-  box-shadow:
-    0 0 55px rgba(244,67,54,.55),
-    inset 0 0 30px rgba(255,220,100,.2);
-}
-
-.coin.skin-inferno .coin-inner {
-  background:
-    repeating-linear-gradient(
-      125deg,
-      rgba(255,255,255,.07) 0 4px,
-      transparent 4px 10px
-    ),
-    linear-gradient(
-      145deg,
-      #ffb23e,
-      #d52a12
-    );
-}
-
-/* CYBER */
-
-.coin.skin-cyber {
-  background:
-    radial-gradient(
-      circle at 30% 24%,
-      #d8ffff,
-      #00d8ef 28%,
-      #00758b 60%,
-      #002b35
-    );
-
-  box-shadow:
-    0 0 55px rgba(0,188,212,.6),
-    inset 0 0 30px rgba(255,255,255,.2);
-}
-
-.coin.skin-cyber .coin-inner {
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgba(255,255,255,.07) 0 2px,
-      transparent 2px 7px
-    ),
-    linear-gradient(
-      145deg,
-      #42f5ff,
-      #007d96
-    );
-}
-
-/* IMMORTAL */
-
-.coin.skin-immortal {
   background:
     radial-gradient(
       circle at 32% 23%,
-      #ffffff,
-      #c99cff 20%,
-      #7137d0 55%,
-      #291052
+      #fff5bf 0%,
+      #ffd95a 12%,
+      #e5a817 35%,
+      #9a5b07 68%,
+      #4d2700 100%
     );
 
   box-shadow:
-    0 0 70px rgba(103,58,183,.75),
-    0 0 110px rgba(150,80,255,.25),
-    inset 0 0 35px rgba(255,255,255,.25);
+    0 0 0 6px rgba(175,105,10,.13),
+    0 16px 50px rgba(0,0,0,.55),
+    0 0 55px rgba(245,184,0,.30),
+    inset 0 0 30px rgba(255,255,255,.25);
 }
 
-.coin.skin-immortal .coin-inner {
+.coin.skin-classic .coin-inner {
+
   background:
-    radial-gradient(
-      circle at 50% 45%,
-      #b977ff,
-      #5424a6 65%,
-      #28104d
+    repeating-radial-gradient(
+      circle,
+      rgba(255,255,255,.045) 0 2px,
+      rgba(0,0,0,.045) 3px 5px
+    ),
+    linear-gradient(
+      145deg,
+      #ffe58a,
+      #d79719 45%,
+      #8a4e05
     );
 }
 
-/* =========================
+.coin.skin-classic .coin-symbol {
+  color: #fff4c4;
+}
+
+
+/* =====================================================
+   OCEAN
+===================================================== */
+
+.coin.skin-ocean {
+
+  background:
+    radial-gradient(
+      circle at 30% 22%,
+      #d9fbff 0%,
+      #7ceaff 13%,
+      #25b9ee 35%,
+      #07679f 68%,
+      #022c52 100%
+    );
+
+  box-shadow:
+    0 0 0 6px rgba(20,135,205,.13),
+    0 16px 50px rgba(0,0,0,.55),
+    0 0 55px rgba(0,170,255,.40),
+    inset 0 0 30px rgba(255,255,255,.25);
+}
+
+.coin.skin-ocean .coin-inner {
+
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255,255,255,.10) 0 2px,
+      transparent 2px 8px
+    ),
+    linear-gradient(
+      145deg,
+      #73e9ff,
+      #087dbb 50%,
+      #034b76
+    );
+}
+
+.coin.skin-ocean .coin-symbol {
+  color: #e9fdff;
+  font-size: 58px;
+  letter-spacing: 0;
+}
+
+
+/* =====================================================
+   NEBULA
+===================================================== */
+
+.coin.skin-nebula {
+
+  background:
+    radial-gradient(
+      circle at 28% 20%,
+      #ffd9ff 0%,
+      #e99aff 14%,
+      #b641df 36%,
+      #6620a8 68%,
+      #250b47 100%
+    );
+
+  box-shadow:
+    0 0 0 6px rgba(145,50,205,.13),
+    0 16px 50px rgba(0,0,0,.55),
+    0 0 65px rgba(177,58,255,.55),
+    inset 0 0 30px rgba(255,255,255,.24);
+}
+
+.coin.skin-nebula .coin-inner {
+
+  background:
+    radial-gradient(
+      circle at 72% 28%,
+      #fff 0 1.5%,
+      transparent 2%
+    ),
+    radial-gradient(
+      circle at 28% 68%,
+      #f6b8ff 0 2%,
+      transparent 2.5%
+    ),
+    radial-gradient(
+      circle at 65% 72%,
+      #8e55ff 0 1.5%,
+      transparent 2%
+    ),
+    linear-gradient(
+      145deg,
+      #d86bf5,
+      #7022b4 55%,
+      #32105d
+    );
+}
+
+.coin.skin-nebula .coin-symbol {
+  color: #ffe9ff;
+  font-size: 55px;
+  letter-spacing: 0;
+}
+
+
+/* =====================================================
+   EMERALD
+===================================================== */
+
+.coin.skin-emerald {
+
+  background:
+    radial-gradient(
+      circle at 30% 20%,
+      #e0ffe9 0%,
+      #75ffb1 14%,
+      #20bd68 36%,
+      #087b40 68%,
+      #022f1c 100%
+    );
+
+  box-shadow:
+    0 0 0 6px rgba(20,155,80,.14),
+    0 16px 50px rgba(0,0,0,.55),
+    0 0 65px rgba(0,220,110,.38),
+    inset 0 0 30px rgba(255,255,255,.22);
+}
+
+.coin.skin-emerald .coin-inner {
+
+  background:
+    linear-gradient(
+      135deg,
+      #9affc2 0%,
+      #29d779 28%,
+      #078e48 60%,
+      #034d29 100%
+    );
+
+  clip-path: circle(50%);
+}
+
+.coin.skin-emerald .coin-symbol {
+  color: #e9fff2;
+  font-size: 54px;
+  letter-spacing: 0;
+}
+
+
+/* =====================================================
+   INFERNO
+===================================================== */
+
+.coin.skin-inferno {
+
+  background:
+    radial-gradient(
+      circle at 30% 20%,
+      #fff4c7 0%,
+      #ffc14b 13%,
+      #ff681f 35%,
+      #d92812 65%,
+      #560703 100%
+    );
+
+  box-shadow:
+    0 0 0 6px rgba(220,50,10,.15),
+    0 16px 50px rgba(0,0,0,.55),
+    0 0 70px rgba(255,60,20,.48),
+    inset 0 0 30px rgba(255,230,130,.24);
+}
+
+.coin.skin-inferno .coin-inner {
+
+  background:
+    repeating-linear-gradient(
+      125deg,
+      rgba(255,255,255,.08) 0 4px,
+      transparent 4px 11px
+    ),
+    linear-gradient(
+      145deg,
+      #ffcf58,
+      #f04a16 48%,
+      #9e1207
+    );
+}
+
+.coin.skin-inferno .coin-symbol {
+  color: #fff1c9;
+  font-size: 51px;
+  letter-spacing: 0;
+}
+
+
+/* =====================================================
+   CYBER
+===================================================== */
+
+.coin.skin-cyber {
+
+  background:
+    radial-gradient(
+      circle at 30% 20%,
+      #efffff 0%,
+      #79faff 12%,
+      #00d9ed 35%,
+      #007a8d 65%,
+      #002b35 100%
+    );
+
+  box-shadow:
+    0 0 0 6px rgba(0,225,245,.15),
+    0 16px 50px rgba(0,0,0,.55),
+    0 0 75px rgba(0,225,255,.60),
+    inset 0 0 35px rgba(255,255,255,.24);
+}
+
+.coin.skin-cyber .coin-inner {
+
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,.09) 0 1px,
+      transparent 1px 7px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(0,255,255,.07) 0 1px,
+      transparent 1px 8px
+    ),
+    linear-gradient(
+      145deg,
+      #45f6ff,
+      #008ca2 55%,
+      #004652
+    );
+}
+
+.coin.skin-cyber .coin-symbol {
+  color: #eaffff;
+  font-size: 55px;
+  letter-spacing: 0;
+
+  text-shadow:
+    0 0 8px #00ffff,
+    0 0 18px rgba(0,255,255,.65);
+}
+
+
+/* =====================================================
+   IMMORTAL
+===================================================== */
+
+.coin.skin-immortal {
+
+  background:
+    radial-gradient(
+      circle at 30% 18%,
+      #ffffff 0%,
+      #fff3b0 10%,
+      #ffd447 25%,
+      #d99b16 46%,
+      #8a5800 72%,
+      #3d2100 100%
+    );
+
+  box-shadow:
+    0 0 0 7px rgba(255,210,70,.16),
+    0 16px 55px rgba(0,0,0,.58),
+    0 0 80px rgba(255,190,30,.62),
+    0 0 120px rgba(255,210,80,.18),
+    inset 0 0 38px rgba(255,255,255,.30);
+}
+
+.coin.skin-immortal .coin-inner {
+
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      #fff1a1,
+      #e5a928 38%,
+      #8c5604 75%,
+      #3b2100
+    );
+}
+
+.coin.skin-immortal .coin-symbol {
+
+  color: #fff6c7;
+
+  font-size: 56px;
+
+  letter-spacing: 0;
+
+  text-shadow:
+    2px 3px 0 rgba(75,40,0,.45),
+    0 0 10px rgba(255,235,130,.8),
+    0 0 25px rgba(255,190,30,.65);
+}
+
+
+/* =====================================================
    TAP EFFECT
-========================= */
+===================================================== */
 
 .tap-effect {
   position: fixed;
@@ -664,13 +969,15 @@ body {
   text-shadow:
     0 2px 7px rgba(0,0,0,.8);
 
-  animation: tapFloat .65s ease-out forwards;
+  animation:
+    tapFloat .65s ease-out forwards;
 }
 
 @keyframes tapFloat {
 
   0% {
     opacity: 1;
+
     transform:
       translate(-50%, -50%)
       scale(.8);
@@ -678,15 +985,17 @@ body {
 
   100% {
     opacity: 0;
+
     transform:
       translate(-50%, -120px)
       scale(1.25);
   }
 }
 
-/* =========================
-   SKINS PANEL
-========================= */
+
+/* =====================================================
+   SKINS
+===================================================== */
 
 .section {
   width: calc(100% - 24px);
@@ -709,9 +1018,12 @@ body {
 
   background: rgba(255,255,255,.045);
 
-  border: 1px solid rgba(255,255,255,.07);
+  border:
+    1px solid
+    rgba(255,255,255,.07);
 
   max-height: 420px;
+
   overflow-y: auto;
 }
 
@@ -724,7 +1036,9 @@ body {
 
   padding: 10px 12px;
 
-  border: 1px solid rgba(255,255,255,.07);
+  border:
+    1px solid
+    rgba(255,255,255,.07);
 
   border-radius: 14px;
 
@@ -755,12 +1069,15 @@ body {
 }
 
 .skin-option.selected {
-  border-color: rgba(245,184,0,.65);
+  border-color:
+    rgba(245,184,0,.65);
 
-  background: rgba(245,184,0,.09);
+  background:
+    rgba(245,184,0,.09);
 
   box-shadow:
-    inset 0 0 20px rgba(245,184,0,.04);
+    inset 0 0 20px
+    rgba(245,184,0,.04);
 }
 
 .skin-option.locked {
@@ -776,6 +1093,8 @@ body {
 .skin-icon {
   width: 40px;
   height: 40px;
+
+  flex-shrink: 0;
 
   border-radius: 50%;
 
@@ -795,20 +1114,26 @@ body {
 
 .skin-info {
   color: #8796a9;
+
   font-size: 11px;
+
   line-height: 1.45;
+
   margin-top: 2px;
 }
 
 .skin-status {
   font-size: 11px;
+
   color: #f5b800;
+
   font-weight: 800;
 }
 
-/* =========================
+
+/* =====================================================
    OTHER PAGES
-========================= */
+===================================================== */
 
 .page-content {
   width: calc(100% - 24px);
@@ -833,7 +1158,9 @@ body {
 
   background: rgba(255,255,255,.05);
 
-  border: 1px solid rgba(255,255,255,.07);
+  border:
+    1px solid
+    rgba(255,255,255,.07);
 }
 
 .rank-row {
@@ -843,7 +1170,9 @@ body {
 
   padding: 13px 5px;
 
-  border-bottom: 1px solid rgba(255,255,255,.06);
+  border-bottom:
+    1px solid
+    rgba(255,255,255,.06);
 }
 
 .rank-row:last-child {
@@ -865,9 +1194,10 @@ body {
   color: #f5b800;
 }
 
-/* =========================
+
+/* =====================================================
    BOTTOM NAV
-========================= */
+===================================================== */
 
 .bottom-nav {
   position: fixed;
@@ -891,9 +1221,11 @@ body {
   backdrop-filter: blur(16px);
 
   border-top:
-    1px solid rgba(255,255,255,.07);
+    1px solid
+    rgba(255,255,255,.07);
 
   display: flex;
+
   justify-content: space-around;
 }
 
@@ -901,18 +1233,23 @@ body {
   flex: 1;
 
   border: none;
+
   background: transparent;
 
   color: #708095;
 
   display: flex;
+
   flex-direction: column;
+
   align-items: center;
+
   justify-content: center;
 
   gap: 4px;
 
   font-size: 10px;
+
   font-weight: 700;
 
   cursor: pointer;
@@ -926,24 +1263,29 @@ body {
   color: #f5b800;
 
   text-shadow:
-    0 0 10px rgba(245,184,0,.35);
+    0 0 10px
+    rgba(245,184,0,.35);
 }
 
-/* =========================
+
+/* =====================================================
    LEVEL POPUP
-========================= */
+===================================================== */
 
 .level-popup {
   position: fixed;
+
   inset: 0;
 
   z-index: 3000;
 
-  background: rgba(0,0,0,.7);
+  background:
+    rgba(0,0,0,.7);
 
   display: none;
 
   align-items: center;
+
   justify-content: center;
 
   padding: 25px;
@@ -970,10 +1312,13 @@ body {
       #091321
     );
 
-  border: 1px solid rgba(245,184,0,.35);
+  border:
+    1px solid
+    rgba(245,184,0,.35);
 
   box-shadow:
-    0 20px 70px rgba(0,0,0,.6);
+    0 20px 70px
+    rgba(0,0,0,.6);
 }
 
 .level-popup-icon {
@@ -984,6 +1329,7 @@ body {
 
 .level-popup-title {
   font-size: 25px;
+
   font-weight: 900;
 
   color: #f5b800;
@@ -1003,20 +1349,24 @@ body {
   padding: 13px;
 
   border: none;
+
   border-radius: 13px;
 
   background: #f5b800;
+
   color: #111;
 
   font-size: 15px;
+
   font-weight: 900;
 
   cursor: pointer;
 }
 
-/* =========================
+
+/* =====================================================
    PROFILE
-========================= */
+===================================================== */
 
 .profile-avatar {
   width: 80px;
@@ -1040,13 +1390,15 @@ body {
     );
 
   box-shadow:
-    0 0 30px rgba(245,184,0,.25);
+    0 0 30px
+    rgba(245,184,0,.25);
 }
 
 .profile-name {
   text-align: center;
 
   font-size: 20px;
+
   font-weight: 900;
 }
 
@@ -1060,24 +1412,25 @@ body {
   margin-top: 4px;
 }
 
-/* =========================
+
+/* =====================================================
    RESPONSIVE
-========================= */
+===================================================== */
 
 @media (max-width: 380px) {
 
   .coin {
-    width: 170px;
-    height: 170px;
+    width: 174px;
+    height: 174px;
   }
 
   .coin-inner {
-    width: 142px;
-    height: 142px;
+    width: 152px;
+    height: 152px;
   }
 
   .coin-symbol {
-    font-size: 52px;
+    font-size: 42px;
   }
 
   .coin-area {
@@ -1091,9 +1444,10 @@ body {
 
 <body>
 
-<!-- =========================
+
+<!-- =====================================================
      LOADING
-========================= -->
+===================================================== -->
 
 <div id="loading">
 
@@ -1110,589 +1464,571 @@ body {
 </div>
 
 
-<!-- =========================
+<!-- =====================================================
      APP
-========================= -->
+===================================================== -->
 
 <div id="app">
 
-  <!-- HEADER -->
+<header class="header">
 
-  <header class="header">
+  <div class="logo">
+    UZCOIN
+  </div>
 
-    <div class="logo">
-      UZCOIN
+  <div class="header-level">
+    LEVEL <span id="level">1</span>
+  </div>
+
+</header>
+
+
+<!-- =====================================================
+     HOME
+===================================================== -->
+
+<div id="homePage" class="page active">
+
+  <div class="balance-box">
+
+    <div class="balance-label">
+      BALANCE
     </div>
 
-    <div class="header-level">
-      LEVEL <span id="level">1</span>
+    <div id="balance" class="balance">
+      0
     </div>
 
-  </header>
+  </div>
 
 
-  <!-- =====================
-       HOME
-  ====================== -->
+  <div class="level-progress">
 
-  <div
-    id="homePage"
-    class="page active"
-  >
+    <div class="level-text">
 
-    <!-- BALANCE -->
+      <span>
+        LEVEL <span id="progressLevel">1</span>
+      </span>
 
-    <div class="balance-box">
+      <span id="nextLevelText">
+        2,000
+      </span>
 
-      <div class="balance-label">
-        BALANCE
-      </div>
+    </div>
+
+    <div class="progress-bg">
 
       <div
-        id="balance"
-        class="balance"
-      >
-        0
+        id="progressFill"
+        class="progress-fill"
+      ></div>
+
+    </div>
+
+  </div>
+
+
+  <div class="energy-box">
+
+    <div class="energy-left">
+
+      <div class="energy-icon">
+        ⚡
+      </div>
+
+      <div class="energy-title">
+        ENERGY
       </div>
 
     </div>
 
+    <div
+      id="energy"
+      class="energy-value"
+    >
+      100 / 100
+    </div>
 
-    <!-- LEVEL PROGRESS -->
+  </div>
 
-    <div class="level-progress">
 
-      <div class="level-text">
+  <!-- =================================================
+       MAIN COIN
+  ================================================== -->
 
-        <span>
-          LEVEL <span id="progressLevel">1</span>
-        </span>
+  <div class="coin-area">
 
-        <span id="nextLevelText">
-          2,000
-        </span>
+    <button
+      id="coin"
+      class="coin skin-classic"
+      type="button"
+      aria-label="Tap UZCOIN"
+    >
 
-      </div>
-
-      <div class="progress-bg">
+      <div class="coin-inner">
 
         <div
-          id="progressFill"
-          class="progress-fill"
-        ></div>
-
-      </div>
-
-    </div>
-
-
-    <!-- ENERGY -->
-
-    <div class="energy-box">
-
-      <div class="energy-left">
-
-        <div class="energy-icon">
-          ⚡
-        </div>
-
-        <div class="energy-title">
-          ENERGY
+          id="coinSymbol"
+          class="coin-symbol"
+        >
+          UZ
         </div>
 
       </div>
 
-      <div
-        id="energy"
-        class="energy-value"
-      >
-        100 / 100
-      </div>
+    </button>
 
+  </div>
+
+
+  <!-- =================================================
+       SKINS
+  ================================================== -->
+
+  <div class="section">
+
+    <div class="section-title">
+      🎨 Skins
     </div>
 
+    <div
+      id="skinsPanel"
+      class="skins-panel"
+    >
 
-    <!-- COIN -->
 
-    <div class="coin-area">
+      <!-- CLASSIC -->
 
       <button
-        id="coin"
-        class="coin skin-classic"
-        type="button"
+        class="skin-option"
+        data-skin="classic"
+        data-level="1"
       >
 
-        <div class="coin-inner">
+        <div class="skin-left">
 
-          <div
-            id="coinSymbol"
-            class="coin-symbol"
-          >
-            UZ
+          <div class="skin-icon">
+            🟡
           </div>
 
+          <div>
+
+            <div class="skin-name">
+              Classic
+            </div>
+
+            <div class="skin-info">
+              Level 1<br>
+              +1 TAP • 100 ⚡
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          class="skin-status"
+          data-status="classic"
+        >
+          SELECT
+        </div>
+
+      </button>
+
+
+      <!-- OCEAN -->
+
+      <button
+        class="skin-option"
+        data-skin="ocean"
+        data-level="2"
+      >
+
+        <div class="skin-left">
+
+          <div class="skin-icon">
+            🔵
+          </div>
+
+          <div>
+
+            <div class="skin-name">
+              Ocean
+            </div>
+
+            <div class="skin-info">
+              Level 2<br>
+              +3 TAP • 200 ⚡
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          class="skin-status"
+          data-status="ocean"
+        >
+          🔒
+        </div>
+
+      </button>
+
+
+      <!-- NEBULA -->
+
+      <button
+        class="skin-option"
+        data-skin="nebula"
+        data-level="3"
+      >
+
+        <div class="skin-left">
+
+          <div class="skin-icon">
+            🟣
+          </div>
+
+          <div>
+
+            <div class="skin-name">
+              Nebula
+            </div>
+
+            <div class="skin-info">
+              Level 3<br>
+              +5 TAP • 300 ⚡
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          class="skin-status"
+          data-status="nebula"
+        >
+          🔒
+        </div>
+
+      </button>
+
+
+      <!-- EMERALD -->
+
+      <button
+        class="skin-option"
+        data-skin="emerald"
+        data-level="4"
+      >
+
+        <div class="skin-left">
+
+          <div class="skin-icon">
+            🟢
+          </div>
+
+          <div>
+
+            <div class="skin-name">
+              Emerald
+            </div>
+
+            <div class="skin-info">
+              Level 4<br>
+              +8 TAP • 400 ⚡
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          class="skin-status"
+          data-status="emerald"
+        >
+          🔒
+        </div>
+
+      </button>
+
+
+      <!-- INFERNO -->
+
+      <button
+        class="skin-option"
+        data-skin="inferno"
+        data-level="5"
+      >
+
+        <div class="skin-left">
+
+          <div class="skin-icon">
+            🔴
+          </div>
+
+          <div>
+
+            <div class="skin-name">
+              Inferno
+            </div>
+
+            <div class="skin-info">
+              Level 5<br>
+              +12 TAP • 500 ⚡
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          class="skin-status"
+          data-status="inferno"
+        >
+          🔒
+        </div>
+
+      </button>
+
+
+      <!-- CYBER -->
+
+      <button
+        class="skin-option"
+        data-skin="cyber"
+        data-level="6"
+      >
+
+        <div class="skin-left">
+
+          <div class="skin-icon">
+            🔷
+          </div>
+
+          <div>
+
+            <div class="skin-name">
+              Cyber
+            </div>
+
+            <div class="skin-info">
+              Level 6<br>
+              +16 TAP • 600 ⚡
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          class="skin-status"
+          data-status="cyber"
+        >
+          🔒
+        </div>
+
+      </button>
+
+
+      <!-- IMMORTAL -->
+
+      <button
+        class="skin-option"
+        data-skin="immortal"
+        data-level="7"
+      >
+
+        <div class="skin-left">
+
+          <div class="skin-icon">
+            👑
+          </div>
+
+          <div>
+
+            <div class="skin-name">
+              Immortal
+            </div>
+
+            <div class="skin-info">
+              Level 7<br>
+              +20 TAP • 700 ⚡
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          class="skin-status"
+          data-status="immortal"
+        >
+          🔒
         </div>
 
       </button>
 
     </div>
 
+  </div>
 
-    <!-- SKINS -->
+</div>
 
-    <div class="section">
 
-      <div class="section-title">
-        🎨 Skins
+<!-- =====================================================
+     RANK
+===================================================== -->
+
+<div id="rankPage" class="page">
+
+  <div class="page-content">
+
+    <div class="page-title">
+      🏆 Rank
+    </div>
+
+    <div
+      id="rankList"
+      class="card"
+    >
+      Yuklanmoqda...
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     FRIENDS
+===================================================== -->
+
+<div id="friendsPage" class="page">
+
+  <div class="page-content">
+
+    <div class="page-title">
+      👥 Friends
+    </div>
+
+    <div class="card">
+
+      <div style="font-size:18px;font-weight:900;">
+        Do‘stlaringni taklif qil
       </div>
 
       <div
-        id="skinsPanel"
-        class="skins-panel"
+        id="referralText"
+        style="
+          margin-top:8px;
+          color:#8492a5;
+          font-size:13px;
+          line-height:1.5;
+        "
       >
-
-        <!-- CLASSIC -->
-
-        <button
-          class="skin-option"
-          data-skin="classic"
-          data-level="1"
-        >
-
-          <div class="skin-left">
-
-            <div class="skin-icon">
-              🟡
-            </div>
-
-            <div>
-
-              <div class="skin-name">
-                Classic
-              </div>
-
-              <div class="skin-info">
-                Level 1<br>
-                +1 TAP • 100 ⚡
-              </div>
-
-            </div>
-
-          </div>
-
-          <div
-            class="skin-status"
-            data-status="classic"
-          >
-            SELECT
-          </div>
-
-        </button>
-
-
-        <!-- OCEAN -->
-
-        <button
-          class="skin-option"
-          data-skin="ocean"
-          data-level="2"
-        >
-
-          <div class="skin-left">
-
-            <div class="skin-icon">
-              🔵
-            </div>
-
-            <div>
-
-              <div class="skin-name">
-                Ocean
-              </div>
-
-              <div class="skin-info">
-                Level 2<br>
-                +3 TAP • 200 ⚡
-              </div>
-
-            </div>
-
-          </div>
-
-          <div
-            class="skin-status"
-            data-status="ocean"
-          >
-            🔒
-          </div>
-
-        </button>
-
-
-        <!-- NEBULA -->
-
-        <button
-          class="skin-option"
-          data-skin="nebula"
-          data-level="3"
-        >
-
-          <div class="skin-left">
-
-            <div class="skin-icon">
-              🟣
-            </div>
-
-            <div>
-
-              <div class="skin-name">
-                Nebula
-              </div>
-
-              <div class="skin-info">
-                Level 3<br>
-                +5 TAP • 300 ⚡
-              </div>
-
-            </div>
-
-          </div>
-
-          <div
-            class="skin-status"
-            data-status="nebula"
-          >
-            🔒
-          </div>
-
-        </button>
-
-
-        <!-- EMERALD -->
-
-        <button
-          class="skin-option"
-          data-skin="emerald"
-          data-level="4"
-        >
-
-          <div class="skin-left">
-
-            <div class="skin-icon">
-              🟢
-            </div>
-
-            <div>
-
-              <div class="skin-name">
-                Emerald
-              </div>
-
-              <div class="skin-info">
-                Level 4<br>
-                +8 TAP • 400 ⚡
-              </div>
-
-            </div>
-
-          </div>
-
-          <div
-            class="skin-status"
-            data-status="emerald"
-          >
-            🔒
-          </div>
-
-        </button>
-
-
-        <!-- INFERNO -->
-
-        <button
-          class="skin-option"
-          data-skin="inferno"
-          data-level="5"
-        >
-
-          <div class="skin-left">
-
-            <div class="skin-icon">
-              🔴
-            </div>
-
-            <div>
-
-              <div class="skin-name">
-                Inferno
-              </div>
-
-              <div class="skin-info">
-                Level 5<br>
-                +12 TAP • 500 ⚡
-              </div>
-
-            </div>
-
-          </div>
-
-          <div
-            class="skin-status"
-            data-status="inferno"
-          >
-            🔒
-          </div>
-
-        </button>
-
-
-        <!-- CYBER -->
-
-        <button
-          class="skin-option"
-          data-skin="cyber"
-          data-level="6"
-        >
-
-          <div class="skin-left">
-
-            <div class="skin-icon">
-              🔷
-            </div>
-
-            <div>
-
-              <div class="skin-name">
-                Cyber
-              </div>
-
-              <div class="skin-info">
-                Level 6<br>
-                +16 TAP • 600 ⚡
-              </div>
-
-            </div>
-
-          </div>
-
-          <div
-            class="skin-status"
-            data-status="cyber"
-          >
-            🔒
-          </div>
-
-        </button>
-
-
-        <!-- IMMORTAL -->
-
-        <button
-          class="skin-option"
-          data-skin="immortal"
-          data-level="7"
-        >
-
-          <div class="skin-left">
-
-            <div class="skin-icon">
-              🔮
-            </div>
-
-            <div>
-
-              <div class="skin-name">
-                Immortal
-              </div>
-
-              <div class="skin-info">
-                Level 7<br>
-                +20 TAP • 700 ⚡
-              </div>
-
-            </div>
-
-          </div>
-
-          <div
-            class="skin-status"
-            data-status="immortal"
-          >
-            🔒
-          </div>
-
-        </button>
-
+        Do‘stlaringni UZCOIN'ga taklif qil.
       </div>
+
+      <button
+        id="copyReferral"
+        style="
+          width:100%;
+          margin-top:15px;
+          padding:13px;
+          border:0;
+          border-radius:12px;
+          background:#f5b800;
+          color:#111;
+          font-weight:900;
+        "
+      >
+        🔗 Linkni nusxalash
+      </button>
 
     </div>
 
   </div>
 
+</div>
 
-  <!-- =====================
-       RANK
-  ====================== -->
 
-  <div
-    id="rankPage"
-    class="page"
-  >
+<!-- =====================================================
+     PROFILE
+===================================================== -->
 
-    <div class="page-content">
+<div id="profilePage" class="page">
 
-      <div class="page-title">
-        🏆 Rank
+  <div class="page-content">
+
+    <div class="page-title">
+      👤 Profile
+    </div>
+
+    <div class="card">
+
+      <div class="profile-avatar">
+        👤
       </div>
 
       <div
-        id="rankList"
-        class="card"
+        id="profileName"
+        class="profile-name"
       >
-        Yuklanmoqda...
+        User
+      </div>
+
+      <div
+        id="profileUsername"
+        class="profile-username"
+      >
+        @username
       </div>
 
     </div>
 
-  </div>
 
+    <div class="card">
 
-  <!-- =====================
-       FRIENDS
-  ====================== -->
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        padding:8px 0;
+      ">
 
-  <div
-    id="friendsPage"
-    class="page"
-  >
+        <span>🪙 Balance</span>
 
-    <div class="page-content">
-
-      <div class="page-title">
-        👥 Friends
-      </div>
-
-      <div class="card">
-
-        <div style="font-size:18px;font-weight:900;">
-          Do‘stlaringni taklif qil
-        </div>
-
-        <div
-          id="referralText"
-          style="
-            margin-top:8px;
-            color:#8492a5;
-            font-size:13px;
-            line-height:1.5;
-          "
-        >
-          Do‘stlaringni UZCOIN'ga taklif qil.
-        </div>
-
-        <button
-          id="copyReferral"
-          style="
-            width:100%;
-            margin-top:15px;
-            padding:13px;
-            border:0;
-            border-radius:12px;
-            background:#f5b800;
-            color:#111;
-            font-weight:900;
-          "
-        >
-          🔗 Linkni nusxalash
-        </button>
+        <strong id="profileBalance">
+          0
+        </strong>
 
       </div>
 
-    </div>
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        padding:8px 0;
+      ">
 
-  </div>
+        <span>⭐ Level</span>
 
-
-  <!-- =====================
-       PROFILE
-  ====================== -->
-
-  <div
-    id="profilePage"
-    class="page"
-  >
-
-    <div class="page-content">
-
-      <div class="page-title">
-        👤 Profile
-      </div>
-
-      <div class="card">
-
-        <div class="profile-avatar">
-          👤
-        </div>
-
-        <div
-          id="profileName"
-          class="profile-name"
-        >
-          User
-        </div>
-
-        <div
-          id="profileUsername"
-          class="profile-username"
-        >
-          @username
-        </div>
+        <strong id="profileLevel">
+          1
+        </strong>
 
       </div>
 
-      <div class="card">
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        padding:8px 0;
+      ">
 
-        <div style="
-          display:flex;
-          justify-content:space-between;
-          padding:8px 0;
-        ">
+        <span>👥 Friends</span>
 
-          <span>🪙 Balance</span>
-
-          <strong id="profileBalance">
-            0
-          </strong>
-
-        </div>
-
-        <div style="
-          display:flex;
-          justify-content:space-between;
-          padding:8px 0;
-        ">
-
-          <span>⭐ Level</span>
-
-          <strong id="profileLevel">
-            1
-          </strong>
-
-        </div>
-
-        <div style="
-          display:flex;
-          justify-content:space-between;
-          padding:8px 0;
-        ">
-
-          <span>👥 Friends</span>
-
-          <strong id="profileFriends">
-            0
-          </strong>
-
-        </div>
+        <strong id="profileFriends">
+          0
+        </strong>
 
       </div>
 
@@ -1702,10 +2038,12 @@ body {
 
 </div>
 
+</div>
 
-<!-- =========================
+
+<!-- =====================================================
      LEVEL POPUP
-========================= -->
+===================================================== -->
 
 <div
   id="levelPopup"
@@ -1744,9 +2082,9 @@ body {
 </div>
 
 
-<!-- =========================
+<!-- =====================================================
      NAVIGATION
-========================= -->
+===================================================== -->
 
 <nav class="bottom-nav">
 
@@ -1754,52 +2092,32 @@ body {
     class="nav-btn active"
     data-page="homePage"
   >
-
-    <span class="nav-icon">
-      🏠
-    </span>
-
+    <span class="nav-icon">🏠</span>
     Home
-
   </button>
 
   <button
     class="nav-btn"
     data-page="rankPage"
   >
-
-    <span class="nav-icon">
-      🏆
-    </span>
-
+    <span class="nav-icon">🏆</span>
     Rank
-
   </button>
 
   <button
     class="nav-btn"
     data-page="friendsPage"
   >
-
-    <span class="nav-icon">
-      👥
-    </span>
-
+    <span class="nav-icon">👥</span>
     Friends
-
   </button>
 
   <button
     class="nav-btn"
     data-page="profilePage"
   >
-
-    <span class="nav-icon">
-      👤
-    </span>
-
+    <span class="nav-icon">👤</span>
     Profile
-
   </button>
 
 </nav>
@@ -1811,15 +2129,11 @@ body {
    TELEGRAM
 ===================================================== */
 
-const tg =
-  window.Telegram?.WebApp;
+const tg = window.Telegram?.WebApp;
 
 if (tg) {
-
   tg.ready();
-
   tg.expand();
-
 }
 
 
@@ -1872,7 +2186,6 @@ const popupIcon =
 ===================================================== */
 
 let telegramId = null;
-
 let initData = "";
 
 if (tg && tg.initDataUnsafe) {
@@ -1888,7 +2201,6 @@ if (tg && tg.initDataUnsafe) {
 
   initData =
     tg.initData || "";
-
 }
 
 
@@ -1897,13 +2209,10 @@ if (tg && tg.initDataUnsafe) {
 ===================================================== */
 
 let balance = 0;
-
 let level = 1;
-
 let lastLevel = 1;
 
 let energy = 100;
-
 let maxEnergy = 100;
 
 let tapPower = 1;
@@ -1911,7 +2220,6 @@ let tapPower = 1;
 let selectedSkin = "classic";
 
 let skins = {};
-
 let userData = null;
 
 
@@ -1973,7 +2281,7 @@ const SKINS = {
     level: 7,
     power: 20,
     maxEnergy: 700,
-    icon: "🔮",
+    icon: "👑",
     name: "Immortal"
   }
 
@@ -2055,7 +2363,6 @@ function getLevelFromBalance(value) {
     return 2;
 
   return 1;
-
 }
 
 
@@ -2163,12 +2470,6 @@ function updateEnergyUI() {
 }
 
 
-function updateTapPowerUI() {
-
-  /* tap power is represented by selected skin */
-}
-
-
 /* =====================================================
    COIN DESIGN
 ===================================================== */
@@ -2179,33 +2480,32 @@ function updateCoinDesign() {
     "coin skin-" +
     selectedSkin;
 
-  const skin =
-    SKINS[selectedSkin];
+  const symbols = {
 
-  if (skin) {
+    classic: "UZ",
 
-    coinSymbol.textContent =
-      selectedSkin === "classic"
-        ? "UZ"
-        : selectedSkin === "ocean"
-        ? "≈"
-        : selectedSkin === "nebula"
-        ? "✦"
-        : selectedSkin === "emerald"
-        ? "◆"
-        : selectedSkin === "inferno"
-        ? "🔥"
-        : selectedSkin === "cyber"
-        ? "⚡"
-        : "♛";
+    ocean: "≈",
 
-  }
+    nebula: "✦",
+
+    emerald: "◆",
+
+    inferno: "🔥",
+
+    cyber: "⚡",
+
+    immortal: "♛"
+
+  };
+
+  coinSymbol.textContent =
+    symbols[selectedSkin] || "UZ";
 
 }
 
 
 /* =====================================================
-   SKIN LOCK SYSTEM
+   SKIN LOCKS
 ===================================================== */
 
 function updateSkinLocks() {
@@ -2353,9 +2653,7 @@ function showTapEffect(
   );
 
   setTimeout(() => {
-
     effect.remove();
-
   }, 700);
 
 }
@@ -2441,11 +2739,6 @@ async function loadUser() {
       "classic";
 
 
-    /*
-      Serverdagi skin ma'lumotidan
-      aniq power/maxEnergy olish.
-    */
-
     const selected =
       skins[selectedSkin] ||
       SKINS[selectedSkin];
@@ -2476,28 +2769,15 @@ async function loadUser() {
 
     updateSkinLocks();
 
+    loadProfile(userData);
 
-    loadProfile(
-      userData
-    );
-
-    loadFriends(
-      userData
-    );
-
+    loadFriends(userData);
 
     loading.classList.add(
       "hidden"
     );
 
-
-    /*
-      Serverdagi energy bilan
-      frontend timerini sinxronlaymiz.
-    */
-
     startEnergyRegeneration();
-
 
   } catch (error) {
 
@@ -2518,17 +2798,8 @@ async function loadUser() {
 
 
 /* =====================================================
-   ENERGY TIMER
+   ENERGY
 ===================================================== */
-
-/*
-  MUHIM:
-  1 SEKUND = 1 ENERGY.
-
-  Bu timer faqat UI uchun.
-  Server ham energy'ni elapsed seconds
-  bo'yicha hisoblaydi.
-*/
 
 let energyTimer = null;
 
@@ -2597,18 +2868,8 @@ function startEnergyRegeneration() {
 
 
 /* =====================================================
-   FAST TAP QUEUE
+   TAP QUEUE
 ===================================================== */
-
-/*
-  Tap darhol ekranda ishlaydi.
-  Serverga esa ketma-ket yuboriladi.
-
-  Shu sababli:
-  - tap sekinlashmaydi
-  - response tartibi buzilmaydi
-  - energy noto'g'ri sakramaydi
-*/
 
 let pendingTaps = 0;
 
@@ -2636,7 +2897,6 @@ async function processTapQueue() {
 
   tapQueueRunning =
     true;
-
 
   while (
     pendingTaps > 0
@@ -2671,15 +2931,9 @@ async function processTapQueue() {
       const data =
         await response.json();
 
-
       if (
         !data.success
       ) {
-
-        /*
-          Server qabul qilmasa,
-          optimistik tapni qaytaramiz.
-        */
 
         balance =
           Math.max(
@@ -2698,23 +2952,9 @@ async function processTapQueue() {
 
         updateEnergyUI();
 
-        console.log(
-          "Server tap xatosi:",
-          data.message
-        );
-
         continue;
 
       }
-
-
-      /*
-        Server tasdiqlagan
-        oxirgi holatni olamiz.
-
-        Faqat pending tap qolmaganida
-        energy/balance'ni to'liq sync qilamiz.
-      */
 
       if (
         pendingTaps === 0
@@ -2743,16 +2983,6 @@ async function processTapQueue() {
             data.tapPower
           ) ||
           tapPower;
-
-        /*
-          Server energy'si lokal
-          qiymatdan keskin past bo'lsa,
-          uni to'g'ridan-to'g'ri bosib
-          yubormaymiz.
-
-          Bu tez tap paytida
-          energy sakrashining oldini oladi.
-        */
 
         const serverEnergy =
           Number(
@@ -2796,11 +3026,6 @@ async function processTapQueue() {
         error
       );
 
-      /*
-        Network xatosida
-        tapni qaytaramiz.
-      */
-
       balance =
         Math.max(
           0,
@@ -2821,7 +3046,6 @@ async function processTapQueue() {
     }
 
   }
-
 
   tapQueueRunning =
     false;
@@ -2845,21 +3069,10 @@ coin.addEventListener(
 
     }
 
-
-    /*
-      Shu tap uchun
-      ayni paytdagi power.
-    */
-
     const currentPower =
       Number(
         tapPower
       ) || 1;
-
-
-    /*
-      DARHOL UI.
-    */
 
     balance +=
       currentPower;
@@ -2870,22 +3083,14 @@ coin.addEventListener(
         energy - 1
       );
 
-
-    /*
-      Timer uchun
-      yangi vaqt nuqtasi.
-    */
-
     lastEnergyTime =
       Date.now();
-
 
     showTapEffect(
       currentPower,
       event.clientX,
       event.clientY
     );
-
 
     updateBalance();
 
@@ -2896,11 +3101,6 @@ coin.addEventListener(
     updateLevelUI();
 
     updateSkinLocks();
-
-
-    /*
-      Serverga yuborish.
-    */
 
     queueServerTap();
 
@@ -2928,13 +3128,6 @@ document
             button.dataset.level
           );
 
-
-        /*
-          Eski skinlar ham qoladi.
-          Faqat level >= talab qilingan
-          bo'lsa tanlanadi.
-        */
-
         if (
           level <
           requiredLevel
@@ -2944,7 +3137,6 @@ document
 
         }
 
-
         if (
           skinName ===
           selectedSkin
@@ -2953,7 +3145,6 @@ document
           return;
 
         }
-
 
         const oldSkin =
           selectedSkin;
@@ -2967,11 +3158,6 @@ document
         const oldEnergy =
           energy;
 
-
-        /*
-          UI'ni darhol almashtiramiz.
-        */
-
         selectedSkin =
           skinName;
 
@@ -2984,24 +3170,17 @@ document
         maxEnergy =
           skin.maxEnergy;
 
-        /*
-          Yangi skin tanlanganda
-          energy to'liq bo'ladi.
-        */
-
         energy =
           maxEnergy;
 
         lastEnergyTime =
           Date.now();
 
-
         updateCoinDesign();
 
         updateEnergyUI();
 
         updateSkinLocks();
-
 
         try {
 
@@ -3030,10 +3209,8 @@ document
               }
             );
 
-
           const data =
             await response.json();
-
 
           if (
             !data.success
@@ -3045,11 +3222,6 @@ document
             );
 
           }
-
-
-          /*
-            Server tasdiqladi.
-          */
 
           selectedSkin =
             skinName;
@@ -3066,11 +3238,6 @@ document
               data.maxEnergy ||
               skin.maxEnergy
             );
-
-          /*
-            Level 3 = 300,
-            Level 4 = 400 va hokazo.
-          */
 
           energy =
             Number(
@@ -3103,18 +3270,12 @@ document
 
           updateSkinLocks();
 
-
         } catch (error) {
 
           console.error(
             "SKIN ERROR:",
             error
           );
-
-
-          /*
-            Eski holatga qaytarish.
-          */
 
           selectedSkin =
             oldSkin;
@@ -3160,7 +3321,6 @@ document
         const pageId =
           button.dataset.page;
 
-
         document
           .querySelectorAll(".page")
           .forEach(page => {
@@ -3170,7 +3330,6 @@ document
             );
 
           });
-
 
         const page =
           document.getElementById(
@@ -3185,7 +3344,6 @@ document
 
         }
 
-
         document
           .querySelectorAll(".nav-btn")
           .forEach(btn => {
@@ -3196,11 +3354,9 @@ document
 
           });
 
-
         button.classList.add(
           "active"
         );
-
 
         if (
           pageId ===
@@ -3233,7 +3389,6 @@ async function loadRank() {
     const data =
       await response.json();
 
-
     if (
       !data.success
     ) {
@@ -3245,12 +3400,10 @@ async function loadRank() {
 
     }
 
-
     const users =
       data.users ||
       data.rank ||
       [];
-
 
     if (
       users.length === 0
@@ -3262,7 +3415,6 @@ async function loadRank() {
       return;
 
     }
-
 
     rankList.innerHTML =
       users
@@ -3421,26 +3573,11 @@ function loadFriends(user) {
 function escapeHtml(value) {
 
   return String(value || "")
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
 }
 
@@ -3467,23 +3604,11 @@ document.getElementById(
    SERVER ENERGY SYNC
 ===================================================== */
 
-/*
-  Serverni har 5 sekund tekshiramiz.
-
-  Lekin pending tap bor paytda
-  server energy'si bilan
-  local taplarni bosib tashlamaymiz.
-*/
-
 setInterval(
   async () => {
 
-    if (
-      !telegramId
-    ) {
-
+    if (!telegramId) {
       return;
-
     }
 
     if (
@@ -3506,7 +3631,6 @@ setInterval(
       const data =
         await response.json();
 
-
       if (
         !data.success ||
         !data.user
@@ -3516,21 +3640,13 @@ setInterval(
 
       }
 
-
       const serverUser =
         data.user;
-
 
       const serverBalance =
         Number(
           serverUser.balance
         );
-
-
-      /*
-        Balance faqat pending tap
-        bo'lmaganda sync qilinadi.
-      */
 
       if (
         Number.isFinite(
@@ -3543,12 +3659,10 @@ setInterval(
 
       }
 
-
       const serverLevel =
         getLevelFromBalance(
           balance
         );
-
 
       if (
         serverLevel >
@@ -3560,12 +3674,10 @@ setInterval(
 
       }
 
-
       const serverMax =
         Number(
           serverUser.max_energy
         );
-
 
       if (
         Number.isFinite(
@@ -3579,12 +3691,10 @@ setInterval(
 
       }
 
-
       const serverEnergy =
         Number(
           serverUser.energy
         );
-
 
       if (
         Number.isFinite(
@@ -3603,7 +3713,6 @@ setInterval(
 
       }
 
-
       if (
         serverUser.skin
       ) {
@@ -3619,11 +3728,6 @@ setInterval(
           tapPower =
             skin.power;
 
-          /*
-            Backend max_energy
-            bilan moslashtiramiz.
-          */
-
           if (
             !serverMax ||
             serverMax <= 0
@@ -3638,10 +3742,8 @@ setInterval(
 
       }
 
-
       lastEnergyTime =
         Date.now();
-
 
       updateBalance();
 
@@ -3652,7 +3754,6 @@ setInterval(
       updateCoinDesign();
 
       updateSkinLocks();
-
 
     } catch (error) {
 
@@ -3676,4 +3777,4 @@ loadUser();
 </script>
 
 </body>
-  </html>
+</html>
