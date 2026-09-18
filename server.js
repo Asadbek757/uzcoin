@@ -17,6 +17,9 @@ const REQUIRED_CHANNEL = "@uzcoin_officiall";
 const CHANNEL_URL = "https://t.me/uzcoin_officiall";
 const BOT_USERNAME = "UZCoinTapBot";
 
+const REFERRAL_BONUS = 500;
+const DAILY_REWARD = 100;
+
 if (!BOT_TOKEN) {
   console.error("BOT_TOKEN is missing");
 }
@@ -39,7 +42,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 
 /* =====================================================
-   LEAGUES
+   LEAGUES — 10 LEVEL
 ===================================================== */
 
 const LEAGUES = [
@@ -63,15 +66,45 @@ const LEAGUES = [
   },
   {
     level: 4,
-    name: "DIAMOND",
+    name: "PLATINUM",
     icon: "💎",
     min: 50000
   },
   {
     level: 5,
+    name: "DIAMOND",
+    icon: "💠",
+    min: 250000
+  },
+  {
+    level: 6,
     name: "MASTER",
     icon: "👑",
-    min: 100000
+    min: 1000000
+  },
+  {
+    level: 7,
+    name: "GRANDMASTER",
+    icon: "🔥",
+    min: 5000000
+  },
+  {
+    level: 8,
+    name: "CHAMPION",
+    icon: "⚔️",
+    min: 25000000
+  },
+  {
+    level: 9,
+    name: "LEGEND",
+    icon: "🌟",
+    min: 100000000
+  },
+  {
+    level: 10,
+    name: "TITAN",
+    icon: "🏆",
+    min: 500000000
   }
 ];
 
@@ -104,6 +137,11 @@ function getLeagueFromBalance(balance) {
 }
 
 
+/*
+  Liga faqat yuqoriga chiqadi.
+  Coin kamaygani uchun liga hech qachon tushmaydi.
+*/
+
 async function updatePermanentLeague(
   client,
   telegramId,
@@ -120,7 +158,7 @@ async function updatePermanentLeague(
     earnedLeague.level
   );
 
-  if (newLevel !== current) {
+  if (newLevel > current) {
     await client.query(
       `
       UPDATE users
@@ -129,7 +167,10 @@ async function updatePermanentLeague(
         updated_at = CURRENT_TIMESTAMP
       WHERE telegram_id = $1
       `,
-      [telegramId, newLevel]
+      [
+        telegramId,
+        newLevel
+      ]
     );
   }
 
@@ -138,58 +179,86 @@ async function updatePermanentLeague(
 
 
 /* =====================================================
-   COSTS
+   TAP LEVEL — 1 TO 10
 ===================================================== */
 
+const TAP_UPGRADE_COSTS = [
+  500,
+  900,
+  1620,
+  2916,
+  5249,
+  9448,
+  17006,
+  30611,
+  55099
+];
+
+
 function getTapUpgradeCost(level) {
-  return Math.floor(
-    500 * Math.pow(1.8, Number(level) - 1)
-  );
+  const currentLevel = Number(level || 1);
+
+  if (currentLevel >= 10) {
+    return null;
+  }
+
+  return TAP_UPGRADE_COSTS[currentLevel - 1];
 }
 
 
-function getMaxEnergy(level) {
-  const limits = [
-    300,
-    500,
-    1000,
-    5000,
-    10000,
-    25000,
-    50000,
-    100000
-  ];
+/* =====================================================
+   ENERGY LEVEL — 1 TO 10
+===================================================== */
 
-  return limits[
+const ENERGY_MAX_VALUES = [
+  300,
+  500,
+  1000,
+  5000,
+  10000,
+  25000,
+  50000,
+  100000,
+  250000,
+  500000
+];
+
+
+const ENERGY_UPGRADE_COSTS = [
+  1000,
+  5000,
+  25000,
+  100000,
+  500000,
+  2500000,
+  10000000,
+  50000000,
+  250000000
+];
+
+
+function getMaxEnergy(level) {
+  const currentLevel = Number(level || 1);
+
+  const index =
     Math.min(
-      Math.max(Number(level) - 1, 0),
-      limits.length - 1
-    )
-  ];
+      Math.max(currentLevel - 1, 0),
+      ENERGY_MAX_VALUES.length - 1
+    );
+
+  return ENERGY_MAX_VALUES[index];
 }
 
 
 function getEnergyUpgradeCost(level) {
-  const costs = [
-    1000,
-    5000,
-    25000,
-    100000,
-    500000,
-    2500000,
-    10000000
-  ];
+  const currentLevel = Number(level || 1);
 
-  return costs[
-    Math.min(
-      Math.max(Number(level) - 1, 0),
-      costs.length - 1
-    )
-  ];
+  if (currentLevel >= 10) {
+    return null;
+  }
+
+  return ENERGY_UPGRADE_COSTS[currentLevel - 1];
 }
-
-
-const REFERRAL_BONUS = 500;
 
 
 /* =====================================================
@@ -278,7 +347,6 @@ async function isSubscribedCached(
 ===================================================== */
 
 async function initDatabase() {
-
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
@@ -331,6 +399,7 @@ async function initDatabase() {
     ["updated_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"]
   ];
 
+
   for (const [name, type] of columns) {
     await pool.query(`
       ALTER TABLE users
@@ -349,9 +418,23 @@ async function initDatabase() {
 
   await pool.query(`
     UPDATE users
+    SET energy_level = 10
+    WHERE energy_level > 10
+  `);
+
+
+  await pool.query(`
+    UPDATE users
     SET tap_level = 1
     WHERE tap_level IS NULL
        OR tap_level < 1
+  `);
+
+
+  await pool.query(`
+    UPDATE users
+    SET tap_level = 10
+    WHERE tap_level > 10
   `);
 
 
@@ -382,6 +465,13 @@ async function initDatabase() {
 
   await pool.query(`
     UPDATE users
+    SET league_level = 10
+    WHERE league_level > 10
+  `);
+
+
+  await pool.query(`
+    UPDATE users
     SET energy_updated_at =
       COALESCE(
         energy_updated_at,
@@ -393,8 +483,8 @@ async function initDatabase() {
 
 
   /*
-    Eski userlarning ligasi.
-    Liga faqat yuqoriga chiqadi.
+    Eski userlarning ligasini hisoblaymiz.
+    GREATEST sabab liga pastga tushmaydi.
   */
 
   for (const league of LEAGUES) {
@@ -415,22 +505,21 @@ async function initDatabase() {
     );
   }
 
+
   console.log("Database initialized");
 }
 
 
 /* =====================================================
-   TELEGRAM INIT DATA
+   TELEGRAM INIT DATA VALIDATION
 ===================================================== */
 
 function validateInitData(initData) {
-
   if (!initData || !BOT_TOKEN) {
     return null;
   }
 
   try {
-
     const params =
       new URLSearchParams(initData);
 
@@ -498,7 +587,6 @@ function validateInitData(initData) {
     return JSON.parse(userString);
 
   } catch (error) {
-
     console.error(
       "initData validation:",
       error.message
@@ -510,14 +598,13 @@ function validateInitData(initData) {
 
 
 /* =====================================================
-   USER
+   CREATE / UPDATE USER
 ===================================================== */
 
 async function createOrUpdateUser(
   telegramUser,
   client = pool
 ) {
-
   const telegramId =
     telegramUser.id;
 
@@ -557,7 +644,8 @@ async function createOrUpdateUser(
       ON CONFLICT (telegram_id)
 
       DO UPDATE SET
-        username = EXCLUDED.username,
+        username =
+          EXCLUDED.username,
 
         first_name =
           EXCLUDED.first_name,
@@ -587,28 +675,13 @@ async function createOrUpdateUser(
 
 /* =====================================================
    ENERGY REGENERATION
+   1 SECOND = +1 ENERGY
 ===================================================== */
-
-/*
-  Serverdagi asosiy qoida:
-
-  1 sekund = +1 energy
-
-  Hech qachon:
-  +2
-  +5
-  +10
-
-  bo'lmaydi.
-
-  Faqat o'tgan to'liq sekundlar hisoblanadi.
-*/
 
 async function regenerateEnergy(
   client,
   user
 ) {
-
   let energy =
     Number(user.energy || 0);
 
@@ -652,11 +725,6 @@ async function regenerateEnergy(
       energy + elapsedSeconds
     );
 
-  /*
-    Faqat ishlatilgan vaqtni oldinga suramiz.
-    Shuning uchun millisekundlar yo'qolmaydi.
-  */
-
   const newTimestamp =
     new Date(
       lastUpdate.getTime() +
@@ -694,7 +762,6 @@ function formatUser(
   user,
   rank = null
 ) {
-
   const league =
     getLeagueByLevel(
       Number(
@@ -702,8 +769,25 @@ function formatUser(
       )
     );
 
-  return {
+  const tapLevel =
+    Math.min(
+      10,
+      Math.max(
+        1,
+        Number(user.tap_level || 1)
+      )
+    );
 
+  const energyLevel =
+    Math.min(
+      10,
+      Math.max(
+        1,
+        Number(user.energy_level || 1)
+      )
+    );
+
+  return {
     telegramId:
       String(user.telegram_id),
 
@@ -725,11 +809,6 @@ function formatUser(
     maxEnergy:
       Number(user.max_energy || 300),
 
-    /*
-      Frontend energyni shu timestampdan
-      hisoblab chiqaradi.
-    */
-
     energyUpdatedAt:
       user.energy_updated_at
         ? new Date(
@@ -737,48 +816,46 @@ function formatUser(
           ).toISOString()
         : new Date().toISOString(),
 
-    tapLevel:
-      Number(user.tap_level || 1),
+    tapLevel,
 
     power:
-      Number(user.tap_level || 1),
+      tapLevel,
 
-    energyLevel:
-      Number(user.energy_level || 1),
+    energyLevel,
 
     referrals:
       Number(user.referrals || 0),
 
     league: {
-      level: league.level,
-      name: league.name,
-      icon: league.icon,
-      min: league.min
+      level:
+        league.level,
+
+      name:
+        league.name,
+
+      icon:
+        league.icon,
+
+      min:
+        league.min
     },
 
     rank,
 
     upgrades: {
-
       tap: {
-        level:
-          Number(
-            user.tap_level || 1
-          ),
+        level: tapLevel,
+
+        maxLevel: 10,
 
         cost:
-          getTapUpgradeCost(
-            Number(
-              user.tap_level || 1
-            )
-          )
+          getTapUpgradeCost(tapLevel)
       },
 
       energy: {
-        level:
-          Number(
-            user.energy_level || 1
-          ),
+        level: energyLevel,
+
+        maxLevel: 10,
 
         max:
           Number(
@@ -787,9 +864,7 @@ function formatUser(
 
         cost:
           getEnergyUpgradeCost(
-            Number(
-              user.energy_level || 1
-            )
+            energyLevel
           )
       }
     }
@@ -798,14 +873,13 @@ function formatUser(
 
 
 /* =====================================================
-   AUTHENTICATION
+   AUTH
 ===================================================== */
 
 async function getAuthenticatedUser(
   initData,
   useCache = true
 ) {
-
   const telegramUser =
     validateInitData(initData);
 
@@ -841,14 +915,13 @@ async function getAuthenticatedUser(
 
 
 /* =====================================================
-   REFERRALS
+   REFERRAL
 ===================================================== */
 
 async function processReferral(
   newUserId,
   referrerId
 ) {
-
   if (!referrerId) {
     return false;
   }
@@ -867,7 +940,6 @@ async function processReferral(
     await pool.connect();
 
   try {
-
     await client.query("BEGIN");
 
     const newUserResult =
@@ -914,9 +986,15 @@ async function processReferral(
       `
       UPDATE users
       SET
-        balance = balance + $2,
-        referred_by = $3,
-        updated_at = CURRENT_TIMESTAMP
+        balance =
+          balance + $2,
+
+        referred_by =
+          $3,
+
+        updated_at =
+          CURRENT_TIMESTAMP
+
       WHERE telegram_id = $1
       `,
       [
@@ -930,9 +1008,15 @@ async function processReferral(
       `
       UPDATE users
       SET
-        balance = balance + $2,
-        referrals = referrals + 1,
-        updated_at = CURRENT_TIMESTAMP
+        balance =
+          balance + $2,
+
+        referrals =
+          referrals + 1,
+
+        updated_at =
+          CURRENT_TIMESTAMP
+
       WHERE telegram_id = $1
       `,
       [
@@ -980,7 +1064,6 @@ async function processReferral(
     return true;
 
   } catch (error) {
-
     await client.query("ROLLBACK");
 
     console.error(
@@ -997,14 +1080,12 @@ async function processReferral(
 
 
 /* =====================================================
-   BOT START
+   BOT /START
 ===================================================== */
 
 bot.start(
   async (ctx) => {
-
     try {
-
       const telegramUser =
         ctx.from;
 
@@ -1022,7 +1103,6 @@ bot.start(
           : null;
 
       if (!subscribed) {
-
         await ctx.reply(
           `
 📢 <b>UZCOIN</b>
@@ -1089,7 +1169,6 @@ Xush kelibsiz, ${
       );
 
     } catch (error) {
-
       console.error(
         "/start error:",
         error
@@ -1110,9 +1189,7 @@ Xush kelibsiz, ${
 bot.action(
   "check_subscription",
   async (ctx) => {
-
     try {
-
       const telegramId =
         ctx.from.id;
 
@@ -1130,7 +1207,6 @@ bot.action(
       );
 
       if (!subscribed) {
-
         await ctx.answerCbQuery(
           "❌ Hali kanalga obuna bo‘lmagansiz.",
           {
@@ -1162,7 +1238,6 @@ bot.action(
       );
 
     } catch (error) {
-
       console.error(
         "Callback error:",
         error
@@ -1186,9 +1261,7 @@ bot.action(
 app.post(
   "/api/check-subscription",
   async (req, res) => {
-
     try {
-
       const telegramUser =
         validateInitData(
           req.body.initData
@@ -1224,7 +1297,6 @@ app.post(
       });
 
     } catch (error) {
-
       console.error(
         "/api/check-subscription:",
         error
@@ -1245,9 +1317,7 @@ app.post(
 app.post(
   "/api/me",
   async (req, res) => {
-
     try {
-
       const auth =
         await getAuthenticatedUser(
           req.body.initData,
@@ -1270,6 +1340,26 @@ app.post(
         await pool.connect();
 
       try {
+        let result =
+          await client.query(
+            `
+            SELECT *
+            FROM users
+            WHERE telegram_id = $1
+            `,
+            [auth.telegramUser.id]
+          );
+
+        let user =
+          result.rows[0];
+
+        if (!user) {
+          user =
+            await createOrUpdateUser(
+              auth.telegramUser,
+              client
+            );
+        }
 
         await client.query(
           `
@@ -1291,7 +1381,7 @@ app.post(
           ]
         );
 
-        let result =
+        result =
           await client.query(
             `
             SELECT *
@@ -1301,13 +1391,8 @@ app.post(
             [auth.telegramUser.id]
           );
 
-        let user =
+        user =
           result.rows[0];
-
-        /*
-          Energy server tomonidan
-          hisoblanadi.
-        */
 
         await regenerateEnergy(
           client,
@@ -1371,7 +1456,6 @@ app.post(
       }
 
     } catch (error) {
-
       console.error(
         "/api/me error:",
         error
@@ -1392,9 +1476,7 @@ app.post(
 app.get(
   "/api/user/:telegramId",
   async (req, res) => {
-
     try {
-
       const result =
         await pool.query(
           `
@@ -1434,7 +1516,6 @@ app.get(
       );
 
     } catch (error) {
-
       console.error(
         "/api/user:",
         error
@@ -1455,12 +1536,10 @@ app.get(
 app.post(
   "/api/tap",
   async (req, res) => {
-
     const client =
       await pool.connect();
 
     try {
-
       const telegramUser =
         validateInitData(
           req.body.initData
@@ -1471,11 +1550,6 @@ app.post(
           error: "INVALID_INIT_DATA"
         });
       }
-
-      /*
-        Cache ishlatiladi.
-        Har bir tapda Telegram API chaqirilmaydi.
-      */
 
       const subscribed =
         await isSubscribedCached(
@@ -1490,17 +1564,29 @@ app.post(
 
       let taps =
         Math.floor(
-          Number(req.body.taps || 0)
+          Number(
+            req.body.taps || 0
+          )
         );
 
-      if (taps <= 0) {
+      if (
+        !Number.isFinite(taps) ||
+        taps <= 0
+      ) {
         return res.status(400).json({
           error: "INVALID_TAPS"
         });
       }
 
+      /*
+        Bitta requestda maksimal 100 tap.
+      */
+
       taps =
-        Math.min(taps, 100);
+        Math.min(
+          taps,
+          100
+        );
 
       await client.query("BEGIN");
 
@@ -1516,7 +1602,6 @@ app.post(
         );
 
       if (!result.rows.length) {
-
         await createOrUpdateUser(
           telegramUser,
           client
@@ -1538,15 +1623,14 @@ app.post(
         result.rows[0];
 
       /*
-        Energy regeneration
-        transaction ichida.
+        Avval energy serverda
+        regeneratsiya qilinadi.
       */
 
-      const regen =
-        await regenerateEnergy(
-          client,
-          user
-        );
+      await regenerateEnergy(
+        client,
+        user
+      );
 
       result =
         await client.query(
@@ -1563,12 +1647,9 @@ app.post(
         result.rows[0];
 
       const availableEnergy =
-        Number(user.energy || 0);
-
-      /*
-        User 100 ta yuborsa ham,
-        energy nechta bo'lsa shuncha tap.
-      */
+        Number(
+          user.energy || 0
+        );
 
       const actualTaps =
         Math.min(
@@ -1577,7 +1658,6 @@ app.post(
         );
 
       if (actualTaps <= 0) {
-
         await client.query("COMMIT");
 
         return res.json({
@@ -1589,7 +1669,9 @@ app.post(
       }
 
       const power =
-        Number(user.tap_level || 1);
+        Number(
+          user.tap_level || 1
+        );
 
       const earned =
         actualTaps * power;
@@ -1662,7 +1744,6 @@ app.post(
       });
 
     } catch (error) {
-
       try {
         await client.query("ROLLBACK");
       } catch (e) {}
@@ -1690,12 +1771,10 @@ app.post(
 app.post(
   "/api/upgrade",
   async (req, res) => {
-
     const client =
       await pool.connect();
 
     try {
-
       const telegramUser =
         validateInitData(
           req.body.initData
@@ -1744,7 +1823,6 @@ app.post(
         );
 
       if (!result.rows.length) {
-
         await createOrUpdateUser(
           telegramUser,
           client
@@ -1766,7 +1844,7 @@ app.post(
         result.rows[0];
 
       /*
-        Upgrade paytida energy ham
+        Upgrade oldidan energy
         server bo'yicha yangilanadi.
       */
 
@@ -1790,18 +1868,36 @@ app.post(
         result.rows[0];
 
       const balance =
-        Number(user.balance || 0);
+        Number(
+          user.balance || 0
+        );
+
+
+      /* ===============================================
+         TAP UPGRADE
+      =============================================== */
 
       if (type === "tap") {
-
         const level =
-          Number(user.tap_level || 1);
+          Number(
+            user.tap_level || 1
+          );
+
+        if (level >= 10) {
+          await client.query("ROLLBACK");
+
+          return res.status(400).json({
+            error: "MAX_LEVEL"
+          });
+        }
 
         const cost =
           getTapUpgradeCost(level);
 
-        if (balance < cost) {
-
+        if (
+          cost === null ||
+          balance < cost
+        ) {
           await client.query("ROLLBACK");
 
           return res.status(400).json({
@@ -1832,16 +1928,32 @@ app.post(
         );
       }
 
-      if (type === "energy") {
 
+      /* ===============================================
+         ENERGY UPGRADE
+      =============================================== */
+
+      if (type === "energy") {
         const level =
-          Number(user.energy_level || 1);
+          Number(
+            user.energy_level || 1
+          );
+
+        if (level >= 10) {
+          await client.query("ROLLBACK");
+
+          return res.status(400).json({
+            error: "MAX_LEVEL"
+          });
+        }
 
         const cost =
           getEnergyUpgradeCost(level);
 
-        if (balance < cost) {
-
+        if (
+          cost === null ||
+          balance < cost
+        ) {
           await client.query("ROLLBACK");
 
           return res.status(400).json({
@@ -1855,6 +1967,11 @@ app.post(
 
         const newMax =
           getMaxEnergy(newLevel);
+
+        /*
+          Energy upgrade qilinganda
+          yangi maksimumga to'ldiriladi.
+        */
 
         await client.query(
           `
@@ -1889,6 +2006,7 @@ app.post(
         );
       }
 
+
       result =
         await client.query(
           `
@@ -1901,6 +2019,11 @@ app.post(
 
       user =
         result.rows[0];
+
+      /*
+        Balance kamayganidan keyin ham
+        league_level pasaymaydi.
+      */
 
       await updatePermanentLeague(
         client,
@@ -1931,7 +2054,6 @@ app.post(
       });
 
     } catch (error) {
-
       try {
         await client.query("ROLLBACK");
       } catch (e) {}
@@ -1953,18 +2075,16 @@ app.post(
 
 
 /* =====================================================
-   DAILY
+   DAILY REWARD
 ===================================================== */
 
 app.post(
   "/api/daily",
   async (req, res) => {
-
     const client =
       await pool.connect();
 
     try {
-
       const telegramUser =
         validateInitData(
           req.body.initData
@@ -2001,7 +2121,6 @@ app.post(
         );
 
       if (!result.rows.length) {
-
         await createOrUpdateUser(
           telegramUser,
           client
@@ -2035,14 +2154,12 @@ app.post(
       let alreadyClaimed = false;
 
       if (lastClaim) {
-
         alreadyClaimed =
           lastClaim.toDateString() ===
           now.toDateString();
       }
 
       if (alreadyClaimed) {
-
         await client.query("ROLLBACK");
 
         return res.status(400).json({
@@ -2056,7 +2173,7 @@ app.post(
         UPDATE users
         SET
           balance =
-            balance + 100,
+            balance + $2,
 
           daily_claimed_at =
             CURRENT_TIMESTAMP,
@@ -2066,7 +2183,10 @@ app.post(
 
         WHERE telegram_id = $1
         `,
-        [telegramUser.id]
+        [
+          telegramUser.id,
+          DAILY_REWARD
+        ]
       );
 
       result =
@@ -2106,13 +2226,15 @@ app.post(
 
       return res.json({
         success: true,
-        reward: 100,
+
+        reward:
+          DAILY_REWARD,
+
         user:
           formatUser(updatedUser)
       });
 
     } catch (error) {
-
       try {
         await client.query("ROLLBACK");
       } catch (e) {}
@@ -2140,9 +2262,7 @@ app.post(
 app.post(
   "/api/referral",
   async (req, res) => {
-
     try {
-
       const telegramUser =
         validateInitData(
           req.body.initData
@@ -2176,7 +2296,6 @@ app.post(
       });
 
     } catch (error) {
-
       console.error(
         "/api/referral:",
         error
@@ -2197,9 +2316,7 @@ app.post(
 app.get(
   "/api/friends/:telegramId",
   async (req, res) => {
-
     try {
-
       const result =
         await pool.query(
           `
@@ -2225,7 +2342,6 @@ app.get(
       );
 
     } catch (error) {
-
       console.error(
         "/api/friends:",
         error
@@ -2240,14 +2356,35 @@ app.get(
 
 
 /* =====================================================
-   RANK
+   RANK — TOP 100
 ===================================================== */
 
 app.get(
   "/api/rank",
   async (req, res) => {
-
     try {
+      let limit =
+        Number(
+          req.query.limit || 100
+        );
+
+      if (
+        !Number.isFinite(limit) ||
+        limit <= 0
+      ) {
+        limit = 100;
+      }
+
+      limit =
+        Math.min(
+          Math.floor(limit),
+          100
+        );
+
+      /*
+        RANK() bilan bir xil balance
+        bo'lsa bir xil o'rin beriladi.
+      */
 
       const result =
         await pool.query(
@@ -2258,22 +2395,28 @@ app.get(
             first_name,
             photo_url,
             balance,
-            league_level
+            league_level,
+
+            RANK() OVER (
+              ORDER BY
+                balance DESC,
+                telegram_id ASC
+            ) AS rank
 
           FROM users
 
           ORDER BY
             balance DESC,
-            created_at ASC
+            telegram_id ASC
 
-          LIMIT 100
-          `
+          LIMIT $1
+          `,
+          [limit]
         );
 
       const users =
         result.rows.map(
-          (user, index) => {
-
+          (user) => {
             const league =
               getLeagueByLevel(
                 Number(
@@ -2282,9 +2425,8 @@ app.get(
               );
 
             return {
-
               rank:
-                index + 1,
+                Number(user.rank),
 
               telegramId:
                 String(
@@ -2308,6 +2450,9 @@ app.get(
                 ),
 
               league: {
+                level:
+                  league.level,
+
                 name:
                   league.name,
 
@@ -2323,7 +2468,6 @@ app.get(
       });
 
     } catch (error) {
-
       console.error(
         "/api/rank:",
         error
@@ -2344,9 +2488,9 @@ app.get(
 app.get(
   "/api/leagues",
   (req, res) => {
-
     res.json({
-      leagues: LEAGUES
+      leagues:
+        LEAGUES
     });
   }
 );
@@ -2359,9 +2503,7 @@ app.get(
 app.get(
   "/api/status",
   async (req, res) => {
-
     try {
-
       const result =
         await pool.query(
           `
@@ -2392,7 +2534,6 @@ app.get(
       });
 
     } catch (error) {
-
       return res.status(500).json({
         online: false
       });
@@ -2402,15 +2543,31 @@ app.get(
 
 
 /* =====================================================
-   WEBHOOK
+   HEALTH
+===================================================== */
+
+app.get(
+  "/",
+  (req, res) => {
+    res.sendFile(
+      path.join(
+        __dirname,
+        "public",
+        "index.html"
+      )
+    );
+  }
+);
+
+
+/* =====================================================
+   TELEGRAM WEBHOOK
 ===================================================== */
 
 app.post(
   "/telegram-webhook",
   async (req, res) => {
-
     try {
-
       await bot.handleUpdate(
         req.body
       );
@@ -2418,7 +2575,6 @@ app.post(
       return res.sendStatus(200);
 
     } catch (error) {
-
       console.error(
         "Webhook error:",
         error
@@ -2435,13 +2591,10 @@ app.post(
 ===================================================== */
 
 async function startServer() {
-
   try {
-
     await initDatabase();
 
     try {
-
       await bot.telegram.setWebhook(
         `${PUBLIC_URL}/telegram-webhook`
       );
@@ -2452,7 +2605,6 @@ async function startServer() {
       );
 
     } catch (error) {
-
       console.error(
         "Webhook setup error:",
         error.message
@@ -2465,16 +2617,13 @@ async function startServer() {
     app.listen(
       PORT,
       () => {
-
         console.log(
           `UZCOIN server running on port ${PORT}`
         );
-
       }
     );
 
   } catch (error) {
-
     console.error(
       "Server startup error:",
       error
