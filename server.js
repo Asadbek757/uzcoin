@@ -1,6 +1,5 @@
 const express = require("express");
 const path = require("path");
-const crypto = require("crypto");
 const { Telegraf } = require("telegraf");
 const { Pool } = require("pg");
 
@@ -49,9 +48,8 @@ async function initDatabase() {
       max_energy INTEGER DEFAULT 100,
       skin TEXT DEFAULT 'classic',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       energy_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      ADD COLUMN IF NOT EXISTS energy_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
@@ -63,7 +61,8 @@ async function initDatabase() {
       ADD COLUMN IF NOT EXISTS energy INTEGER DEFAULT 100,
       ADD COLUMN IF NOT EXISTS max_energy INTEGER DEFAULT 100,
       ADD COLUMN IF NOT EXISTS skin TEXT DEFAULT 'classic',
-      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      ADD COLUMN IF NOT EXISTS energy_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   `);
 
   await pool.query(`
@@ -74,11 +73,19 @@ async function initDatabase() {
       max_energy = COALESCE(max_energy, 100),
       skin = COALESCE(skin, 'classic'),
       referrals = COALESCE(referrals, 0),
-      updated_at = COALESCE(updated_at, CURRENT_TIMESTAMP)
+      updated_at = COALESCE(updated_at, CURRENT_TIMESTAMP),
+      energy_updated_at = COALESCE(energy_updated_at, CURRENT_TIMESTAMP)
   `);
 
   console.log("Database tayyor!");
 }
+
+
+// =========================
+// EXPRESS
+// =========================
+
+app.use(express.json());
 
 
 // =========================
@@ -114,27 +121,27 @@ bot.start(async (ctx) => {
     const user = result.rows[0];
 
     await ctx.reply(
-  `Salom! 👋 ${firstName || ""}\n\n` +
-  `🪙 UZCOIN\n` +
-  `💰 Balans: ${user.balance} UZC\n` +
-  `⭐ Level: ${user.level}\n` +
-  `⚡ Energy: ${user.energy}/${user.max_energy}\n\n` +
-  `UZCOIN Mini App'ni ochish uchun quyidagi tugmani bosing 👇`,
-  {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "🪙 UZCOIN'ni ochish",
-            web_app: {
-              url: "https://uzcoin.onrender.com"
-            }
-          }
-        ]
-      ]
-    }
-  }
-);
+      `Salom! 👋 ${firstName || ""}\n\n` +
+      `🪙 UZCOIN\n` +
+      `💰 Balans: ${user.balance} UZC\n` +
+      `⭐ Level: ${user.level}\n` +
+      `⚡ Energy: ${user.energy}/${user.max_energy}\n\n` +
+      `UZCOIN Mini App'ni ochish uchun quyidagi tugmani bosing 👇`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "🪙 UZCOIN'ni ochish",
+                web_app: {
+                  url: PUBLIC_URL
+                }
+              }
+            ]
+          ]
+        }
+      }
+    );
 
     console.log(`Foydalanuvchi kirdi: ${telegramId}`);
 
@@ -193,41 +200,88 @@ bot.command("balance", async (ctx) => {
 
 
 // =========================
-// MINI APP API
+// MINI APP — TAP
 // =========================
-
-app.use(express.json());
 
 app.post("/api/tap", async (req, res) => {
   try {
     const { telegramId, amount } = req.body;
 
-    await pool.query(
-      `UPDATE users
-       SET balance = balance + $1,
-    energy = GREATEST(energy - 1, 0),
-    updated_at = CURRENT_TIMESTAMP
-    updated_at = CURRENT_TIMESTAMP,
-energy_updated_at = CURRENT_TIMESTAMP
-       WHERE telegram_id = $2`,
-      [amount, telegramId]
+    if (!telegramId) {
+      return res.status(400).json({
+        success: false,
+        message: "telegramId kerak"
+      });
+    }
+
+    const tapAmount = Number(amount);
+
+    if (!Number.isFinite(tapAmount) || tapAmount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Noto‘g‘ri amount"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      WITH regenerated AS (
+        SELECT
+          telegram_id,
+          GREATEST(
+            LEAST(
+              max_energy,
+              energy + FLOOR(
+                EXTRACT(
+                  EPOCH FROM (
+                    CURRENT_TIMESTAMP - energy_updated_at
+                  )
+                )
+              )
+            ),
+            0
+          ) AS new_energy
+        FROM users
+        WHERE telegram_id = $1
+      )
+
+      UPDATE users
+      SET
+        balance = balance + $2,
+        energy = regenerated.new_energy - 1,
+        updated_at = CURRENT_TIMESTAMP,
+        energy_updated_at = CURRENT_TIMESTAMP
+      FROM regenerated
+      WHERE users.telegram_id = regenerated.telegram_id
+        AND regenerated.new_energy > 0
+
+      RETURNING balance, energy, max_energy
+      `,
+      [telegramId, tapAmount]
     );
 
-    res.json({ success: true });
+    if (result.rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Energy tugagan yoki foydalanuvchi topilmadi"
+      });
+    }
+
+    res.json({
+      success: true,
+      balance: result.rows[0].balance,
+      energy: result.rows[0].energy,
+      maxEnergy: result.rows[0].max_energy
+    });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false });
+    console.error("TAP ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Tap server xatosi"
+    });
   }
-});
-app.use(express.static(path.join(__dirname, "public")));
-
-
-// Server holati
-app.get("/api/status", (req, res) => {
-  res.json({
-    success: true,
-    message: "UZCOIN server ishlayapti!"
-  });
 });
 
 
@@ -238,16 +292,29 @@ app.get("/api/status", (req, res) => {
 app.get("/api/user/:telegramId", async (req, res) => {
   try {
     const telegramId = req.params.telegramId;
+
     await pool.query(
-  `UPDATE users
-   SET energy = LEAST(
-     max_energy,
-     energy + FLOOR(EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - energy_updated_at)))
-   ),
-   energy_updated_at = CURRENT_TIMESTAMP
-   WHERE telegram_id = $1`,
-  [telegramId]
-);
+      `
+      UPDATE users
+      SET
+        energy = GREATEST(
+          LEAST(
+            max_energy,
+            energy + FLOOR(
+              EXTRACT(
+                EPOCH FROM (
+                  CURRENT_TIMESTAMP - energy_updated_at
+                )
+              )
+            )
+          ),
+          0
+        ),
+        energy_updated_at = CURRENT_TIMESTAMP
+      WHERE telegram_id = $1
+      `,
+      [telegramId]
+    );
 
     const result = await pool.query(
       `
@@ -290,6 +357,25 @@ app.get("/api/user/:telegramId", async (req, res) => {
 
 
 // =========================
+// SERVER STATUS
+// =========================
+
+app.get("/api/status", (req, res) => {
+  res.json({
+    success: true,
+    message: "UZCOIN server ishlayapti!"
+  });
+});
+
+
+// =========================
+// STATIC MINI APP
+// =========================
+
+app.use(express.static(path.join(__dirname, "public")));
+
+
+// =========================
 // TELEGRAM WEBHOOK
 // =========================
 
@@ -301,11 +387,9 @@ app.use(bot.webhookCallback("/telegram-webhook"));
 // =========================
 
 app.listen(PORT, async () => {
-
   console.log(`UZCOIN server ${PORT}-portda ishlayapti`);
 
   try {
-
     await initDatabase();
 
     await bot.telegram.setWebhook(
@@ -316,11 +400,8 @@ app.listen(PORT, async () => {
     console.log(`${PUBLIC_URL}/telegram-webhook`);
 
   } catch (error) {
-
     console.error("STARTUP ERROR:", error);
-
   }
-
 });
 
 
