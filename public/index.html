@@ -721,8 +721,21 @@
 
     function updateLevel() {
 
-      level =
-        Math.floor(balance / 100) + 1;
+      if (balance >= 1000000) {
+  level = 7;
+} else if (balance >= 100000) {
+  level = 6;
+} else if (balance >= 50000) {
+  level = 5;
+} else if (balance >= 10000) {
+  level = 4;
+} else if (balance >= 5000) {
+  level = 3;
+} else if (balance >= 2000) {
+  level = 2;
+} else {
+  level = 1;
+}
 
       if (level > 7) {
         level = 7;
