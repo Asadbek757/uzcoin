@@ -14,9 +14,7 @@ const PUBLIC_URL =
   "https://uzcoin.onrender.com";
 
 const REQUIRED_CHANNEL = "@uzcoin_officiall";
-const CHANNEL_URL =
-  "https://t.me/uzcoin_officiall";
-
+const CHANNEL_URL = "https://t.me/uzcoin_officiall";
 const BOT_USERNAME = "UZCoinTapBot";
 
 if (!BOT_TOKEN) {
@@ -36,17 +34,8 @@ const pool = new Pool({
   }
 });
 
-app.use(
-  express.json({
-    limit: "1mb"
-  })
-);
-
-app.use(
-  express.static(
-    path.join(__dirname, "public")
-  )
-);
+app.use(express.json({ limit: "1mb" }));
+app.use(express.static(path.join(__dirname, "public")));
 
 
 /* =====================================================
@@ -88,15 +77,12 @@ const LEAGUES = [
 
 
 function getLeagueByLevel(level) {
-
   let result = LEAGUES[0];
 
   for (const league of LEAGUES) {
-
-    if (league.level <= level) {
+    if (league.level <= Number(level || 1)) {
       result = league;
     }
-
   }
 
   return result;
@@ -104,35 +90,18 @@ function getLeagueByLevel(level) {
 
 
 function getLeagueFromBalance(balance) {
-
-  const amount =
-    Number(balance || 0);
+  const amount = Number(balance || 0);
 
   let result = LEAGUES[0];
 
   for (const league of LEAGUES) {
-
     if (amount >= league.min) {
       result = league;
     }
-
   }
 
   return result;
 }
-
-
-/*
-  Juda muhim:
-
-  league_level hech qachon kamaymaydi.
-
-  Masalan:
-  Bronze -> Silver
-
-  keyin user 1500 coin qilib qolsa ham
-  Silver bo'lib qoladi.
-*/
 
 
 async function updatePermanentLeague(
@@ -141,21 +110,17 @@ async function updatePermanentLeague(
   balance,
   currentLeagueLevel
 ) {
-
-  const current =
-    Number(currentLeagueLevel || 1);
+  const current = Number(currentLeagueLevel || 1);
 
   const earnedLeague =
     getLeagueFromBalance(balance);
 
-  const newLevel =
-    Math.max(
-      current,
-      earnedLeague.level
-    );
+  const newLevel = Math.max(
+    current,
+    earnedLeague.level
+  );
 
   if (newLevel !== current) {
-
     await client.query(
       `
       UPDATE users
@@ -164,10 +129,7 @@ async function updatePermanentLeague(
         updated_at = CURRENT_TIMESTAMP
       WHERE telegram_id = $1
       `,
-      [
-        telegramId,
-        newLevel
-      ]
+      [telegramId, newLevel]
     );
   }
 
@@ -180,19 +142,13 @@ async function updatePermanentLeague(
 ===================================================== */
 
 function getTapUpgradeCost(level) {
-
   return Math.floor(
-    500 *
-    Math.pow(
-      1.8,
-      Number(level) - 1
-    )
+    500 * Math.pow(1.8, Number(level) - 1)
   );
 }
 
 
 function getMaxEnergy(level) {
-
   const limits = [
     300,
     500,
@@ -206,7 +162,7 @@ function getMaxEnergy(level) {
 
   return limits[
     Math.min(
-      Number(level) - 1,
+      Math.max(Number(level) - 1, 0),
       limits.length - 1
     )
   ];
@@ -214,7 +170,6 @@ function getMaxEnergy(level) {
 
 
 function getEnergyUpgradeCost(level) {
-
   const costs = [
     1000,
     5000,
@@ -227,7 +182,7 @@ function getEnergyUpgradeCost(level) {
 
   return costs[
     Math.min(
-      Number(level) - 1,
+      Math.max(Number(level) - 1, 0),
       costs.length - 1
     )
   ];
@@ -235,6 +190,87 @@ function getEnergyUpgradeCost(level) {
 
 
 const REFERRAL_BONUS = 500;
+
+
+/* =====================================================
+   SUBSCRIPTION CACHE
+===================================================== */
+
+const subscriptionCache = new Map();
+
+const SUB_CACHE_MS = 60 * 1000;
+
+
+async function isSubscribed(telegramId) {
+  try {
+    const member =
+      await bot.telegram.getChatMember(
+        REQUIRED_CHANNEL,
+        telegramId
+      );
+
+    if (
+      [
+        "creator",
+        "administrator",
+        "member"
+      ].includes(member.status)
+    ) {
+      return true;
+    }
+
+    if (
+      member.status === "restricted" &&
+      member.is_member === true
+    ) {
+      return true;
+    }
+
+    return false;
+
+  } catch (error) {
+    console.error(
+      "Subscription check:",
+      error.description ||
+      error.message
+    );
+
+    return false;
+  }
+}
+
+
+async function isSubscribedCached(
+  telegramId,
+  force = false
+) {
+  const key = String(telegramId);
+
+  const cached =
+    subscriptionCache.get(key);
+
+  if (
+    !force &&
+    cached &&
+    Date.now() - cached.checkedAt <
+      SUB_CACHE_MS
+  ) {
+    return cached.value;
+  }
+
+  const value =
+    await isSubscribed(telegramId);
+
+  subscriptionCache.set(
+    key,
+    {
+      value,
+      checkedAt: Date.now()
+    }
+  );
+
+  return value;
+}
 
 
 /* =====================================================
@@ -277,140 +313,99 @@ async function initDatabase() {
   `);
 
 
-  await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS username TEXT
-  `);
+  const columns = [
+    ["username", "TEXT"],
+    ["first_name", "TEXT"],
+    ["photo_url", "TEXT"],
+    ["balance", "NUMERIC DEFAULT 0"],
+    ["energy", "INTEGER DEFAULT 300"],
+    ["max_energy", "INTEGER DEFAULT 300"],
+    ["tap_level", "INTEGER DEFAULT 1"],
+    ["energy_level", "INTEGER DEFAULT 1"],
+    ["referrals", "INTEGER DEFAULT 0"],
+    ["referred_by", "BIGINT"],
+    ["league_level", "INTEGER DEFAULT 1"],
+    ["daily_claimed_at", "TIMESTAMP"],
+    ["energy_updated_at", "TIMESTAMP"],
+    ["created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"],
+    ["updated_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"]
+  ];
+
+  for (const [name, type] of columns) {
+    await pool.query(`
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS ${name} ${type}
+    `);
+  }
+
 
   await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS first_name TEXT
+    UPDATE users
+    SET energy_level = 1
+    WHERE energy_level IS NULL
+       OR energy_level < 1
   `);
 
-  await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS photo_url TEXT
-  `);
 
   await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS balance NUMERIC DEFAULT 0
+    UPDATE users
+    SET tap_level = 1
+    WHERE tap_level IS NULL
+       OR tap_level < 1
   `);
 
-  await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS energy INTEGER DEFAULT 300
-  `);
 
   await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS max_energy INTEGER DEFAULT 300
+    UPDATE users
+    SET max_energy = 300
+    WHERE max_energy IS NULL
+       OR max_energy < 1
   `);
 
-  await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS tap_level INTEGER DEFAULT 1
-  `);
 
   await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS energy_level INTEGER DEFAULT 1
+    UPDATE users
+    SET energy = LEAST(
+      GREATEST(COALESCE(energy, 0), 0),
+      GREATEST(COALESCE(max_energy, 300), 300)
+    )
   `);
 
-  await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS referrals INTEGER DEFAULT 0
-  `);
 
   await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS referred_by BIGINT
+    UPDATE users
+    SET league_level = 1
+    WHERE league_level IS NULL
+       OR league_level < 1
   `);
 
-  await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS league_level INTEGER DEFAULT 1
-  `);
 
   await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS daily_claimed_at TIMESTAMP
-  `);
-
-  await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS energy_updated_at TIMESTAMP
-  `);
-
-  await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  `);
-
-  await pool.query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    UPDATE users
+    SET energy_updated_at =
+      COALESCE(
+        energy_updated_at,
+        updated_at,
+        CURRENT_TIMESTAMP
+      )
+    WHERE energy_updated_at IS NULL
   `);
 
 
   /*
-    Eski userlarda energy levelga mos
-    max energy o'rnatiladi.
-  */
-
-  await pool.query(`
-    UPDATE users
-    SET
-      energy_level =
-        CASE
-          WHEN energy_level IS NULL
-            OR energy_level < 1
-          THEN 1
-          ELSE energy_level
-        END
-  `);
-
-
-  await pool.query(`
-    UPDATE users
-    SET
-      max_energy =
-        CASE
-          WHEN max_energy IS NULL
-            OR max_energy < 1
-          THEN 300
-          ELSE max_energy
-        END
-  `);
-
-
-  await pool.query(`
-    UPDATE users
-    SET
-      league_level =
-        CASE
-          WHEN league_level IS NULL
-            OR league_level < 1
-          THEN 1
-          ELSE league_level
-        END
-  `);
-
-
-  /*
-    Eski userlarning mavjud balanceiga qarab
-    boshlang'ich liga aniqlanadi.
+    Eski userlarning ligasi.
+    Liga faqat yuqoriga chiqadi.
   */
 
   for (const league of LEAGUES) {
-
     await pool.query(
       `
       UPDATE users
-      SET league_level = GREATEST(
-        COALESCE(league_level, 1),
-        $1
-      )
+      SET league_level =
+        GREATEST(
+          COALESCE(league_level, 1),
+          $1
+        )
       WHERE balance >= $2
       `,
       [
@@ -418,7 +413,6 @@ async function initDatabase() {
         league.min
       ]
     );
-
   }
 
   console.log("Database initialized");
@@ -426,7 +420,7 @@ async function initDatabase() {
 
 
 /* =====================================================
-   TELEGRAM INIT DATA VALIDATION
+   TELEGRAM INIT DATA
 ===================================================== */
 
 function validateInitData(initData) {
@@ -438,9 +432,7 @@ function validateInitData(initData) {
   try {
 
     const params =
-      new URLSearchParams(
-        initData
-      );
+      new URLSearchParams(initData);
 
     const hash =
       params.get("hash");
@@ -453,16 +445,14 @@ function validateInitData(initData) {
 
     const dataCheckString =
       Array.from(params.entries())
-        .sort(
-          ([a], [b]) =>
-            a.localeCompare(b)
+        .sort(([a], [b]) =>
+          a.localeCompare(b)
         )
         .map(
           ([key, value]) =>
             `${key}=${value}`
         )
         .join("\n");
-
 
     const secretKey =
       crypto
@@ -473,7 +463,6 @@ function validateInitData(initData) {
         .update(BOT_TOKEN)
         .digest();
 
-
     const calculatedHash =
       crypto
         .createHmac(
@@ -483,7 +472,6 @@ function validateInitData(initData) {
         .update(dataCheckString)
         .digest("hex");
 
-
     if (
       calculatedHash.length !==
       hash.length
@@ -491,20 +479,14 @@ function validateInitData(initData) {
       return null;
     }
 
-
-    const valid =
-      crypto.timingSafeEqual(
-        Buffer.from(
-          calculatedHash
-        ),
+    if (
+      !crypto.timingSafeEqual(
+        Buffer.from(calculatedHash),
         Buffer.from(hash)
-      );
-
-
-    if (!valid) {
+      )
+    ) {
       return null;
     }
-
 
     const userString =
       params.get("user");
@@ -513,15 +495,12 @@ function validateInitData(initData) {
       return null;
     }
 
-
-    return JSON.parse(
-      userString
-    );
+    return JSON.parse(userString);
 
   } catch (error) {
 
     console.error(
-      "initData validation error:",
+      "initData validation:",
       error.message
     );
 
@@ -531,154 +510,7 @@ function validateInitData(initData) {
 
 
 /* =====================================================
-   SUBSCRIPTION
-===================================================== */
-
-async function isSubscribed(
-  telegramId
-) {
-
-  try {
-
-    const member =
-      await bot.telegram.getChatMember(
-        REQUIRED_CHANNEL,
-        telegramId
-      );
-
-
-    if (
-      [
-        "creator",
-        "administrator",
-        "member"
-      ].includes(
-        member.status
-      )
-    ) {
-      return true;
-    }
-
-
-    if (
-      member.status ===
-        "restricted" &&
-      member.is_member === true
-    ) {
-      return true;
-    }
-
-
-    return false;
-
-  } catch (error) {
-
-    console.error(
-      "Subscription check:",
-      error.description ||
-      error.message
-    );
-
-    return false;
-  }
-}
-
-
-/* =====================================================
-   ENERGY
-===================================================== */
-
-async function regenerateEnergy(
-  client,
-  user
-) {
-
-  const currentEnergy =
-    Number(
-      user.energy || 0
-    );
-
-  const maxEnergy =
-    Number(
-      user.max_energy || 300
-    );
-
-
-  if (
-    currentEnergy >=
-    maxEnergy
-  ) {
-
-    return currentEnergy;
-  }
-
-
-  const lastUpdate =
-    new Date(
-      user.energy_updated_at ||
-      user.updated_at ||
-      Date.now()
-    );
-
-
-  const now =
-    Date.now();
-
-
-  const elapsedSeconds =
-    Math.floor(
-      (
-        now -
-        lastUpdate.getTime()
-      ) / 1000
-    );
-
-
-  if (
-    elapsedSeconds <= 0
-  ) {
-    return currentEnergy;
-  }
-
-
-  const newEnergy =
-    Math.min(
-      maxEnergy,
-      currentEnergy +
-      elapsedSeconds
-    );
-
-
-  const newTimestamp =
-    new Date(
-      lastUpdate.getTime() +
-      elapsedSeconds * 1000
-    );
-
-
-  await client.query(
-    `
-    UPDATE users
-    SET
-      energy = $2,
-      energy_updated_at = $3,
-      updated_at = CURRENT_TIMESTAMP
-    WHERE telegram_id = $1
-    `,
-    [
-      user.telegram_id,
-      newEnergy,
-      newTimestamp
-    ]
-  );
-
-
-  return newEnergy;
-}
-
-
-/* =====================================================
-   USER CREATION / UPDATE
+   USER
 ===================================================== */
 
 async function createOrUpdateUser(
@@ -688,7 +520,6 @@ async function createOrUpdateUser(
 
   const telegramId =
     telegramUser.id;
-
 
   const result =
     await client.query(
@@ -723,13 +554,13 @@ async function createOrUpdateUser(
         CURRENT_TIMESTAMP
       )
 
-      ON CONFLICT (
-        telegram_id
-      )
+      ON CONFLICT (telegram_id)
 
       DO UPDATE SET
         username = EXCLUDED.username,
-        first_name = EXCLUDED.first_name,
+
+        first_name =
+          EXCLUDED.first_name,
 
         photo_url =
           COALESCE(
@@ -744,17 +575,114 @@ async function createOrUpdateUser(
       `,
       [
         telegramId,
-        telegramUser.username ||
-          null,
-        telegramUser.first_name ||
-          "Player",
-        telegramUser.photo_url ||
-          null
+        telegramUser.username || null,
+        telegramUser.first_name || "Player",
+        telegramUser.photo_url || null
       ]
     );
 
-
   return result.rows[0];
+}
+
+
+/* =====================================================
+   ENERGY REGENERATION
+===================================================== */
+
+/*
+  Serverdagi asosiy qoida:
+
+  1 sekund = +1 energy
+
+  Hech qachon:
+  +2
+  +5
+  +10
+
+  bo'lmaydi.
+
+  Faqat o'tgan to'liq sekundlar hisoblanadi.
+*/
+
+async function regenerateEnergy(
+  client,
+  user
+) {
+
+  let energy =
+    Number(user.energy || 0);
+
+  const maxEnergy =
+    Number(user.max_energy || 300);
+
+  if (energy >= maxEnergy) {
+    return {
+      energy: maxEnergy,
+      energyUpdatedAt:
+        user.energy_updated_at ||
+        new Date()
+    };
+  }
+
+  const lastUpdate =
+    new Date(
+      user.energy_updated_at ||
+      user.updated_at ||
+      Date.now()
+    );
+
+  const now =
+    Date.now();
+
+  const elapsedSeconds =
+    Math.floor(
+      (now - lastUpdate.getTime()) / 1000
+    );
+
+  if (elapsedSeconds <= 0) {
+    return {
+      energy,
+      energyUpdatedAt: lastUpdate
+    };
+  }
+
+  const newEnergy =
+    Math.min(
+      maxEnergy,
+      energy + elapsedSeconds
+    );
+
+  /*
+    Faqat ishlatilgan vaqtni oldinga suramiz.
+    Shuning uchun millisekundlar yo'qolmaydi.
+  */
+
+  const newTimestamp =
+    new Date(
+      lastUpdate.getTime() +
+      elapsedSeconds * 1000
+    );
+
+  await client.query(
+    `
+    UPDATE users
+    SET
+      energy = $2,
+      energy_updated_at = $3,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE telegram_id = $1
+    `,
+    [
+      user.telegram_id,
+      newEnergy,
+      newTimestamp
+    ]
+  );
+
+  return {
+    energy: newEnergy,
+    energyUpdatedAt: newTimestamp
+  };
 }
 
 
@@ -774,72 +702,58 @@ function formatUser(
       )
     );
 
-
   return {
 
     telegramId:
-      String(
-        user.telegram_id
-      ),
+      String(user.telegram_id),
 
     username:
       user.username || "",
 
     firstName:
-      user.first_name ||
-      "Player",
+      user.first_name || "Player",
 
     photoUrl:
-      user.photo_url ||
-      null,
+      user.photo_url || null,
 
     balance:
-      Number(
-        user.balance || 0
-      ),
+      Number(user.balance || 0),
 
     energy:
-      Number(
-        user.energy || 0
-      ),
+      Number(user.energy || 0),
 
     maxEnergy:
-      Number(
-        user.max_energy || 300
-      ),
+      Number(user.max_energy || 300),
+
+    /*
+      Frontend energyni shu timestampdan
+      hisoblab chiqaradi.
+    */
+
+    energyUpdatedAt:
+      user.energy_updated_at
+        ? new Date(
+            user.energy_updated_at
+          ).toISOString()
+        : new Date().toISOString(),
 
     tapLevel:
-      Number(
-        user.tap_level || 1
-      ),
+      Number(user.tap_level || 1),
 
     power:
-      Number(
-        user.tap_level || 1
-      ),
+      Number(user.tap_level || 1),
 
     energyLevel:
-      Number(
-        user.energy_level || 1
-      ),
+      Number(user.energy_level || 1),
 
     referrals:
-      Number(
-        user.referrals || 0
-      ),
+      Number(user.referrals || 0),
 
     league: {
-      level:
-        league.level,
-
-      name:
-        league.name,
-
-      icon:
-        league.icon,
-
-      min:
-        league.min
+      level: league.level,
+      name: league.name,
+      icon: league.icon,
+      min: league.min
     },
 
     rank,
@@ -878,37 +792,32 @@ function formatUser(
             )
           )
       }
-
     }
-
   };
 }
 
 
 /* =====================================================
-   AUTHENTICATED USER
+   AUTHENTICATION
 ===================================================== */
 
 async function getAuthenticatedUser(
-  initData
+  initData,
+  useCache = true
 ) {
 
   const telegramUser =
-    validateInitData(
-      initData
-    );
-
+    validateInitData(initData);
 
   if (!telegramUser) {
     return null;
   }
 
-
   const subscribed =
-    await isSubscribed(
-      telegramUser.id
+    await isSubscribedCached(
+      telegramUser.id,
+      !useCache
     );
-
 
   if (!subscribed) {
     return {
@@ -918,12 +827,10 @@ async function getAuthenticatedUser(
     };
   }
 
-
   const user =
     await createOrUpdateUser(
       telegramUser
     );
-
 
   return {
     telegramUser,
@@ -934,7 +841,7 @@ async function getAuthenticatedUser(
 
 
 /* =====================================================
-   REFERRAL PROCESS
+   REFERRALS
 ===================================================== */
 
 async function processReferral(
@@ -946,31 +853,22 @@ async function processReferral(
     return false;
   }
 
-
   const newId =
     String(newUserId);
 
   const refId =
     String(referrerId);
 
-
-  if (
-    newId === refId
-  ) {
+  if (newId === refId) {
     return false;
   }
-
 
   const client =
     await pool.connect();
 
-
   try {
 
-    await client.query(
-      "BEGIN"
-    );
-
+    await client.query("BEGIN");
 
     const newUserResult =
       await client.query(
@@ -983,39 +881,18 @@ async function processReferral(
         [newId]
       );
 
-
-    if (
-      !newUserResult.rows.length
-    ) {
-
-      await client.query(
-        "ROLLBACK"
-      );
-
+    if (!newUserResult.rows.length) {
+      await client.query("ROLLBACK");
       return false;
     }
-
 
     const newUser =
       newUserResult.rows[0];
 
-
-    /*
-      Agar oldin referral olgan bo'lsa,
-      ikkinchi marta bonus berilmaydi.
-    */
-
-    if (
-      newUser.referred_by
-    ) {
-
-      await client.query(
-        "ROLLBACK"
-      );
-
+    if (newUser.referred_by) {
+      await client.query("ROLLBACK");
       return false;
     }
-
 
     const referrerResult =
       await client.query(
@@ -1028,31 +905,18 @@ async function processReferral(
         [refId]
       );
 
-
-    if (
-      !referrerResult.rows.length
-    ) {
-
-      await client.query(
-        "ROLLBACK"
-      );
-
+    if (!referrerResult.rows.length) {
+      await client.query("ROLLBACK");
       return false;
     }
-
 
     await client.query(
       `
       UPDATE users
       SET
-        balance =
-          balance + $2,
-
-        referred_by =
-          $3,
-
-        updated_at =
-          CURRENT_TIMESTAMP
+        balance = balance + $2,
+        referred_by = $3,
+        updated_at = CURRENT_TIMESTAMP
       WHERE telegram_id = $1
       `,
       [
@@ -1062,19 +926,13 @@ async function processReferral(
       ]
     );
 
-
     await client.query(
       `
       UPDATE users
       SET
-        balance =
-          balance + $2,
-
-        referrals =
-          referrals + 1,
-
-        updated_at =
-          CURRENT_TIMESTAMP
+        balance = balance + $2,
+        referrals = referrals + 1,
+        updated_at = CURRENT_TIMESTAMP
       WHERE telegram_id = $1
       `,
       [
@@ -1082,12 +940,6 @@ async function processReferral(
         REFERRAL_BONUS
       ]
     );
-
-
-    /*
-      Yangi userning ligasini yangilaymiz.
-      Referrerning ligasi ham yuqorilashi mumkin.
-    */
 
     const updatedNew =
       await client.query(
@@ -1099,7 +951,6 @@ async function processReferral(
         [newId]
       );
 
-
     const updatedRef =
       await client.query(
         `
@@ -1110,14 +961,12 @@ async function processReferral(
         [refId]
       );
 
-
     await updatePermanentLeague(
       client,
       newId,
       updatedNew.rows[0].balance,
       updatedNew.rows[0].league_level
     );
-
 
     await updatePermanentLeague(
       client,
@@ -1126,29 +975,22 @@ async function processReferral(
       updatedRef.rows[0].league_level
     );
 
-
-    await client.query(
-      "COMMIT"
-    );
-
+    await client.query("COMMIT");
 
     return true;
 
   } catch (error) {
 
-    await client.query(
-      "ROLLBACK"
-    );
+    await client.query("ROLLBACK");
 
     console.error(
       "Referral error:",
-      error
+      error.message
     );
 
     return false;
 
   } finally {
-
     client.release();
   }
 }
@@ -1166,29 +1008,18 @@ bot.start(
       const telegramUser =
         ctx.from;
 
-
       const subscribed =
         await isSubscribed(
           telegramUser.id
         );
 
-
-      /*
-        Referral payload:
-        /start ref_123456
-      */
-
       const payload =
         ctx.startPayload || "";
 
-
       const referrerId =
-        payload.startsWith(
-          "ref_"
-        )
+        payload.startsWith("ref_")
           ? payload.substring(4)
           : null;
-
 
       if (!subscribed) {
 
@@ -1210,7 +1041,6 @@ Keyin <b>✅ Tekshirish</b> tugmasini bosing.
                   CHANNEL_URL
                 )
               ],
-
               [
                 Markup.button.callback(
                   "✅ Tekshirish",
@@ -1224,31 +1054,25 @@ Keyin <b>✅ Tekshirish</b> tugmasini bosing.
         return;
       }
 
-
       await createOrUpdateUser(
         telegramUser
       );
 
-
-      /*
-        Referralni serverning o'zida
-        qayta ishlaymiz.
-      */
-
       if (referrerId) {
-
         await processReferral(
           telegramUser.id,
           referrerId
         );
       }
 
-
       await ctx.reply(
         `
 🪙 <b>UZCOIN</b>
 
-Xush kelibsiz, ${telegramUser.first_name || "Player"}!
+Xush kelibsiz, ${
+          telegramUser.first_name ||
+          "Player"
+        }!
         `,
         {
           parse_mode: "HTML",
@@ -1280,7 +1104,7 @@ Xush kelibsiz, ${telegramUser.first_name || "Player"}!
 
 
 /* =====================================================
-   CHECK SUBSCRIPTION CALLBACK
+   SUBSCRIPTION CALLBACK
 ===================================================== */
 
 bot.action(
@@ -1292,12 +1116,18 @@ bot.action(
       const telegramId =
         ctx.from.id;
 
-
       const subscribed =
         await isSubscribed(
           telegramId
         );
 
+      subscriptionCache.set(
+        String(telegramId),
+        {
+          value: subscribed,
+          checkedAt: Date.now()
+        }
+      );
 
       if (!subscribed) {
 
@@ -1311,16 +1141,13 @@ bot.action(
         return;
       }
 
-
       await createOrUpdateUser(
         ctx.from
       );
 
-
       await ctx.answerCbQuery(
         "✅ Obuna tasdiqlandi!"
       );
-
 
       await ctx.reply(
         "🎉 Tayyor! UZCOIN'ni oching.",
@@ -1367,28 +1194,30 @@ app.post(
           req.body.initData
         );
 
-
       if (!telegramUser) {
-
         return res.status(401).json({
           error: "INVALID_INIT_DATA"
         });
       }
-
 
       const subscribed =
         await isSubscribed(
           telegramUser.id
         );
 
+      subscriptionCache.set(
+        String(telegramUser.id),
+        {
+          value: subscribed,
+          checkedAt: Date.now()
+        }
+      );
 
       if (subscribed) {
-
         await createOrUpdateUser(
           telegramUser
         );
       }
-
 
       return res.json({
         subscribed
@@ -1396,7 +1225,10 @@ app.post(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "/api/check-subscription:",
+        error
+      );
 
       return res.status(500).json({
         error: "SERVER_ERROR"
@@ -1418,36 +1250,24 @@ app.post(
 
       const auth =
         await getAuthenticatedUser(
-          req.body.initData
+          req.body.initData,
+          true
         );
 
-
       if (!auth) {
-
         return res.status(401).json({
-          error:
-            "INVALID_INIT_DATA"
+          error: "INVALID_INIT_DATA"
         });
       }
-
 
       if (!auth.subscribed) {
-
         return res.status(403).json({
-          error:
-            "NOT_SUBSCRIBED"
+          error: "NOT_SUBSCRIBED"
         });
       }
-
-
-      /*
-        Telegram photo URL shu yerda
-        databasega saqlanadi.
-      */
 
       const client =
         await pool.connect();
-
 
       try {
 
@@ -1457,23 +1277,21 @@ app.post(
           SET
             username = $2,
             first_name = $3,
-            photo_url = COALESCE($4, photo_url),
-            updated_at = CURRENT_TIMESTAMP
+            photo_url =
+              COALESCE($4, photo_url),
+            updated_at =
+              CURRENT_TIMESTAMP
           WHERE telegram_id = $1
           `,
           [
             auth.telegramUser.id,
-            auth.telegramUser.username ||
-              null,
-            auth.telegramUser.first_name ||
-              "Player",
-            auth.telegramUser.photo_url ||
-              null
+            auth.telegramUser.username || null,
+            auth.telegramUser.first_name || "Player",
+            auth.telegramUser.photo_url || null
           ]
         );
 
-
-        let userResult =
+        let result =
           await client.query(
             `
             SELECT *
@@ -1482,20 +1300,21 @@ app.post(
             `,
             [auth.telegramUser.id]
           );
-
 
         let user =
-          userResult.rows[0];
+          result.rows[0];
 
+        /*
+          Energy server tomonidan
+          hisoblanadi.
+        */
 
-        const regenerated =
-          await regenerateEnergy(
-            client,
-            user
-          );
+        await regenerateEnergy(
+          client,
+          user
+        );
 
-
-        userResult =
+        result =
           await client.query(
             `
             SELECT *
@@ -1505,14 +1324,8 @@ app.post(
             [auth.telegramUser.id]
           );
 
-
         user =
-          userResult.rows[0];
-
-
-        /*
-          Balance orqali faqat yuqoriga liga.
-        */
+          result.rows[0];
 
         await updatePermanentLeague(
           client,
@@ -1521,8 +1334,7 @@ app.post(
           user.league_level
         );
 
-
-        userResult =
+        result =
           await client.query(
             `
             SELECT *
@@ -1532,10 +1344,8 @@ app.post(
             [auth.telegramUser.id]
           );
 
-
         user =
-          userResult.rows[0];
-
+          result.rows[0];
 
         const rankResult =
           await client.query(
@@ -1547,22 +1357,16 @@ app.post(
             [user.balance]
           );
 
-
-        const rank =
-          Number(
-            rankResult.rows[0].rank
-          );
-
-
         return res.json(
           formatUser(
             user,
-            rank
+            Number(
+              rankResult.rows[0].rank
+            )
           )
         );
 
       } finally {
-
         client.release();
       }
 
@@ -1574,8 +1378,7 @@ app.post(
       );
 
       return res.status(500).json({
-        error:
-          "SERVER_ERROR"
+        error: "SERVER_ERROR"
       });
     }
   }
@@ -1583,7 +1386,7 @@ app.post(
 
 
 /* =====================================================
-   OLD USER API COMPATIBILITY
+   OLD USER API
 ===================================================== */
 
 app.get(
@@ -1602,18 +1405,14 @@ app.get(
           [req.params.telegramId]
         );
 
-
       if (!result.rows.length) {
-
         return res.status(404).json({
           error: "USER_NOT_FOUND"
         });
       }
 
-
       const user =
         result.rows[0];
-
 
       const rankResult =
         await pool.query(
@@ -1624,7 +1423,6 @@ app.get(
           `,
           [user.balance]
         );
-
 
       return res.json(
         formatUser(
@@ -1637,11 +1435,13 @@ app.get(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "/api/user:",
+        error
+      );
 
       return res.status(500).json({
-        error:
-          "SERVER_ERROR"
+        error: "SERVER_ERROR"
       });
     }
   }
@@ -1659,7 +1459,6 @@ app.post(
     const client =
       await pool.connect();
 
-
     try {
 
       const telegramUser =
@@ -1667,63 +1466,43 @@ app.post(
           req.body.initData
         );
 
-
       if (!telegramUser) {
-
         return res.status(401).json({
-          error:
-            "INVALID_INIT_DATA"
+          error: "INVALID_INIT_DATA"
         });
       }
 
+      /*
+        Cache ishlatiladi.
+        Har bir tapda Telegram API chaqirilmaydi.
+      */
 
       const subscribed =
-        await isSubscribed(
+        await isSubscribedCached(
           telegramUser.id
         );
 
-
       if (!subscribed) {
-
         return res.status(403).json({
-          error:
-            "NOT_SUBSCRIBED"
+          error: "NOT_SUBSCRIBED"
         });
       }
-
 
       let taps =
-        Number(
-          req.body.taps || 0
+        Math.floor(
+          Number(req.body.taps || 0)
         );
 
-
-      taps =
-        Math.floor(taps);
-
-
-      if (
-        taps <= 0
-      ) {
-
+      if (taps <= 0) {
         return res.status(400).json({
-          error:
-            "INVALID_TAPS"
+          error: "INVALID_TAPS"
         });
       }
 
-
       taps =
-        Math.min(
-          taps,
-          100
-        );
+        Math.min(taps, 100);
 
-
-      await client.query(
-        "BEGIN"
-      );
-
+      await client.query("BEGIN");
 
       let result =
         await client.query(
@@ -1735,7 +1514,6 @@ app.post(
           `,
           [telegramUser.id]
         );
-
 
       if (!result.rows.length) {
 
@@ -1756,16 +1534,19 @@ app.post(
           );
       }
 
-
       let user =
         result.rows[0];
 
+      /*
+        Energy regeneration
+        transaction ichida.
+      */
 
-      await regenerateEnergy(
-        client,
-        user
-      );
-
+      const regen =
+        await regenerateEnergy(
+          client,
+          user
+        );
 
       result =
         await client.query(
@@ -1778,16 +1559,16 @@ app.post(
           [telegramUser.id]
         );
 
-
       user =
         result.rows[0];
 
-
       const availableEnergy =
-        Number(
-          user.energy || 0
-        );
+        Number(user.energy || 0);
 
+      /*
+        User 100 ta yuborsa ham,
+        energy nechta bo'lsa shuncha tap.
+      */
 
       const actualTaps =
         Math.min(
@@ -1795,34 +1576,23 @@ app.post(
           availableEnergy
         );
 
+      if (actualTaps <= 0) {
 
-      if (
-        actualTaps <= 0
-      ) {
-
-        await client.query(
-          "COMMIT"
-        );
+        await client.query("COMMIT");
 
         return res.json({
+          earned: 0,
+          taps: 0,
           user:
-            formatUser(
-              user
-            )
+            formatUser(user)
         });
       }
 
-
       const power =
-        Number(
-          user.tap_level || 1
-        );
-
+        Number(user.tap_level || 1);
 
       const earned =
-        actualTaps *
-        power;
-
+        actualTaps * power;
 
       await client.query(
         `
@@ -1839,6 +1609,7 @@ app.post(
 
           updated_at =
             CURRENT_TIMESTAMP
+
         WHERE telegram_id = $1
         `,
         [
@@ -1848,7 +1619,6 @@ app.post(
         ]
       );
 
-
       result =
         await client.query(
           `
@@ -1859,10 +1629,8 @@ app.post(
           [telegramUser.id]
         );
 
-
       user =
         result.rows[0];
-
 
       await updatePermanentLeague(
         client,
@@ -1871,7 +1639,6 @@ app.post(
         user.league_level
       );
 
-
       result =
         await client.query(
           `
@@ -1882,15 +1649,10 @@ app.post(
           [telegramUser.id]
         );
 
-
       user =
         result.rows[0];
 
-
-      await client.query(
-        "COMMIT"
-      );
-
+      await client.query("COMMIT");
 
       return res.json({
         earned,
@@ -1902,9 +1664,7 @@ app.post(
     } catch (error) {
 
       try {
-        await client.query(
-          "ROLLBACK"
-        );
+        await client.query("ROLLBACK");
       } catch (e) {}
 
       console.error(
@@ -1913,12 +1673,10 @@ app.post(
       );
 
       return res.status(500).json({
-        error:
-          "SERVER_ERROR"
+        error: "SERVER_ERROR"
       });
 
     } finally {
-
       client.release();
     }
   }
@@ -1936,7 +1694,6 @@ app.post(
     const client =
       await pool.connect();
 
-
     try {
 
       const telegramUser =
@@ -1944,51 +1701,36 @@ app.post(
           req.body.initData
         );
 
-
       if (!telegramUser) {
-
         return res.status(401).json({
-          error:
-            "INVALID_INIT_DATA"
+          error: "INVALID_INIT_DATA"
         });
       }
 
-
       const subscribed =
-        await isSubscribed(
+        await isSubscribedCached(
           telegramUser.id
         );
 
-
       if (!subscribed) {
-
         return res.status(403).json({
-          error:
-            "NOT_SUBSCRIBED"
+          error: "NOT_SUBSCRIBED"
         });
       }
 
-
       const type =
         req.body.type;
-
 
       if (
         type !== "tap" &&
         type !== "energy"
       ) {
-
         return res.status(400).json({
-          error:
-            "INVALID_UPGRADE"
+          error: "INVALID_UPGRADE"
         });
       }
 
-
-      await client.query(
-        "BEGIN"
-      );
-
+      await client.query("BEGIN");
 
       let result =
         await client.query(
@@ -2000,7 +1742,6 @@ app.post(
           `,
           [telegramUser.id]
         );
-
 
       if (!result.rows.length) {
 
@@ -2021,45 +1762,53 @@ app.post(
           );
       }
 
-
-      const user =
+      let user =
         result.rows[0];
 
+      /*
+        Upgrade paytida energy ham
+        server bo'yicha yangilanadi.
+      */
 
-      const balance =
-        Number(
-          user.balance || 0
+      await regenerateEnergy(
+        client,
+        user
+      );
+
+      result =
+        await client.query(
+          `
+          SELECT *
+          FROM users
+          WHERE telegram_id = $1
+          FOR UPDATE
+          `,
+          [telegramUser.id]
         );
 
+      user =
+        result.rows[0];
+
+      const balance =
+        Number(user.balance || 0);
 
       if (type === "tap") {
 
         const level =
-          Number(
-            user.tap_level || 1
-          );
-
+          Number(user.tap_level || 1);
 
         const cost =
-          getTapUpgradeCost(
-            level
-          );
+          getTapUpgradeCost(level);
 
+        if (balance < cost) {
 
-        if (
-          balance < cost
-        ) {
-
-          await client.query(
-            "ROLLBACK"
-          );
+          await client.query("ROLLBACK");
 
           return res.status(400).json({
             error:
               "NOT_ENOUGH_BALANCE"
           });
         }
-
 
         await client.query(
           `
@@ -2073,6 +1822,7 @@ app.post(
 
             updated_at =
               CURRENT_TIMESTAMP
+
           WHERE telegram_id = $1
           `,
           [
@@ -2080,31 +1830,19 @@ app.post(
             cost
           ]
         );
-
       }
-
 
       if (type === "energy") {
 
         const level =
-          Number(
-            user.energy_level || 1
-          );
-
+          Number(user.energy_level || 1);
 
         const cost =
-          getEnergyUpgradeCost(
-            level
-          );
+          getEnergyUpgradeCost(level);
 
+        if (balance < cost) {
 
-        if (
-          balance < cost
-        ) {
-
-          await client.query(
-            "ROLLBACK"
-          );
+          await client.query("ROLLBACK");
 
           return res.status(400).json({
             error:
@@ -2112,16 +1850,11 @@ app.post(
           });
         }
 
-
         const newLevel =
           level + 1;
 
-
         const newMax =
-          getMaxEnergy(
-            newLevel
-          );
-
+          getMaxEnergy(newLevel);
 
         await client.query(
           `
@@ -2156,7 +1889,6 @@ app.post(
         );
       }
 
-
       result =
         await client.query(
           `
@@ -2167,22 +1899,15 @@ app.post(
           [telegramUser.id]
         );
 
-
-      let updatedUser =
+      user =
         result.rows[0];
-
-
-      /*
-        Liga pasaymaydi.
-      */
 
       await updatePermanentLeague(
         client,
         telegramUser.id,
-        updatedUser.balance,
-        updatedUser.league_level
+        user.balance,
+        user.league_level
       );
-
 
       result =
         await client.query(
@@ -2194,30 +1919,21 @@ app.post(
           [telegramUser.id]
         );
 
-
-      updatedUser =
+      user =
         result.rows[0];
 
-
-      await client.query(
-        "COMMIT"
-      );
-
+      await client.query("COMMIT");
 
       return res.json({
         success: true,
         user:
-          formatUser(
-            updatedUser
-          )
+          formatUser(user)
       });
 
     } catch (error) {
 
       try {
-        await client.query(
-          "ROLLBACK"
-        );
+        await client.query("ROLLBACK");
       } catch (e) {}
 
       console.error(
@@ -2226,12 +1942,10 @@ app.post(
       );
 
       return res.status(500).json({
-        error:
-          "SERVER_ERROR"
+        error: "SERVER_ERROR"
       });
 
     } finally {
-
       client.release();
     }
   }
@@ -2249,7 +1963,6 @@ app.post(
     const client =
       await pool.connect();
 
-
     try {
 
       const telegramUser =
@@ -2257,37 +1970,26 @@ app.post(
           req.body.initData
         );
 
-
       if (!telegramUser) {
-
         return res.status(401).json({
-          error:
-            "INVALID_INIT_DATA"
+          error: "INVALID_INIT_DATA"
         });
       }
 
-
       const subscribed =
-        await isSubscribed(
+        await isSubscribedCached(
           telegramUser.id
         );
 
-
       if (!subscribed) {
-
         return res.status(403).json({
-          error:
-            "NOT_SUBSCRIBED"
+          error: "NOT_SUBSCRIBED"
         });
       }
 
+      await client.query("BEGIN");
 
-      await client.query(
-        "BEGIN"
-      );
-
-
-      const result =
+      let result =
         await client.query(
           `
           SELECT *
@@ -2297,7 +1999,6 @@ app.post(
           `,
           [telegramUser.id]
         );
-
 
       if (!result.rows.length) {
 
@@ -2305,28 +2006,24 @@ app.post(
           telegramUser,
           client
         );
+
+        result =
+          await client.query(
+            `
+            SELECT *
+            FROM users
+            WHERE telegram_id = $1
+            FOR UPDATE
+            `,
+            [telegramUser.id]
+          );
       }
 
-
-      const userResult =
-        await client.query(
-          `
-          SELECT *
-          FROM users
-          WHERE telegram_id = $1
-          FOR UPDATE
-          `,
-          [telegramUser.id]
-        );
-
-
       const user =
-        userResult.rows[0];
-
+        result.rows[0];
 
       const now =
         new Date();
-
 
       const lastClaim =
         user.daily_claimed_at
@@ -2335,10 +2032,7 @@ app.post(
             )
           : null;
 
-
-      let alreadyClaimed =
-        false;
-
+      let alreadyClaimed = false;
 
       if (lastClaim) {
 
@@ -2347,19 +2041,15 @@ app.post(
           now.toDateString();
       }
 
-
       if (alreadyClaimed) {
 
-        await client.query(
-          "ROLLBACK"
-        );
+        await client.query("ROLLBACK");
 
         return res.status(400).json({
           error:
             "ALREADY_CLAIMED"
         });
       }
-
 
       await client.query(
         `
@@ -2379,8 +2069,7 @@ app.post(
         [telegramUser.id]
       );
 
-
-      let updated =
+      result =
         await client.query(
           `
           SELECT *
@@ -2390,10 +2079,8 @@ app.post(
           [telegramUser.id]
         );
 
-
       let updatedUser =
-        updated.rows[0];
-
+        result.rows[0];
 
       await updatePermanentLeague(
         client,
@@ -2402,8 +2089,7 @@ app.post(
         updatedUser.league_level
       );
 
-
-      updated =
+      result =
         await client.query(
           `
           SELECT *
@@ -2413,31 +2099,22 @@ app.post(
           [telegramUser.id]
         );
 
-
       updatedUser =
-        updated.rows[0];
+        result.rows[0];
 
-
-      await client.query(
-        "COMMIT"
-      );
-
+      await client.query("COMMIT");
 
       return res.json({
         success: true,
         reward: 100,
         user:
-          formatUser(
-            updatedUser
-          )
+          formatUser(updatedUser)
       });
 
     } catch (error) {
 
       try {
-        await client.query(
-          "ROLLBACK"
-        );
+        await client.query("ROLLBACK");
       } catch (e) {}
 
       console.error(
@@ -2446,12 +2123,10 @@ app.post(
       );
 
       return res.status(500).json({
-        error:
-          "SERVER_ERROR"
+        error: "SERVER_ERROR"
       });
 
     } finally {
-
       client.release();
     }
   }
@@ -2473,37 +2148,28 @@ app.post(
           req.body.initData
         );
 
-
       if (!telegramUser) {
-
         return res.status(401).json({
-          error:
-            "INVALID_INIT_DATA"
+          error: "INVALID_INIT_DATA"
         });
       }
 
-
       const subscribed =
-        await isSubscribed(
+        await isSubscribedCached(
           telegramUser.id
         );
 
-
       if (!subscribed) {
-
         return res.status(403).json({
-          error:
-            "NOT_SUBSCRIBED"
+          error: "NOT_SUBSCRIBED"
         });
       }
-
 
       const success =
         await processReferral(
           telegramUser.id,
           req.body.referrerId
         );
-
 
       return res.json({
         success
@@ -2517,8 +2183,7 @@ app.post(
       );
 
       return res.status(500).json({
-        error:
-          "SERVER_ERROR"
+        error: "SERVER_ERROR"
       });
     }
   }
@@ -2545,15 +2210,15 @@ app.get(
             photo_url,
             balance,
             created_at
+
           FROM users
+
           WHERE referred_by = $1
+
           ORDER BY created_at DESC
           `,
-          [
-            req.params.telegramId
-          ]
+          [req.params.telegramId]
         );
-
 
       return res.json(
         result.rows
@@ -2567,8 +2232,7 @@ app.get(
       );
 
       return res.status(500).json({
-        error:
-          "SERVER_ERROR"
+        error: "SERVER_ERROR"
       });
     }
   }
@@ -2606,7 +2270,6 @@ app.get(
           `
         );
 
-
       const users =
         result.rows.map(
           (user, index) => {
@@ -2617,7 +2280,6 @@ app.get(
                   user.league_level || 1
                 )
               );
-
 
             return {
 
@@ -2652,12 +2314,9 @@ app.get(
                 icon:
                   league.icon
               }
-
             };
-
           }
         );
-
 
       return res.json({
         users
@@ -2671,8 +2330,7 @@ app.get(
       );
 
       return res.status(500).json({
-        error:
-          "SERVER_ERROR"
+        error: "SERVER_ERROR"
       });
     }
   }
@@ -2688,10 +2346,8 @@ app.get(
   (req, res) => {
 
     res.json({
-      leagues:
-        LEAGUES
+      leagues: LEAGUES
     });
-
   }
 );
 
@@ -2711,14 +2367,15 @@ app.get(
           `
           SELECT
             COUNT(*) AS users,
+
             COALESCE(
               SUM(balance),
               0
             ) AS total_balance
+
           FROM users
           `
         );
-
 
       return res.json({
         online: true,
@@ -2758,9 +2415,7 @@ app.post(
         req.body
       );
 
-      return res.sendStatus(
-        200
-      );
+      return res.sendStatus(200);
 
     } catch (error) {
 
@@ -2769,9 +2424,7 @@ app.post(
         error
       );
 
-      return res.sendStatus(
-        500
-      );
+      return res.sendStatus(500);
     }
   }
 );
@@ -2786,7 +2439,6 @@ async function startServer() {
   try {
 
     await initDatabase();
-
 
     try {
 
@@ -2807,10 +2459,8 @@ async function startServer() {
       );
     }
 
-
     const PORT =
       process.env.PORT || 3000;
-
 
     app.listen(
       PORT,
