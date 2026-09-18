@@ -741,10 +741,29 @@
         level = 7;
       }
 
-      levelElement.textContent =
-        "⭐ Level " + level;
+    
+  levelElement.textContent = 
+    "⭐ Level " + level;
 
-      updateSkinLocks();
+  if (level === 1) {
+  selectedSkin = "#f5b800";
+ } else if (level === 2) {
+  selectedSkin = "#2196f3";
+ } else if (level === 3) {
+  selectedSkin = "#9c27b0";
+ } else if (level === 4) {
+  selectedSkin = "#4caf50";
+ } else if (level === 5) {
+  selectedSkin = "#f44336";
+ } else if (level === 6) {
+  selectedSkin = "#00bcd4";
+ } else if (level === 7) {
+  selectedSkin = "#ff9800";
+ }
+
+coin.style.background = selectedSkin;
+
+updateSkinLocks();
 
     }
 
