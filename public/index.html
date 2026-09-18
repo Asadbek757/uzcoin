@@ -19,7 +19,7 @@
       background: #10131a;
       color: white;
       font-family: Arial, sans-serif;
-      overflow-y: auto;
+      overflow: hidden;
     }
 
     .app {
@@ -143,16 +143,20 @@
   display: none;
   width: 90%;
   max-width: 360px;
+  max-height: 300px;
   margin-top: 12px;
   padding: 15px;
   background: #191d26;
   border: 1px solid #292e38;
   border-radius: 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .skin-panel.show {
   display: block;
 }
+
 
 .skin-title {
   text-align: center;
