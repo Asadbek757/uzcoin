@@ -43,6 +43,7 @@ async function initDatabase() {
       username TEXT,
       first_name TEXT,
       balance NUMERIC DEFAULT 0,
+      referrals INTEGER DEFAULT 0,
       level INTEGER DEFAULT 1,
       energy INTEGER DEFAULT 100,
       max_energy INTEGER DEFAULT 100,
@@ -50,6 +51,28 @@ async function initDatabase() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
+  `);
+
+  await pool.query(`
+    ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS first_name TEXT,
+      ADD COLUMN IF NOT EXISTS referrals INTEGER DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1,
+      ADD COLUMN IF NOT EXISTS energy INTEGER DEFAULT 100,
+      ADD COLUMN IF NOT EXISTS max_energy INTEGER DEFAULT 100,
+      ADD COLUMN IF NOT EXISTS skin TEXT DEFAULT 'classic',
+      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  `);
+
+  await pool.query(`
+    UPDATE users
+    SET
+      level = COALESCE(level, 1),
+      energy = COALESCE(energy, 100),
+      max_energy = COALESCE(max_energy, 100),
+      skin = COALESCE(skin, 'classic'),
+      referrals = COALESCE(referrals, 0),
+      updated_at = COALESCE(updated_at, CURRENT_TIMESTAMP)
   `);
 
   console.log("Database tayyor!");
