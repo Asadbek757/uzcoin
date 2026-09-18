@@ -33,99 +33,83 @@ const pool = new Pool({
 app.use(express.json());
 
 /* =====================================================
-   UZCOIN CONFIG
+   CONFIG
 ===================================================== */
 
-const SKINS = {
-  classic: {
-    level: 1,
-    name: "Classic",
-    icon: "🟡",
-    color: "#f5b800",
-    power: 1,
-    maxEnergy: 100
+const LEAGUES = [
+  {
+    min: 0,
+    name: "BRONZE",
+    icon: "🥉"
   },
-
-  ocean: {
-    level: 2,
-    name: "Ocean",
-    icon: "🔵",
-    color: "#2196f3",
-    power: 3,
-    maxEnergy: 200
+  {
+    min: 2000,
+    name: "SILVER",
+    icon: "🥈"
   },
-
-  nebula: {
-    level: 3,
-    name: "Nebula",
-    icon: "🟣",
-    color: "#9c27b0",
-    power: 5,
-    maxEnergy: 300
+  {
+    min: 10000,
+    name: "GOLD",
+    icon: "🥇"
   },
-
-  emerald: {
-    level: 4,
-    name: "Emerald",
-    icon: "🟢",
-    color: "#4caf50",
-    power: 8,
-    maxEnergy: 400
+  {
+    min: 50000,
+    name: "DIAMOND",
+    icon: "💎"
   },
-
-  inferno: {
-    level: 5,
-    name: "Inferno",
-    icon: "🔴",
-    color: "#f44336",
-    power: 12,
-    maxEnergy: 500
-  },
-
-  cyber: {
-    level: 6,
-    name: "Cyber",
-    icon: "🔷",
-    color: "#00bcd4",
-    power: 16,
-    maxEnergy: 600
-  },
-
-  immortal: {
-    level: 7,
-    name: "Immortal",
-    icon: "🔮",
-    color: "#673ab7",
-    power: 20,
-    maxEnergy: 700
+  {
+    min: 100000,
+    name: "MASTER",
+    icon: "👑"
   }
-};
+];
 
-function getLevel(balance) {
+const REFERRAL_BONUS = 500;
+
+/*
+  Tap Power:
+  Level 1 = +1 coin/tap
+  Level 2 = +2 coin/tap
+  Level 3 = +3 coin/tap
+  ...
+*/
+
+function getTapUpgradeCost(level) {
+  return Math.floor(
+    500 * Math.pow(1.8, Number(level) - 1)
+  );
+}
+
+/*
+  Energy:
+  Level 1 = 100
+  Level 2 = 200
+  Level 3 = 300
+  ...
+*/
+
+function getEnergyUpgradeCost(level) {
+  return Math.floor(
+    1000 * Math.pow(1.75, Number(level) - 1)
+  );
+}
+
+function getMaxEnergy(level) {
+  return Number(level) * 100;
+}
+
+function getLeague(balance) {
   const amount = Number(balance) || 0;
 
-  if (amount >= 1000000) return 7;
-  if (amount >= 100000) return 6;
-  if (amount >= 50000) return 5;
-  if (amount >= 10000) return 4;
-  if (amount >= 5000) return 3;
-  if (amount >= 2000) return 2;
+  let current = LEAGUES[0];
 
-  return 1;
-}
+  for (const league of LEAGUES) {
+    if (amount >= league.min) {
+      current = league;
+    }
+  }
 
-function getSkinByLevel(level) {
-  return Object.values(SKINS).find(
-    skin => skin.level === Number(level)
-  ) || SKINS.classic;
-}
-
-function getSkinKeyByLevel(level) {
-  const entry = Object.entries(SKINS).find(
-    ([, skin]) => skin.level === Number(level)
-  );
-
-  return entry ? entry[0] : "classic";
+  return current;
 }
 
 /* =====================================================
@@ -133,92 +117,105 @@ function getSkinKeyByLevel(level) {
 ===================================================== */
 
 async function initDatabase() {
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
+
       telegram_id BIGINT UNIQUE NOT NULL,
+
       username TEXT,
+
       first_name TEXT,
-      balance NUMERIC DEFAULT 0,
-      referrals INTEGER DEFAULT 0,
-      level INTEGER DEFAULT 1,
-      energy INTEGER DEFAULT 100,
-      max_energy INTEGER DEFAULT 100,
-      skin TEXT DEFAULT 'classic',
+
+      balance NUMERIC NOT NULL DEFAULT 0,
+
+      energy INTEGER NOT NULL DEFAULT 100,
+
+      max_energy INTEGER NOT NULL DEFAULT 100,
+
+      tap_level INTEGER NOT NULL DEFAULT 1,
+
+      energy_level INTEGER NOT NULL DEFAULT 1,
+
+      referrals INTEGER NOT NULL DEFAULT 0,
+
+      referred_by BIGINT,
+
+      daily_claimed_at TIMESTAMP,
+
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
       energy_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  /*
+    Eski database bo'lsa ham ishlashi uchun
+    kerakli ustunlarni qo'shamiz.
+  */
 
   await pool.query(`
     ALTER TABLE users
       ADD COLUMN IF NOT EXISTS username TEXT,
       ADD COLUMN IF NOT EXISTS first_name TEXT,
-      ADD COLUMN IF NOT EXISTS referrals INTEGER DEFAULT 0,
-      ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1,
+      ADD COLUMN IF NOT EXISTS balance NUMERIC DEFAULT 0,
       ADD COLUMN IF NOT EXISTS energy INTEGER DEFAULT 100,
       ADD COLUMN IF NOT EXISTS max_energy INTEGER DEFAULT 100,
-      ADD COLUMN IF NOT EXISTS skin TEXT DEFAULT 'classic',
+      ADD COLUMN IF NOT EXISTS tap_level INTEGER DEFAULT 1,
+      ADD COLUMN IF NOT EXISTS energy_level INTEGER DEFAULT 1,
+      ADD COLUMN IF NOT EXISTS referrals INTEGER DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS referred_by BIGINT,
+      ADD COLUMN IF NOT EXISTS daily_claimed_at TIMESTAMP,
       ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       ADD COLUMN IF NOT EXISTS energy_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   `);
 
   /*
-    Eski foydalanuvchilarni yangi level tizimiga moslaymiz.
+    Eski skin/level ustunlari bo'lsa,
+    ularga tegmaymiz.
+    Faqat yangi tizimga kerakli qiymatlarni
+    xavfsiz holatga keltiramiz.
   */
 
-  const users = await pool.query(`
-    SELECT telegram_id, balance, skin
-    FROM users
+  await pool.query(`
+    UPDATE users
+    SET
+      balance = COALESCE(balance, 0),
+      tap_level = GREATEST(COALESCE(tap_level, 1), 1),
+      energy_level = GREATEST(COALESCE(energy_level, 1), 1)
   `);
 
-  for (const user of users.rows) {
-    const level = getLevel(user.balance);
+  await pool.query(`
+    UPDATE users
+    SET
+      max_energy = GREATEST(
+        COALESCE(max_energy, 100),
+        COALESCE(energy_level, 1) * 100
+      )
+  `);
 
-    let skin = user.skin;
-
-    if (!SKINS[skin]) {
-      skin = getSkinKeyByLevel(level);
-    }
-
-    const skinData = SKINS[skin];
-
-    await pool.query(
-      `
-      UPDATE users
-      SET
-        level = $2,
-        skin = $3,
-        max_energy = GREATEST(
-          COALESCE(max_energy, 100),
-          $4
-        ),
-        energy = LEAST(
-          COALESCE(energy, $4),
-          $4
-        ),
-        updated_at = CURRENT_TIMESTAMP
-      WHERE telegram_id = $1
-      `,
-      [
-        user.telegram_id,
-        level,
-        skin,
-        skinData.maxEnergy
-      ]
-    );
-  }
+  await pool.query(`
+    UPDATE users
+    SET
+      energy = LEAST(
+        COALESCE(energy, max_energy),
+        max_energy
+      )
+  `);
 
   console.log("Database tayyor!");
 }
 
 /* =====================================================
-   ENERGY
+   ENERGY REGENERATION
 ===================================================== */
 
 async function regenerateEnergy(telegramId) {
+
   const result = await pool.query(
     `
     UPDATE users
@@ -233,8 +230,13 @@ async function regenerateEnergy(telegramId) {
           )
         )
       ),
-      energy_updated_at = CURRENT_TIMESTAMP
+
+      energy_updated_at = CURRENT_TIMESTAMP,
+
+      updated_at = CURRENT_TIMESTAMP
+
     WHERE telegram_id = $1
+
     RETURNING *
     `,
     [telegramId]
@@ -244,7 +246,7 @@ async function regenerateEnergy(telegramId) {
 }
 
 /* =====================================================
-   USER CREATE
+   CREATE / UPDATE USER
 ===================================================== */
 
 async function createOrUpdateUser(
@@ -252,6 +254,7 @@ async function createOrUpdateUser(
   username = null,
   firstName = null
 ) {
+
   const result = await pool.query(
     `
     INSERT INTO users (
@@ -259,9 +262,11 @@ async function createOrUpdateUser(
       username,
       first_name
     )
+
     VALUES ($1, $2, $3)
 
     ON CONFLICT (telegram_id)
+
     DO UPDATE SET
       username = COALESCE($2, users.username),
       first_name = COALESCE($3, users.first_name),
@@ -276,25 +281,7 @@ async function createOrUpdateUser(
     ]
   );
 
-  const user = result.rows[0];
-
-  const level = getLevel(user.balance);
-
-  if (Number(user.level) !== level) {
-    await pool.query(
-      `
-      UPDATE users
-      SET level = $2,
-          updated_at = CURRENT_TIMESTAMP
-      WHERE telegram_id = $1
-      `,
-      [telegramId, level]
-    );
-
-    user.level = level;
-  }
-
-  return user;
+  return result.rows[0];
 }
 
 /* =====================================================
@@ -302,11 +289,13 @@ async function createOrUpdateUser(
 ===================================================== */
 
 function validateTelegramInitData(initData) {
+
   if (!initData) {
     return null;
   }
 
   try {
+
     const params = new URLSearchParams(initData);
 
     const hash = params.get("hash");
@@ -319,16 +308,25 @@ function validateTelegramInitData(initData) {
 
     const dataCheckString = [...params.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, value]) => `${key}=${value}`)
+      .map(
+        ([key, value]) =>
+          `${key}=${value}`
+      )
       .join("\n");
 
     const secretKey = crypto
-      .createHmac("sha256", "WebAppData")
+      .createHmac(
+        "sha256",
+        "WebAppData"
+      )
       .update(BOT_TOKEN)
       .digest();
 
     const calculatedHash = crypto
-      .createHmac("sha256", secretKey)
+      .createHmac(
+        "sha256",
+        secretKey
+      )
       .update(dataCheckString)
       .digest("hex");
 
@@ -336,7 +334,8 @@ function validateTelegramInitData(initData) {
       return null;
     }
 
-    const authDate = Number(params.get("auth_date"));
+    const authDate =
+      Number(params.get("auth_date"));
 
     if (
       authDate &&
@@ -345,7 +344,8 @@ function validateTelegramInitData(initData) {
       return null;
     }
 
-    const userString = params.get("user");
+    const userString =
+      params.get("user");
 
     if (!userString) {
       return null;
@@ -354,9 +354,169 @@ function validateTelegramInitData(initData) {
     return JSON.parse(userString);
 
   } catch (error) {
-    console.error("Telegram validation error:", error);
+
+    console.error(
+      "Telegram validation:",
+      error
+    );
+
     return null;
   }
+}
+
+/* =====================================================
+   AUTH HELPER
+===================================================== */
+
+async function authenticateRequest(req) {
+
+  const {
+    telegramId,
+    initData
+  } = req.body || {};
+
+  if (!telegramId) {
+    return {
+      ok: false,
+      status: 400,
+      message: "telegramId kerak"
+    };
+  }
+
+  /*
+    Mini App initData yuborilsa,
+    Telegram user ID tekshiriladi.
+  */
+
+  if (initData) {
+
+    const telegramUser =
+      validateTelegramInitData(
+        initData
+      );
+
+    if (!telegramUser) {
+
+      return {
+        ok: false,
+        status: 403,
+        message: "Telegram sessiyasi noto'g'ri"
+      };
+    }
+
+    if (
+      String(telegramUser.id) !==
+      String(telegramId)
+    ) {
+
+      return {
+        ok: false,
+        status: 403,
+        message: "Telegram user mos emas"
+      };
+    }
+  }
+
+  const user =
+    await regenerateEnergy(
+      telegramId
+    );
+
+  if (!user) {
+
+    return {
+      ok: false,
+      status: 404,
+      message: "Foydalanuvchi topilmadi"
+    };
+  }
+
+  return {
+    ok: true,
+    user
+  };
+}
+
+/* =====================================================
+   USER RESPONSE
+===================================================== */
+
+function formatUser(user) {
+
+  const balance =
+    Number(user.balance);
+
+  const tapLevel =
+    Number(user.tap_level || 1);
+
+  const energyLevel =
+    Number(user.energy_level || 1);
+
+  const league =
+    getLeague(balance);
+
+  return {
+
+    telegramId:
+      String(user.telegram_id),
+
+    username:
+      user.username,
+
+    firstName:
+      user.first_name,
+
+    balance,
+
+    energy:
+      Number(user.energy),
+
+    maxEnergy:
+      Number(user.max_energy),
+
+    tapLevel,
+
+    power:
+      tapLevel,
+
+    energyLevel,
+
+    referrals:
+      Number(user.referrals || 0),
+
+    league: {
+      name: league.name,
+      icon: league.icon,
+      min: league.min
+    },
+
+    upgrades: {
+
+      tap: {
+        level: tapLevel,
+        nextLevel: tapLevel + 1,
+        cost: getTapUpgradeCost(
+          tapLevel
+        ),
+        currentPower: tapLevel,
+        nextPower: tapLevel + 1
+      },
+
+      energy: {
+        level: energyLevel,
+        nextLevel: energyLevel + 1,
+        cost: getEnergyUpgradeCost(
+          energyLevel
+        ),
+        currentMaxEnergy:
+          Number(user.max_energy),
+        nextMaxEnergy:
+          getMaxEnergy(
+            energyLevel + 1
+          )
+      }
+    }
+  };
 }
 
 /* =====================================================
@@ -364,49 +524,72 @@ function validateTelegramInitData(initData) {
 ===================================================== */
 
 bot.start(async (ctx) => {
+
   try {
-    const telegramId = ctx.from.id;
-    const username = ctx.from.username || null;
-    const firstName = ctx.from.first_name || null;
 
-    const user = await createOrUpdateUser(
-      telegramId,
-      username,
-      firstName
-    );
+    const telegramId =
+      ctx.from.id;
 
-    const level = getLevel(user.balance);
-    const skin = SKINS[user.skin] || getSkinByLevel(level);
+    const username =
+      ctx.from.username || null;
+
+    const firstName =
+      ctx.from.first_name || null;
+
+    const user =
+      await createOrUpdateUser(
+        telegramId,
+        username,
+        firstName
+      );
+
+    const league =
+      getLeague(user.balance);
 
     await ctx.reply(
-      `Salom! 👋 ${firstName || ""}\n\n` +
-      `🪙 UZCOIN\n` +
-      `💰 Balans: ${Number(user.balance).toLocaleString("uz-UZ")} UZC\n` +
-      `⭐ Level: ${level}\n` +
-      `⚡ Energy: ${user.energy}/${user.max_energy}\n` +
-      `🎨 Skin: ${skin.icon} ${skin.name}\n\n` +
-      `UZCOIN Mini App'ni ochish uchun tugmani bosing 👇`,
+
+      `Salom, ${firstName || "do'st"}! 👋\n\n` +
+
+      `🪙 UZCOIN\n\n` +
+
+      `💰 Balans: ` +
+      `${Number(user.balance).toLocaleString("uz-UZ")} UZC\n` +
+
+      `🏆 Liga: ${league.icon} ${league.name}\n` +
+
+      `⚡ Energy: ` +
+      `${user.energy}/${user.max_energy}\n\n` +
+
+      `UZCOIN Mini App'ni oching 👇`,
+
       {
         reply_markup: {
+
           inline_keyboard: [
+
             [
               {
-                text: "🪙 UZCOIN'ni ochish",
+                text: "🪙 UZCOIN",
                 web_app: {
                   url: PUBLIC_URL
                 }
               }
             ]
+
           ]
         }
       }
     );
 
   } catch (error) {
-    console.error("START ERROR:", error);
+
+    console.error(
+      "START ERROR:",
+      error
+    );
 
     await ctx.reply(
-      "❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko‘ring."
+      "❌ Xatolik yuz berdi."
     );
   }
 });
@@ -415,467 +598,1009 @@ bot.start(async (ctx) => {
    /BALANCE
 ===================================================== */
 
-bot.command("balance", async (ctx) => {
-  try {
-    const telegramId = ctx.from.id;
+bot.command(
+  "balance",
+  async (ctx) => {
 
-    const user = await regenerateEnergy(telegramId);
+    try {
 
-    if (!user) {
-      return ctx.reply(
-        "Avval /start buyrug‘ini bosing."
+      const user =
+        await regenerateEnergy(
+          ctx.from.id
+        );
+
+      if (!user) {
+
+        return ctx.reply(
+          "Avval /start buyrug'ini bosing."
+        );
+      }
+
+      const league =
+        getLeague(user.balance);
+
+      await ctx.reply(
+
+        `🪙 UZCOIN\n\n` +
+
+        `💰 ` +
+        `${Number(user.balance).toLocaleString("uz-UZ")} UZC\n` +
+
+        `🏆 ${league.icon} ${league.name}\n` +
+
+        `⚡ ` +
+        `${user.energy}/${user.max_energy}\n` +
+
+        `👆 Tap Power: +${user.tap_level}\n` +
+
+        `⚡ Max Energy: ${user.max_energy}`
+
+      );
+
+    } catch (error) {
+
+      console.error(
+        "BALANCE ERROR:",
+        error
+      );
+
+      await ctx.reply(
+        "❌ Balansni olishda xatolik."
       );
     }
-
-    const level = getLevel(user.balance);
-    const skin = SKINS[user.skin] || getSkinByLevel(level);
-
-    await ctx.reply(
-      `🪙 UZCOIN balansingiz\n\n` +
-      `💰 ${Number(user.balance).toLocaleString("uz-UZ")} UZC\n` +
-      `⭐ Level: ${level}\n` +
-      `⚡ Energy: ${user.energy}/${user.max_energy}\n` +
-      `🎨 Skin: ${skin.icon} ${skin.name}`
-    );
-
-  } catch (error) {
-    console.error("BALANCE ERROR:", error);
-
-    await ctx.reply(
-      "❌ Balansni olishda xatolik."
-    );
   }
-});
+);
 
 /* =====================================================
    USER API
 ===================================================== */
 
-app.get("/api/user/:telegramId", async (req, res) => {
-  try {
-    const telegramId = req.params.telegramId;
+app.get(
+  "/api/user/:telegramId",
+  async (req, res) => {
 
-    const user = await regenerateEnergy(telegramId);
+    try {
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Foydalanuvchi topilmadi"
+      const user =
+        await regenerateEnergy(
+          req.params.telegramId
+        );
+
+      if (!user) {
+
+        return res.status(404).json({
+          success: false,
+          message:
+            "Foydalanuvchi topilmadi"
+        });
+      }
+
+      res.json({
+        success: true,
+        user: formatUser(user)
       });
-    }
 
-    const level = getLevel(user.balance);
+    } catch (error) {
 
-    if (Number(user.level) !== level) {
-      await pool.query(
-        `
-        UPDATE users
-        SET level = $2
-        WHERE telegram_id = $1
-        `,
-        [telegramId, level]
+      console.error(
+        "USER API:",
+        error
       );
 
-      user.level = level;
+      res.status(500).json({
+        success: false,
+        message: "Server xatosi"
+      });
     }
-
-    const skin =
-      SKINS[user.skin] ||
-      getSkinByLevel(level);
-
-    res.json({
-      success: true,
-
-      user: {
-        telegram_id: user.telegram_id,
-        username: user.username,
-        first_name: user.first_name,
-
-        balance: Number(user.balance),
-
-        level,
-
-        energy: Number(user.energy),
-
-        max_energy: Number(user.max_energy),
-
-        skin: user.skin,
-
-        skinData: skin,
-
-        referrals: Number(user.referrals || 0)
-      },
-
-      skins: SKINS
-    });
-
-  } catch (error) {
-    console.error("USER API ERROR:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Server xatosi"
-    });
   }
-});
+);
 
 /* =====================================================
    TAP
 ===================================================== */
 
-app.post("/api/tap", async (req, res) => {
-  try {
-    const {
-      telegramId,
-      initData
-    } = req.body;
+app.post(
+  "/api/tap",
+  async (req, res) => {
 
-    if (!telegramId) {
-      return res.status(400).json({
-        success: false,
-        message: "telegramId kerak"
-      });
-    }
+    try {
 
-    /*
-      Telegram WebApp validation.
-      Agar initData yuborilsa, user ID ni tekshiramiz.
-    */
+      const auth =
+        await authenticateRequest(req);
 
-    if (initData) {
-      const telegramUser =
-        validateTelegramInitData(initData);
+      if (!auth.ok) {
 
-      if (!telegramUser) {
-        return res.status(403).json({
+        return res
+          .status(auth.status)
+          .json({
+            success: false,
+            message: auth.message
+          });
+      }
+
+      const user =
+        auth.user;
+
+      const tapLevel =
+        Number(user.tap_level || 1);
+
+      const power =
+        tapLevel;
+
+      /*
+        Frontend nechta tap qilganini yuborishi mumkin.
+        Lekin server har bir tapni energy bilan tekshiradi.
+      */
+
+      let requestedTaps =
+        Number(req.body.taps || 1);
+
+      requestedTaps =
+        Math.floor(requestedTaps);
+
+      if (
+        requestedTaps < 1
+      ) {
+        requestedTaps = 1;
+      }
+
+      /*
+        Juda katta so'rov yuborilishining oldini olamiz.
+      */
+
+      requestedTaps =
+        Math.min(
+          requestedTaps,
+          100
+        );
+
+      const availableEnergy =
+        Number(user.energy);
+
+      const actualTaps =
+        Math.min(
+          requestedTaps,
+          availableEnergy
+        );
+
+      if (actualTaps <= 0) {
+
+        return res.status(400).json({
           success: false,
-          message: "Telegram sessiyasi noto‘g‘ri"
+          message: "Energy tugagan",
+          balance:
+            Number(user.balance),
+          energy: 0,
+          maxEnergy:
+            Number(user.max_energy)
         });
       }
 
-      if (String(telegramUser.id) !== String(telegramId)) {
-        return res.status(403).json({
+      const earned =
+        actualTaps * power;
+
+      const result =
+        await pool.query(
+          `
+          UPDATE users
+
+          SET
+            balance =
+              balance + $2,
+
+            energy =
+              energy - $3,
+
+            energy_updated_at =
+              CURRENT_TIMESTAMP,
+
+            updated_at =
+              CURRENT_TIMESTAMP
+
+          WHERE telegram_id = $1
+
+            AND energy >= $3
+
+          RETURNING *
+          `,
+          [
+            user.telegram_id,
+            earned,
+            actualTaps
+          ]
+        );
+
+      if (
+        result.rows.length === 0
+      ) {
+
+        return res.status(400).json({
           success: false,
-          message: "Telegram user mos emas"
+          message:
+            "Tap amalga oshmadi"
         });
       }
-    }
 
-    const user = await regenerateEnergy(telegramId);
+      const updated =
+        result.rows[0];
 
-    if (!user) {
-      return res.status(404).json({
+      res.json({
+        success: true,
+
+        balance:
+          Number(updated.balance),
+
+        energy:
+          Number(updated.energy),
+
+        maxEnergy:
+          Number(updated.max_energy),
+
+        power:
+          Number(updated.tap_level),
+
+        tapLevel:
+          Number(updated.tap_level),
+
+        energyLevel:
+          Number(updated.energy_level),
+
+        earned,
+
+        taps:
+          actualTaps,
+
+        league:
+          getLeague(updated.balance)
+      });
+
+    } catch (error) {
+
+      console.error(
+        "TAP ERROR:",
+        error
+      );
+
+      res.status(500).json({
         success: false,
-        message: "Foydalanuvchi topilmadi"
+        message:
+          "Tap server xatosi"
       });
     }
+  }
+);
 
-    const level = getLevel(user.balance);
+/* =====================================================
+   BOOST / UPGRADE
+===================================================== */
 
-    const skin =
-      SKINS[user.skin] ||
-      getSkinByLevel(level);
+app.post(
+  "/api/upgrade",
+  async (req, res) => {
 
-    /*
-      TAP miqdorini frontenddan olmaymiz.
-      Server o‘zi hisoblaydi.
-    */
+    try {
 
-    if (Number(user.energy) <= 0) {
+      const auth =
+        await authenticateRequest(req);
+
+      if (!auth.ok) {
+
+        return res
+          .status(auth.status)
+          .json({
+            success: false,
+            message: auth.message
+          });
+      }
+
+      const user =
+        auth.user;
+
+      const type =
+        req.body.type;
+
+      /*
+        TAP POWER
+      */
+
+      if (type === "tap") {
+
+        const currentLevel =
+          Number(user.tap_level || 1);
+
+        const cost =
+          getTapUpgradeCost(
+            currentLevel
+          );
+
+        const result =
+          await pool.query(
+            `
+            UPDATE users
+
+            SET
+              balance =
+                balance - $2,
+
+              tap_level =
+                tap_level + 1,
+
+              updated_at =
+                CURRENT_TIMESTAMP
+
+            WHERE telegram_id = $1
+
+              AND balance >= $2
+
+            RETURNING *
+            `,
+            [
+              user.telegram_id,
+              cost
+            ]
+          );
+
+        if (
+          result.rows.length === 0
+        ) {
+
+          return res.status(400).json({
+            success: false,
+            message:
+              "Coin yetarli emas"
+          });
+        }
+
+        const updated =
+          result.rows[0];
+
+        return res.json({
+          success: true,
+
+          type: "tap",
+
+          balance:
+            Number(updated.balance),
+
+          power:
+            Number(updated.tap_level),
+
+          tapLevel:
+            Number(updated.tap_level),
+
+          energy:
+            Number(updated.energy),
+
+          maxEnergy:
+            Number(updated.max_energy),
+
+          cost,
+
+          nextCost:
+            getTapUpgradeCost(
+              Number(updated.tap_level)
+            )
+        });
+      }
+
+      /*
+        MAX ENERGY
+      */
+
+      if (type === "energy") {
+
+        const currentLevel =
+          Number(
+            user.energy_level || 1
+          );
+
+        const cost =
+          getEnergyUpgradeCost(
+            currentLevel
+          );
+
+        const newLevel =
+          currentLevel + 1;
+
+        const newMaxEnergy =
+          getMaxEnergy(
+            newLevel
+          );
+
+        const result =
+          await pool.query(
+            `
+            UPDATE users
+
+            SET
+              balance =
+                balance - $2,
+
+              energy_level =
+                energy_level + 1,
+
+              max_energy =
+                $3,
+
+              energy =
+                energy + 100,
+
+              updated_at =
+                CURRENT_TIMESTAMP
+
+            WHERE telegram_id = $1
+
+              AND balance >= $2
+
+            RETURNING *
+            `,
+            [
+              user.telegram_id,
+              cost,
+              newMaxEnergy
+            ]
+          );
+
+        if (
+          result.rows.length === 0
+        ) {
+
+          return res.status(400).json({
+            success: false,
+            message:
+              "Coin yetarli emas"
+          });
+        }
+
+        const updated =
+          result.rows[0];
+
+        return res.json({
+          success: true,
+
+          type: "energy",
+
+          balance:
+            Number(updated.balance),
+
+          power:
+            Number(updated.tap_level),
+
+          tapLevel:
+            Number(updated.tap_level),
+
+          energy:
+            Number(updated.energy),
+
+          maxEnergy:
+            Number(updated.max_energy),
+
+          energyLevel:
+            Number(updated.energy_level),
+
+          cost,
+
+          nextCost:
+            getEnergyUpgradeCost(
+              Number(updated.energy_level)
+            )
+        });
+      }
+
       return res.status(400).json({
         success: false,
-        message: "Energy tugagan",
-        balance: Number(user.balance),
-        energy: 0,
-        maxEnergy: Number(user.max_energy)
+        message:
+          "Noto'g'ri upgrade turi"
+      });
+
+    } catch (error) {
+
+      console.error(
+        "UPGRADE ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Upgrade server xatosi"
       });
     }
+  }
+);
 
-    const result = await pool.query(
-      `
-      UPDATE users
-      SET
-        balance = balance + $2,
-        energy = energy - 1,
-        level = $3,
-        updated_at = CURRENT_TIMESTAMP,
-        energy_updated_at = CURRENT_TIMESTAMP
-      WHERE telegram_id = $1
-        AND energy > 0
-      RETURNING
-        balance,
-        energy,
-        max_energy,
-        level,
-        skin
-      `,
-      [
+/* =====================================================
+   REFERRAL
+===================================================== */
+
+app.post(
+  "/api/referral",
+  async (req, res) => {
+
+    try {
+
+      const {
         telegramId,
-        skin.power,
-        level
-      ]
-    );
+        referredBy
+      } = req.body;
 
-    if (result.rows.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Tap amalga oshmadi"
-      });
-    }
+      if (
+        !telegramId ||
+        !referredBy
+      ) {
 
-    const updated = result.rows[0];
+        return res.status(400).json({
+          success: false,
+          message:
+            "Referral ma'lumotlari yetishmayapti"
+        });
+      }
 
-    const newLevel =
-      getLevel(updated.balance);
+      if (
+        String(telegramId) ===
+        String(referredBy)
+      ) {
 
-    if (Number(updated.level) !== newLevel) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "O'zingizni referral qila olmaysiz"
+        });
+      }
+
+      const user =
+        await regenerateEnergy(
+          telegramId
+        );
+
+      const inviter =
+        await regenerateEnergy(
+          referredBy
+        );
+
+      if (!user || !inviter) {
+
+        return res.status(404).json({
+          success: false,
+          message:
+            "Foydalanuvchi topilmadi"
+        });
+      }
+
+      /*
+        Referral faqat bir marta.
+      */
+
+      if (user.referred_by) {
+
+        return res.json({
+          success: true,
+          alreadyUsed: true
+        });
+      }
+
       await pool.query(
         `
         UPDATE users
-        SET level = $2
+
+        SET
+          referred_by = $2,
+          updated_at = CURRENT_TIMESTAMP
+
         WHERE telegram_id = $1
         `,
-        [telegramId, newLevel]
+        [
+          telegramId,
+          referredBy
+        ]
       );
 
-      updated.level = newLevel;
-    }
+      await pool.query(
+        `
+        UPDATE users
 
-    res.json({
-      success: true,
+        SET
+          balance =
+            balance + $2,
 
-      balance: Number(updated.balance),
+          referrals =
+            referrals + 1,
 
-      energy: Number(updated.energy),
+          updated_at =
+            CURRENT_TIMESTAMP
 
-      maxEnergy: Number(updated.max_energy),
+        WHERE telegram_id = $1
+        `,
+        [
+          referredBy,
+          REFERRAL_BONUS
+        ]
+      );
 
-      level: newLevel,
-
-      tapPower: skin.power,
-
-      skin: updated.skin
-    });
-
-  } catch (error) {
-    console.error("TAP ERROR:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Tap server xatosi"
-    });
-  }
-});
-
-/* =====================================================
-   SELECT SKIN
-===================================================== */
-
-app.post("/api/skin", async (req, res) => {
-  try {
-    const {
-      telegramId,
-      skin
-    } = req.body;
-
-    if (!telegramId || !skin) {
-      return res.status(400).json({
-        success: false,
-        message: "Ma'lumot yetishmayapti"
+      res.json({
+        success: true,
+        bonus:
+          REFERRAL_BONUS
       });
-    }
 
-    if (!SKINS[skin]) {
-      return res.status(400).json({
-        success: false,
-        message: "Bunday skin mavjud emas"
-      });
-    }
+    } catch (error) {
 
-    const user = await regenerateEnergy(telegramId);
+      console.error(
+        "REFERRAL ERROR:",
+        error
+      );
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Foydalanuvchi topilmadi"
-      });
-    }
-
-    const level = getLevel(user.balance);
-    const selectedSkin = SKINS[skin];
-
-    if (level < selectedSkin.level) {
-      return res.status(403).json({
+      res.status(500).json({
         success: false,
         message:
-          `Bu skin uchun Level ${selectedSkin.level} kerak`
+          "Referral xatosi"
       });
     }
-
-    await pool.query(
-      `
-      UPDATE users
-      SET
-        skin = $2,
-        max_energy = $3,
-        energy = LEAST(energy, $3),
-        level = $4,
-        updated_at = CURRENT_TIMESTAMP
-      WHERE telegram_id = $1
-      `,
-      [
-        telegramId,
-        skin,
-        selectedSkin.maxEnergy,
-        level
-      ]
-    );
-
-    const updated = await pool.query(
-      `
-      SELECT
-        balance,
-        level,
-        energy,
-        max_energy,
-        skin
-      FROM users
-      WHERE telegram_id = $1
-      `,
-      [telegramId]
-    );
-
-    res.json({
-      success: true,
-      user: updated.rows[0],
-      skinData: selectedSkin
-    });
-
-  } catch (error) {
-    console.error("SKIN ERROR:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Skin tanlashda xatolik"
-    });
   }
-});
+);
+
+/* =====================================================
+   FRIENDS
+===================================================== */
+
+app.get(
+  "/api/friends/:telegramId",
+  async (req, res) => {
+
+    try {
+
+      const user =
+        await regenerateEnergy(
+          req.params.telegramId
+        );
+
+      if (!user) {
+
+        return res.status(404).json({
+          success: false
+        });
+      }
+
+      const friends =
+        await pool.query(
+          `
+          SELECT
+            telegram_id,
+            username,
+            first_name,
+            balance
+          FROM users
+
+          WHERE referred_by = $1
+
+          ORDER BY created_at DESC
+
+          LIMIT 100
+          `,
+          [
+            req.params.telegramId
+          ]
+        );
+
+      res.json({
+        success: true,
+
+        referrals:
+          Number(user.referrals || 0),
+
+        bonus:
+          Number(user.referrals || 0) *
+          REFERRAL_BONUS,
+
+        friends:
+          friends.rows.map(friend => ({
+            telegramId:
+              String(friend.telegram_id),
+
+            username:
+              friend.username,
+
+            firstName:
+              friend.first_name,
+
+            balance:
+              Number(friend.balance)
+          }))
+      });
+
+    } catch (error) {
+
+      console.error(
+        "FRIENDS ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false
+      });
+    }
+  }
+);
 
 /* =====================================================
    RANK
 ===================================================== */
 
-app.get("/api/rank", async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT
-        telegram_id,
-        username,
-        first_name,
-        balance,
-        level
-      FROM users
-      ORDER BY balance DESC
-      LIMIT 100
-    `);
+app.get(
+  "/api/rank",
+  async (req, res) => {
 
-    res.json({
-      success: true,
-      users: result.rows.map((user, index) => ({
-        position: index + 1,
-        telegram_id: user.telegram_id,
-        username: user.username,
-        first_name: user.first_name,
-        balance: Number(user.balance),
-        level: Number(user.level)
-      }))
-    });
+    try {
 
-  } catch (error) {
-    console.error("RANK ERROR:", error);
+      const result =
+        await pool.query(
+          `
+          SELECT
+            telegram_id,
+            username,
+            first_name,
+            balance
+          FROM users
 
-    res.status(500).json({
-      success: false,
-      message: "Rank xatosi"
-    });
+          ORDER BY balance DESC
+
+          LIMIT 100
+          `
+        );
+
+      res.json({
+
+        success: true,
+
+        users:
+          result.rows.map(
+            (user, index) => {
+
+              const league =
+                getLeague(
+                  user.balance
+                );
+
+              return {
+
+                position:
+                  index + 1,
+
+                telegramId:
+                  String(user.telegram_id),
+
+                username:
+                  user.username,
+
+                firstName:
+                  user.first_name,
+
+                balance:
+                  Number(user.balance),
+
+                league:
+                  league.name,
+
+                leagueIcon:
+                  league.icon
+              };
+            }
+          )
+      });
+
+    } catch (error) {
+
+      console.error(
+        "RANK ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Rank xatosi"
+      });
+    }
   }
-});
+);
 
 /* =====================================================
    PROFILE
 ===================================================== */
 
-app.get("/api/profile/:telegramId", async (req, res) => {
-  try {
-    const user = await regenerateEnergy(
-      req.params.telegramId
-    );
+app.get(
+  "/api/profile/:telegramId",
+  async (req, res) => {
 
-    if (!user) {
-      return res.status(404).json({
+    try {
+
+      const user =
+        await regenerateEnergy(
+          req.params.telegramId
+        );
+
+      if (!user) {
+
+        return res.status(404).json({
+          success: false,
+          message:
+            "Foydalanuvchi topilmadi"
+        });
+      }
+
+      res.json({
+        success: true,
+        profile:
+          formatUser(user)
+      });
+
+    } catch (error) {
+
+      console.error(
+        "PROFILE ERROR:",
+        error
+      );
+
+      res.status(500).json({
         success: false
       });
     }
+  }
+);
 
-    const level = getLevel(user.balance);
-    const skin =
-      SKINS[user.skin] ||
-      getSkinByLevel(level);
+/* =====================================================
+   LEAGUES
+===================================================== */
+
+app.get(
+  "/api/leagues",
+  async (req, res) => {
 
     res.json({
       success: true,
-      profile: {
-        telegram_id: user.telegram_id,
-        username: user.username,
-        first_name: user.first_name,
-        balance: Number(user.balance),
-        level,
-        energy: Number(user.energy),
-        max_energy: Number(user.max_energy),
-        skin: user.skin,
-        skinName: skin.name,
-        referrals: Number(user.referrals || 0)
-      }
+      leagues: LEAGUES
     });
 
-  } catch (error) {
-    console.error("PROFILE ERROR:", error);
-
-    res.status(500).json({
-      success: false
-    });
   }
-});
+);
+
+/* =====================================================
+   DAILY REWARD
+===================================================== */
+
+app.post(
+  "/api/daily",
+  async (req, res) => {
+
+    try {
+
+      const auth =
+        await authenticateRequest(req);
+
+      if (!auth.ok) {
+
+        return res
+          .status(auth.status)
+          .json({
+            success: false,
+            message: auth.message
+          });
+      }
+
+      const user =
+        auth.user;
+
+      const result =
+        await pool.query(
+          `
+          UPDATE users
+
+          SET
+            balance =
+              balance + 100,
+
+            daily_claimed_at =
+              CURRENT_TIMESTAMP,
+
+            updated_at =
+              CURRENT_TIMESTAMP
+
+          WHERE telegram_id = $1
+
+            AND (
+              daily_claimed_at IS NULL
+              OR daily_claimed_at < CURRENT_DATE
+            )
+
+          RETURNING *
+          `,
+          [
+            user.telegram_id
+          ]
+        );
+
+      if (
+        result.rows.length === 0
+      ) {
+
+        return res.status(400).json({
+          success: false,
+          message:
+            "Bugungi reward allaqachon olingan"
+        });
+      }
+
+      const updated =
+        result.rows[0];
+
+      res.json({
+        success: true,
+
+        reward: 100,
+
+        balance:
+          Number(updated.balance)
+      });
+
+    } catch (error) {
+
+      console.error(
+        "DAILY ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Daily reward xatosi"
+      });
+    }
+  }
+);
 
 /* =====================================================
    STATUS
 ===================================================== */
 
-app.get("/api/status", async (req, res) => {
-  try {
-    await pool.query("SELECT 1");
+app.get(
+  "/api/status",
+  async (req, res) => {
 
-    res.json({
-      success: true,
-      message: "UZCOIN server ishlayapti!",
-      database: "connected"
-    });
+    try {
 
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Database ulanmagan"
-    });
+      await pool.query(
+        "SELECT 1"
+      );
+
+      res.json({
+        success: true,
+        message:
+          "UZCOIN server ishlayapti!",
+        database:
+          "connected"
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Database ulanmagan"
+      });
+    }
   }
-});
+);
 
 /* =====================================================
-   STATIC
+   STATIC FILES
 ===================================================== */
 
 app.use(
   express.static(
-    path.join(__dirname, "public")
+    path.join(
+      __dirname,
+      "public"
+    )
   )
 );
 
@@ -893,33 +1618,39 @@ app.use(
    SERVER
 ===================================================== */
 
-app.listen(PORT, async () => {
-  console.log(
-    `UZCOIN server ${PORT}-portda ishlayapti`
-  );
-
-  try {
-    await initDatabase();
-
-    await bot.telegram.setWebhook(
-      `${PUBLIC_URL}/telegram-webhook`
-    );
+app.listen(
+  PORT,
+  async () => {
 
     console.log(
-      "Telegram webhook o‘rnatildi!"
+      `UZCOIN server ${PORT}-portda ishlayapti`
     );
 
-    console.log(
-      `${PUBLIC_URL}/telegram-webhook`
-    );
+    try {
 
-  } catch (error) {
-    console.error(
-      "STARTUP ERROR:",
-      error
-    );
+      await initDatabase();
+
+      await bot.telegram.setWebhook(
+        `${PUBLIC_URL}/telegram-webhook`
+      );
+
+      console.log(
+        "Telegram webhook o'rnatildi!"
+      );
+
+      console.log(
+        `${PUBLIC_URL}/telegram-webhook`
+      );
+
+    } catch (error) {
+
+      console.error(
+        "STARTUP ERROR:",
+        error
+      );
+    }
   }
-});
+);
 
 /* =====================================================
    SHUTDOWN
