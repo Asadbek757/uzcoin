@@ -195,6 +195,25 @@ bot.command("balance", async (ctx) => {
 // =========================
 
 app.use(express.json());
+
+app.post("/api/tap", async (req, res) => {
+  try {
+    const { telegramId, amount } = req.body;
+
+    await pool.query(
+      `UPDATE users
+       SET balance = balance + $1,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE telegram_id = $2`,
+      [amount, telegramId]
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false });
+  }
+});
 app.use(express.static(path.join(__dirname, "public")));
 
 
