@@ -663,14 +663,14 @@
     // BALANCE
     // =========================
 
-    function showTapEffect(amount) {
+    function showTapEffect(amount, x, y) {
   const effect = document.createElement("div");
   effect.textContent = "+" + amount;
   effect.style.position = "fixed";
-  effect.style.left = "50%";
-  effect.style.top = "45%";
+  effect.style.left = x + "px";
+ effect.style.top = y + "px";
   effect.style.transform = "translate(-50%, -50%)";
-  effect.style.fontSize = "32px";
+  effect.style.fontSize = "42px";
   effect.style.fontWeight = "bold";
   effect.style.color = "white";
   effect.style.zIndex = "9999";
@@ -833,15 +833,13 @@
     // TAP
     // =========================
 
-    coin.addEventListener(
-      "click",
-      () => {
+    coin.addEventListener("click", (event) => {
 
         if (energy <= 0) {
           return;
         }
         
-        showTapEffect(tapPower);
+        showTapEffect(tapPower, event.clientX, event.clientY);
 
         balance += tapPower;
 
