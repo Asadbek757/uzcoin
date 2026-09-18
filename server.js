@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const crypto = require("crypto");
 const { Telegraf } = require("telegraf");
 const { Pool } = require("pg");
 
@@ -29,62 +30,106 @@ const pool = new Pool({
   }
 });
 
-// Database
+
+// =========================
+// DATABASE
+// =========================
+
 async function initDatabase() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       telegram_id BIGINT UNIQUE NOT NULL,
       username TEXT,
+      first_name TEXT,
       balance NUMERIC DEFAULT 0,
-      referrals INTEGER DEFAULT 0,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      level INTEGER DEFAULT 1,
+      energy INTEGER DEFAULT 100,
+      max_energy INTEGER DEFAULT 100,
+      skin TEXT DEFAULT 'classic',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
   console.log("Database tayyor!");
 }
 
-// /start
+
+// =========================
+// TELEGRAM /START
+// =========================
+
 bot.start(async (ctx) => {
   try {
     const telegramId = ctx.from.id;
     const username = ctx.from.username || null;
+    const firstName = ctx.from.first_name || null;
 
     const result = await pool.query(
       `
-      INSERT INTO users (telegram_id, username)
-      VALUES ($1, $2)
+      INSERT INTO users (
+        telegram_id,
+        username,
+        first_name
+      )
+      VALUES ($1, $2, $3)
+
       ON CONFLICT (telegram_id)
-      DO UPDATE SET username = $2
-      RETURNING balance
+      DO UPDATE SET
+        username = $2,
+        first_name = $3,
+        updated_at = CURRENT_TIMESTAMP
+
+      RETURNING balance, level, energy, max_energy, skin
       `,
-      [telegramId, username]
+      [telegramId, username, firstName]
     );
 
-    const balance = result.rows[0].balance;
+    const user = result.rows[0];
 
     await ctx.reply(
-      `Salom! 👋 ${ctx.from.first_name || ""}\n\n` +
+      `Salom! 👋 ${firstName || ""}\n\n` +
       `🪙 UZCOIN\n` +
-      `💰 Balans: ${balance} UZC\n\n` +
-      `Tap-to-Earn tez orada ishga tushadi! 🚀`
+      `💰 Balans: ${user.balance} UZC\n` +
+      `⭐ Level: ${user.level}\n` +
+      `⚡ Energy: ${user.energy}/${user.max_energy}\n\n` +
+      `Mini App tez orada to‘liq ishga tushadi! 🚀`
     );
 
     console.log(`Foydalanuvchi kirdi: ${telegramId}`);
+
   } catch (error) {
     console.error("START ERROR:", error);
-    await ctx.reply("❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko‘ring.");
+
+    try {
+      await ctx.reply(
+        "❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko‘ring."
+      );
+    } catch {}
   }
 });
 
-// /balance
+
+// =========================
+// /BALANCE
+// =========================
+
 bot.command("balance", async (ctx) => {
   try {
     const telegramId = ctx.from.id;
 
     const result = await pool.query(
-      "SELECT balance FROM users WHERE telegram_id = $1",
+      `
+      SELECT
+        balance,
+        level,
+        energy,
+        max_energy,
+        skin
+      FROM users
+      WHERE telegram_id = $1
+      `,
       [telegramId]
     );
 
@@ -92,21 +137,31 @@ bot.command("balance", async (ctx) => {
       return ctx.reply("Avval /start buyrug‘ini bosing.");
     }
 
+    const user = result.rows[0];
+
     await ctx.reply(
-      `🪙 UZCOIN balansingiz: ${result.rows[0].balance} UZC`
+      `🪙 UZCOIN balansingiz: ${user.balance} UZC\n\n` +
+      `⭐ Level: ${user.level}\n` +
+      `⚡ Energy: ${user.energy}/${user.max_energy}\n` +
+      `🎨 Skin: ${user.skin}`
     );
+
   } catch (error) {
     console.error("BALANCE ERROR:", error);
     await ctx.reply("❌ Balansni olishda xatolik.");
   }
 });
 
+
+// =========================
+// MINI APP API
+// =========================
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Telegram webhook
-app.use(bot.webhookCallback("/telegram-webhook"));
 
+// Server holati
 app.get("/api/status", (req, res) => {
   res.json({
     success: true,
@@ -114,10 +169,72 @@ app.get("/api/status", (req, res) => {
   });
 });
 
+
+// =========================
+// USER DATA
+// =========================
+
+app.get("/api/user/:telegramId", async (req, res) => {
+  try {
+    const telegramId = req.params.telegramId;
+
+    const result = await pool.query(
+      `
+      SELECT
+        telegram_id,
+        username,
+        first_name,
+        balance,
+        level,
+        energy,
+        max_energy,
+        skin
+      FROM users
+      WHERE telegram_id = $1
+      `,
+      [telegramId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Foydalanuvchi topilmadi"
+      });
+    }
+
+    res.json({
+      success: true,
+      user: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("USER API ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server xatosi"
+    });
+  }
+});
+
+
+// =========================
+// TELEGRAM WEBHOOK
+// =========================
+
+app.use(bot.webhookCallback("/telegram-webhook"));
+
+
+// =========================
+// SERVER START
+// =========================
+
 app.listen(PORT, async () => {
+
   console.log(`UZCOIN server ${PORT}-portda ishlayapti`);
 
   try {
+
     await initDatabase();
 
     await bot.telegram.setWebhook(
@@ -126,10 +243,19 @@ app.listen(PORT, async () => {
 
     console.log("Telegram webhook o‘rnatildi!");
     console.log(`${PUBLIC_URL}/telegram-webhook`);
+
   } catch (error) {
+
     console.error("STARTUP ERROR:", error);
+
   }
+
 });
+
+
+// =========================
+// SHUTDOWN
+// =========================
 
 process.once("SIGINT", () => bot.stop("SIGINT"));
 process.once("SIGTERM", () => bot.stop("SIGTERM"));
