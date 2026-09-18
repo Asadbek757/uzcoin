@@ -8,6 +8,11 @@
   },
   "dependencies": {
     "express": "^5.1.0",
-    "telegraf": "^4.16.3"
+    "telegraf": "^4.16.3" ,
+    "dependencies": {
+  "express": "^5.1.0",
+  "telegraf": "^4.16.3",
+  "pg": "^8.16.3"
+    }
   }
 }
