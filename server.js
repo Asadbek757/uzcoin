@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const DATABASE_URL = process.env.DATABASE_URL;
+const PUBLIC_URL = "https://uzcoin.onrender.com";
 
 if (!BOT_TOKEN) {
   console.error("BOT_TOKEN topilmadi!");
@@ -28,7 +29,7 @@ const pool = new Pool({
   }
 });
 
-// Database jadvalini yaratish
+// Database
 async function initDatabase() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
@@ -103,6 +104,9 @@ bot.command("balance", async (ctx) => {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
+// Telegram webhook
+app.use(bot.webhookCallback("/telegram-webhook"));
+
 app.get("/api/status", (req, res) => {
   res.json({
     success: true,
@@ -116,11 +120,12 @@ app.listen(PORT, async () => {
   try {
     await initDatabase();
 
-    console.log("Telegram botni ishga tushiryapman...");
+    await bot.telegram.setWebhook(
+      `${PUBLIC_URL}/telegram-webhook`
+    );
 
-    await bot.launch();
-
-    console.log("UZCOIN Telegram bot ishga tushdi!");
+    console.log("Telegram webhook o‘rnatildi!");
+    console.log(`${PUBLIC_URL}/telegram-webhook`);
   } catch (error) {
     console.error("STARTUP ERROR:", error);
   }
