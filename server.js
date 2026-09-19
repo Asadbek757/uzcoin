@@ -39,11 +39,7 @@ if (!DATABASE_URL) {
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use(
-  express.static(
-    path.join(__dirname, "public")
-  )
-);
+app.use(express.static(path.join(__dirname, "public")));
 
 /* =====================================================
    TELEGRAM BOT
@@ -214,11 +210,7 @@ function getTapUpgradeCost(level) {
   return (
     TAP_COSTS[numericLevel - 1] ||
     Math.floor(
-      500 *
-        Math.pow(
-          1.8,
-          numericLevel - 1
-        )
+      500 * Math.pow(1.8, numericLevel - 1)
     )
   );
 }
@@ -244,8 +236,7 @@ function getEnergyUpgradeCost(level) {
   }
 
   return (
-    ENERGY_COSTS[numericLevel - 1] ||
-    null
+    ENERGY_COSTS[numericLevel - 1] || null
   );
 }
 
@@ -259,11 +250,9 @@ function validateInitData(initData) {
   }
 
   try {
-    const params =
-      new URLSearchParams(initData);
+    const params = new URLSearchParams(initData);
 
-    const receivedHash =
-      params.get("hash");
+    const receivedHash = params.get("hash");
 
     if (!receivedHash) {
       return null;
@@ -273,32 +262,19 @@ function validateInitData(initData) {
 
     const dataCheckString =
       Array.from(params.entries())
-        .sort(([a], [b]) =>
-          a.localeCompare(b)
-        )
-        .map(
-          ([key, value]) =>
-            `${key}=${value}`
-        )
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([key, value]) => `${key}=${value}`)
         .join("\n");
 
-    const secretKey =
-      crypto
-        .createHmac(
-          "sha256",
-          "WebAppData"
-        )
-        .update(BOT_TOKEN)
-        .digest();
+    const secretKey = crypto
+      .createHmac("sha256", "WebAppData")
+      .update(BOT_TOKEN)
+      .digest();
 
-    const calculatedHash =
-      crypto
-        .createHmac(
-          "sha256",
-          secretKey
-        )
-        .update(dataCheckString)
-        .digest("hex");
+    const calculatedHash = crypto
+      .createHmac("sha256", secretKey)
+      .update(dataCheckString)
+      .digest("hex");
 
     if (
       calculatedHash.length !==
@@ -316,8 +292,7 @@ function validateInitData(initData) {
       return null;
     }
 
-    const userRaw =
-      params.get("user");
+    const userRaw = params.get("user");
 
     if (!userRaw) {
       return null;
@@ -326,7 +301,7 @@ function validateInitData(initData) {
     return JSON.parse(userRaw);
   } catch (error) {
     console.error(
-      "InitData validation error:",
+      "❌ InitData validation error:",
       error.message
     );
 
@@ -355,11 +330,7 @@ function getTelegramUserFromRequest(req) {
   return validateInitData(initData);
 }
 
-function requireTelegramUser(
-  req,
-  res,
-  next
-) {
+function requireTelegramUser(req, res, next) {
   const telegramUser =
     getTelegramUserFromRequest(req);
 
@@ -386,46 +357,31 @@ async function initDatabase() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
-
       telegram_id BIGINT UNIQUE NOT NULL,
 
       username TEXT,
       first_name TEXT,
       photo_url TEXT,
 
-      balance NUMERIC(30, 0)
-        DEFAULT 0,
+      balance NUMERIC(30, 0) DEFAULT 0,
 
-      energy INTEGER
-        DEFAULT 300,
+      energy INTEGER DEFAULT 300,
+      max_energy INTEGER DEFAULT 300,
 
-      max_energy INTEGER
-        DEFAULT 300,
+      tap_level INTEGER DEFAULT 1,
+      energy_level INTEGER DEFAULT 1,
 
-      tap_level INTEGER
-        DEFAULT 1,
-
-      energy_level INTEGER
-        DEFAULT 1,
-
-      referrals INTEGER
-        DEFAULT 0,
-
+      referrals INTEGER DEFAULT 0,
       referred_by BIGINT,
 
-      league_level INTEGER
-        DEFAULT 1,
+      league_level INTEGER DEFAULT 1,
 
       daily_claimed_at TIMESTAMP,
 
-      energy_updated_at TIMESTAMP
-        DEFAULT CURRENT_TIMESTAMP,
+      energy_updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-      created_at TIMESTAMP
-        DEFAULT CURRENT_TIMESTAMP,
-
-      updated_at TIMESTAMP
-        DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
@@ -536,9 +492,7 @@ async function initDatabase() {
     );
   }
 
-  console.log(
-    "✅ Database initialized"
-  );
+  console.log("✅ Database initialized");
 }
 
 /* =====================================================
@@ -569,20 +523,14 @@ async function createOrUpdateUser(
       ON CONFLICT (telegram_id)
 
       DO UPDATE SET
-        username =
-          EXCLUDED.username,
-
-        first_name =
-          EXCLUDED.first_name,
-
+        username = EXCLUDED.username,
+        first_name = EXCLUDED.first_name,
         photo_url =
           COALESCE(
             EXCLUDED.photo_url,
             users.photo_url
           ),
-
-        updated_at =
-          CURRENT_TIMESTAMP
+        updated_at = CURRENT_TIMESTAMP
 
       RETURNING *
       `,
@@ -691,9 +639,7 @@ async function updatePermanentLeague(
   currentLeagueLevel
 ) {
   const current =
-    Number(
-      currentLeagueLevel || 1
-    );
+    Number(currentLeagueLevel || 1);
 
   const earned =
     getLeagueFromBalance(balance);
@@ -846,6 +792,7 @@ function formatUser(
           Number(
             user.tap_level || 1
           ),
+
         cost:
           Number(
             user.tap_level || 1
@@ -863,10 +810,12 @@ function formatUser(
           Number(
             user.energy_level || 1
           ),
+
         max:
           Number(
             user.max_energy || 300
           ),
+
         cost:
           Number(
             user.energy_level || 1
@@ -886,16 +835,20 @@ function formatUser(
    SUBSCRIPTION CACHE
 ===================================================== */
 
-const subscriptionCache =
-  new Map();
+const subscriptionCache = new Map();
 
-const SUB_CACHE_MS =
-  60 * 1000;
+const SUB_CACHE_MS = 60 * 1000;
 
-async function isSubscribed(
-  telegramId
-) {
+/* =====================================================
+   TELEGRAM SUBSCRIPTION CHECK
+===================================================== */
+
+async function isSubscribed(telegramId) {
   if (!bot) {
+    console.error(
+      "❌ Subscription check: BOT_TOKEN mavjud emas"
+    );
+
     return false;
   }
 
@@ -906,32 +859,52 @@ async function isSubscribed(
         telegramId
       );
 
-    if (
-      [
-        "creator",
-        "administrator",
-        "member",
-      ].includes(
-        member.status
-      )
-    ) {
+    console.log(
+      `📢 Telegram member status: user=${telegramId}, status=${member.status}`
+    );
+
+    /*
+      Kanal egasi
+    */
+    if (member.status === "creator") {
       return true;
     }
 
+    /*
+      Kanal administratori
+    */
+    if (member.status === "administrator") {
+      return true;
+    }
+
+    /*
+      Oddiy obunachi
+    */
+    if (member.status === "member") {
+      return true;
+    }
+
+    /*
+      Restricted, lekin hali kanal a'zosi
+    */
     if (
-      member.status ===
-        "restricted" &&
+      member.status === "restricted" &&
       member.is_member === true
     ) {
       return true;
     }
 
+    /*
+      left / kicked / boshqa holatlar
+    */
     return false;
+
   } catch (error) {
     console.error(
-      "Subscription check:",
-      error.description ||
-        error.message
+      "❌ Telegram subscription API error:",
+      error?.description ||
+        error?.message ||
+        error
     );
 
     return false;
@@ -942,34 +915,34 @@ async function isSubscribedCached(
   telegramId,
   force = false
 ) {
-  const key =
-    String(telegramId);
+  const key = String(telegramId);
 
-  const cached =
-    subscriptionCache.get(key);
+  /*
+    force=true bo'lsa cache ishlatilmaydi.
+    Bu aynan "Obunani tekshirish" tugmasi
+    uchun kerak.
+  */
+  if (!force) {
+    const cached =
+      subscriptionCache.get(key);
 
-  if (
-    !force &&
-    cached &&
-    Date.now() -
+    if (
+      cached &&
+      Date.now() -
         cached.checkedAt <
-      SUB_CACHE_MS
-  ) {
-    return cached.value;
+        SUB_CACHE_MS
+    ) {
+      return cached.value;
+    }
   }
 
   const value =
-    await isSubscribed(
-      telegramId
-    );
+    await isSubscribed(telegramId);
 
-  subscriptionCache.set(
-    key,
-    {
-      value,
-      checkedAt: Date.now(),
-    }
-  );
+  subscriptionCache.set(key, {
+    value,
+    checkedAt: Date.now(),
+  });
 
   return value;
 }
@@ -1006,26 +979,46 @@ app.get(
   requireTelegramUser,
   async (req, res) => {
     try {
+      const force =
+        String(
+          req.query.force || ""
+        ).toLowerCase() === "true";
+
+      const telegramId =
+        req.telegramUser.id;
+
+      console.log(
+        `🔎 Subscription check: user=${telegramId}, force=${force}`
+      );
+
       const subscribed =
         await isSubscribedCached(
-          req.telegramUser.id
+          telegramId,
+          force
         );
+
+      console.log(
+        `📢 Subscription result: user=${telegramId}, subscribed=${subscribed}`
+      );
 
       return res.json({
         ok: true,
         subscribed,
-        channel:
-          CHANNEL_URL,
+        channel: CHANNEL_URL,
+        telegramId:
+          String(telegramId),
       });
     } catch (error) {
       console.error(
-        "/api/subscription:",
-        error
+        "❌ /api/subscription:",
+        error?.description ||
+          error?.message ||
+          error
       );
 
       return res.status(500).json({
-        error:
-          "Server xatosi",
+        ok: false,
+        error: "Server xatosi",
       });
     }
   }
@@ -1047,13 +1040,6 @@ app.get(
         await isSubscribedCached(
           req.telegramUser.id
         );
-
-      /*
-        Subscription false bo'lsa ham
-        user API ishlaydi.
-        Frontend subscription oynasini
-        o'zi ko'rsatadi.
-      */
 
       let user =
         await createOrUpdateUser(
@@ -1078,8 +1064,7 @@ app.get(
           ]
         );
 
-      user =
-        result.rows[0];
+      user = result.rows[0];
 
       await updatePermanentLeague(
         client,
@@ -1100,8 +1085,7 @@ app.get(
           ]
         );
 
-      user =
-        result.rows[0];
+      user = result.rows[0];
 
       const rank =
         await getUserRank(
@@ -1120,13 +1104,12 @@ app.get(
       });
     } catch (error) {
       console.error(
-        "/api/me:",
+        "❌ /api/me:",
         error
       );
 
       return res.status(500).json({
-        error:
-          "Server xatosi",
+        error: "Server xatosi",
       });
     } finally {
       client.release();
@@ -1175,12 +1158,9 @@ app.post(
         });
       }
 
-      taps =
-        Math.min(taps, 100);
+      taps = Math.min(taps, 100);
 
-      await client.query(
-        "BEGIN"
-      );
+      await client.query("BEGIN");
 
       let result =
         await client.query(
@@ -1236,13 +1216,10 @@ app.post(
           ]
         );
 
-      user =
-        result.rows[0];
+      user = result.rows[0];
 
       const energy =
-        Number(
-          user.energy || 0
-        );
+        Number(user.energy || 0);
 
       const actualTaps =
         Math.min(
@@ -1251,9 +1228,7 @@ app.post(
         );
 
       if (actualTaps <= 0) {
-        await client.query(
-          "COMMIT"
-        );
+        await client.query("COMMIT");
 
         return res.json({
           ok: true,
@@ -1301,8 +1276,7 @@ app.post(
           ]
         );
 
-      user =
-        result.rows[0];
+      user = result.rows[0];
 
       await updatePermanentLeague(
         client,
@@ -1323,12 +1297,9 @@ app.post(
           ]
         );
 
-      user =
-        result.rows[0];
+      user = result.rows[0];
 
-      await client.query(
-        "COMMIT"
-      );
+      await client.query("COMMIT");
 
       return res.json({
         ok: true,
@@ -1340,19 +1311,16 @@ app.post(
       });
     } catch (error) {
       try {
-        await client.query(
-          "ROLLBACK"
-        );
+        await client.query("ROLLBACK");
       } catch {}
 
       console.error(
-        "/api/tap:",
+        "❌ /api/tap:",
         error
       );
 
       return res.status(500).json({
-        error:
-          "Server xatosi",
+        error: "Server xatosi",
       });
     } finally {
       client.release();
@@ -1397,9 +1365,7 @@ app.post(
         });
       }
 
-      await client.query(
-        "BEGIN"
-      );
+      await client.query("BEGIN");
 
       let result =
         await client.query(
@@ -1455,8 +1421,7 @@ app.post(
           ]
         );
 
-      user =
-        result.rows[0];
+      user = result.rows[0];
 
       const balance =
         Number(
@@ -1470,9 +1435,7 @@ app.post(
           );
 
         if (level >= 10) {
-          await client.query(
-            "ROLLBACK"
-          );
+          await client.query("ROLLBACK");
 
           return res.status(400).json({
             error:
@@ -1481,14 +1444,10 @@ app.post(
         }
 
         const cost =
-          getTapUpgradeCost(
-            level
-          );
+          getTapUpgradeCost(level);
 
         if (balance < cost) {
-          await client.query(
-            "ROLLBACK"
-          );
+          await client.query("ROLLBACK");
 
           return res.status(400).json({
             error:
@@ -1528,9 +1487,7 @@ app.post(
           );
 
         if (level >= 10) {
-          await client.query(
-            "ROLLBACK"
-          );
+          await client.query("ROLLBACK");
 
           return res.status(400).json({
             error:
@@ -1539,14 +1496,10 @@ app.post(
         }
 
         const cost =
-          getEnergyUpgradeCost(
-            level
-          );
+          getEnergyUpgradeCost(level);
 
         if (balance < cost) {
-          await client.query(
-            "ROLLBACK"
-          );
+          await client.query("ROLLBACK");
 
           return res.status(400).json({
             error:
@@ -1558,9 +1511,7 @@ app.post(
           level + 1;
 
         const newMaxEnergy =
-          getMaxEnergy(
-            newLevel
-          );
+          getMaxEnergy(newLevel);
 
         result =
           await client.query(
@@ -1598,8 +1549,7 @@ app.post(
           );
       }
 
-      user =
-        result.rows[0];
+      user = result.rows[0];
 
       await updatePermanentLeague(
         client,
@@ -1620,12 +1570,9 @@ app.post(
           ]
         );
 
-      user =
-        result.rows[0];
+      user = result.rows[0];
 
-      await client.query(
-        "COMMIT"
-      );
+      await client.query("COMMIT");
 
       return res.json({
         ok: true,
@@ -1635,19 +1582,16 @@ app.post(
       });
     } catch (error) {
       try {
-        await client.query(
-          "ROLLBACK"
-        );
+        await client.query("ROLLBACK");
       } catch {}
 
       console.error(
-        "/api/upgrade:",
+        "❌ /api/upgrade:",
         error
       );
 
       return res.status(500).json({
-        error:
-          "Server xatosi",
+        error: "Server xatosi",
       });
     } finally {
       client.release();
@@ -1679,9 +1623,7 @@ app.post(
         });
       }
 
-      await client.query(
-        "BEGIN"
-      );
+      await client.query("BEGIN");
 
       let result =
         await client.query(
@@ -1727,8 +1669,7 @@ app.post(
             user.daily_claimed_at
           );
 
-        const now =
-          new Date();
+        const now = new Date();
 
         claimedToday =
           last.getFullYear() ===
@@ -1740,9 +1681,7 @@ app.post(
       }
 
       if (claimedToday) {
-        await client.query(
-          "ROLLBACK"
-        );
+        await client.query("ROLLBACK");
 
         return res.status(400).json({
           error:
@@ -1799,9 +1738,7 @@ app.post(
       updatedUser =
         result.rows[0];
 
-      await client.query(
-        "COMMIT"
-      );
+      await client.query("COMMIT");
 
       return res.json({
         ok: true,
@@ -1809,25 +1746,20 @@ app.post(
         reward:
           DAILY_REWARD,
         user:
-          formatUser(
-            updatedUser
-          ),
+          formatUser(updatedUser),
       });
     } catch (error) {
       try {
-        await client.query(
-          "ROLLBACK"
-        );
+        await client.query("ROLLBACK");
       } catch {}
 
       console.error(
-        "/api/daily:",
+        "❌ /api/daily:",
         error
       );
 
       return res.status(500).json({
-        error:
-          "Server xatosi",
+        error: "Server xatosi",
       });
     } finally {
       client.release();
@@ -1875,16 +1807,13 @@ app.get(
               ),
 
             username:
-              friend.username ||
-              "",
+              friend.username || "",
 
             firstName:
-              friend.first_name ||
-              "",
+              friend.first_name || "",
 
             photoUrl:
-              friend.photo_url ||
-              "",
+              friend.photo_url || "",
 
             balance:
               Number(
@@ -1908,13 +1837,12 @@ app.get(
       });
     } catch (error) {
       console.error(
-        "/api/friends:",
+        "❌ /api/friends:",
         error
       );
 
       return res.status(500).json({
-        error:
-          "Server xatosi",
+        error: "Server xatosi",
       });
     }
   }
@@ -1934,9 +1862,7 @@ app.get(
           req.query.limit || 100
         );
 
-      if (
-        !Number.isFinite(limit)
-      ) {
+      if (!Number.isFinite(limit)) {
         limit = 100;
       }
 
@@ -1958,7 +1884,8 @@ app.get(
             first_name,
             photo_url,
             balance,
-            league_level
+            league_level,
+            created_at
 
           FROM users
 
@@ -1977,8 +1904,7 @@ app.get(
             const league =
               getLeagueByLevel(
                 Number(
-                  user.league_level ||
-                    1
+                  user.league_level || 1
                 )
               );
 
@@ -1992,16 +1918,14 @@ app.get(
                 ),
 
               username:
-                user.username ||
-                "",
+                user.username || "",
 
               firstName:
                 user.first_name ||
                 "Player",
 
               photoUrl:
-                user.photo_url ||
-                "",
+                user.photo_url || "",
 
               balance:
                 Number(
@@ -2031,22 +1955,74 @@ app.get(
           }
         );
 
+      const myUser =
+        await pool.query(
+          `
+          SELECT *
+          FROM users
+          WHERE telegram_id = $1
+          `,
+          [
+            req.telegramUser.id,
+          ]
+        );
+
+      let myRank = null;
+      let myData = null;
+
+      if (myUser.rows.length) {
+        const me =
+          myUser.rows[0];
+
+        myRank =
+          await getUserRank(
+            pool,
+            me.balance
+          );
+
+        const league =
+          getLeagueByLevel(
+            Number(
+              me.league_level || 1
+            )
+          );
+
+        myData = {
+          rank: myRank,
+          balance:
+            Number(
+              me.balance || 0
+            ),
+          league: {
+            level:
+              league.level,
+            name:
+              league.name,
+            icon:
+              league.icon,
+          },
+        };
+      }
+
       return res.json({
         ok: true,
 
         rank: ranking,
 
         users: ranking,
+
+        user: myData,
+
+        players: ranking,
       });
     } catch (error) {
       console.error(
-        "/api/rank:",
+        "❌ /api/rank:",
         error
       );
 
       return res.status(500).json({
-        error:
-          "Server xatosi",
+        error: "Server xatosi",
       });
     }
   }
@@ -2060,9 +2036,7 @@ app.get(
   "/health",
   async (req, res) => {
     try {
-      await pool.query(
-        "SELECT 1"
-      );
+      await pool.query("SELECT 1");
 
       return res.json({
         ok: true,
@@ -2077,88 +2051,6 @@ app.get(
     }
   }
 );
-
-/* =====================================================
-   TELEGRAM BOT
-===================================================== */
-
-if (bot) {
-  bot.start(
-    async (ctx) => {
-      try {
-        const telegramUser =
-          ctx.from;
-
-        const payload =
-          ctx.startPayload ||
-          "";
-
-        const referrerId =
-          payload.startsWith(
-            "ref_"
-          )
-            ? payload.substring(
-                4
-              )
-            : null;
-
-        await createOrUpdateUser(
-          telegramUser
-        );
-
-        if (
-          referrerId &&
-          String(
-            referrerId
-          ) !==
-            String(
-              telegramUser.id
-            )
-        ) {
-          await processReferral(
-            telegramUser.id,
-            referrerId
-          );
-        }
-
-        await ctx.reply(
-          `👋 Salom, ${
-            telegramUser.first_name ||
-            "Player"
-          }!\n\n🪙 UZCOIN'ga xush kelibsiz.`,
-          Markup.inlineKeyboard([
-            [
-              Markup.button.webApp(
-                "🪙 UZCOIN'ni ochish",
-                PUBLIC_URL
-              ),
-            ],
-            [
-              Markup.button.url(
-                "📢 Kanal",
-                CHANNEL_URL
-              ),
-            ],
-          ])
-        );
-      } catch (error) {
-        console.error(
-          "Bot start error:",
-          error
-        );
-      }
-    }
-  );
-
-  bot.catch(
-    (error) => {
-      console.error(
-        "Telegram bot error:",
-        error
-      );
-    }
-  );
-}
 
 /* =====================================================
    REFERRAL
@@ -2183,9 +2075,7 @@ async function processReferral(
     await pool.connect();
 
   try {
-    await client.query(
-      "BEGIN"
-    );
+    await client.query("BEGIN");
 
     const newUserResult =
       await client.query(
@@ -2213,9 +2103,7 @@ async function processReferral(
       !newUserResult.rows.length ||
       !referrerResult.rows.length
     ) {
-      await client.query(
-        "ROLLBACK"
-      );
+      await client.query("ROLLBACK");
 
       return false;
     }
@@ -2224,9 +2112,7 @@ async function processReferral(
       newUserResult.rows[0];
 
     if (newUser.referred_by) {
-      await client.query(
-        "ROLLBACK"
-      );
+      await client.query("ROLLBACK");
 
       return false;
     }
@@ -2270,20 +2156,16 @@ async function processReferral(
       ]
     );
 
-    await client.query(
-      "COMMIT"
-    );
+    await client.query("COMMIT");
 
     return true;
   } catch (error) {
     try {
-      await client.query(
-        "ROLLBACK"
-      );
+      await client.query("ROLLBACK");
     } catch {}
 
     console.error(
-      "Referral error:",
+      "❌ Referral error:",
       error
     );
 
@@ -2294,6 +2176,77 @@ async function processReferral(
 }
 
 /* =====================================================
+   TELEGRAM BOT
+===================================================== */
+
+if (bot) {
+  bot.start(
+    async (ctx) => {
+      try {
+        const telegramUser =
+          ctx.from;
+
+        const payload =
+          ctx.startPayload || "";
+
+        const referrerId =
+          payload.startsWith("ref_")
+            ? payload.substring(4)
+            : null;
+
+        await createOrUpdateUser(
+          telegramUser
+        );
+
+        if (
+          referrerId &&
+          String(referrerId) !==
+            String(telegramUser.id)
+        ) {
+          await processReferral(
+            telegramUser.id,
+            referrerId
+          );
+        }
+
+        await ctx.reply(
+          `👋 Salom, ${
+            telegramUser.first_name ||
+            "Player"
+          }!\n\n🪙 UZCOIN'ga xush kelibsiz.`,
+          Markup.inlineKeyboard([
+            [
+              Markup.button.webApp(
+                "🪙 UZCOIN'ni ochish",
+                PUBLIC_URL
+              ),
+            ],
+            [
+              Markup.button.url(
+                "📢 Kanal",
+                CHANNEL_URL
+              ),
+            ],
+          ])
+        );
+      } catch (error) {
+        console.error(
+          "❌ Bot start error:",
+          error
+        );
+      }
+    }
+  );
+
+  bot.catch((error) => {
+    console.error(
+      "❌ Telegram bot error:",
+      error
+    );
+  });
+}
+
+/* =====================================================
    API 404
 ===================================================== */
 
@@ -2301,6 +2254,7 @@ app.use(
   "/api",
   (req, res) => {
     return res.status(404).json({
+      ok: false,
       error:
         "UZCOIN API NOT FOUND",
       path:
@@ -2310,6 +2264,32 @@ app.use(
 );
 
 /* =====================================================
+   TELEGRAM WEBHOOK
+===================================================== */
+
+if (bot) {
+  app.post(
+    "/telegram-webhook",
+    async (req, res) => {
+      try {
+        await bot.handleUpdate(
+          req.body
+        );
+
+        res.sendStatus(200);
+      } catch (error) {
+        console.error(
+          "❌ Webhook error:",
+          error
+        );
+
+        res.sendStatus(500);
+      }
+    }
+  );
+}
+
+/* =====================================================
    FRONTEND FALLBACK
 ===================================================== */
 
@@ -2317,12 +2297,8 @@ app.use(
   (req, res, next) => {
     if (
       req.method === "GET" &&
-      !req.path.startsWith(
-        "/api"
-      ) &&
-      !req.path.startsWith(
-        "/health"
-      )
+      !req.path.startsWith("/api") &&
+      !req.path.startsWith("/health")
     ) {
       return res.sendFile(
         path.join(
@@ -2349,7 +2325,7 @@ app.use(
     next
   ) => {
     console.error(
-      "GLOBAL ERROR:",
+      "❌ GLOBAL ERROR:",
       error
     );
 
@@ -2388,13 +2364,16 @@ async function startServer() {
         console.log(
           `🌐 Public URL: ${PUBLIC_URL}`
         );
+
+        console.log(
+          `📢 Required channel: ${REQUIRED_CHANNEL}`
+        );
+
+        console.log(
+          `🤖 Bot: @${BOT_USERNAME}`
+        );
       }
     );
-
-    /*
-      Webhookni faqat PUBLIC_URL mavjud bo'lsa
-      o'rnatamiz.
-    */
 
     if (bot) {
       try {
@@ -2407,8 +2386,10 @@ async function startServer() {
         );
       } catch (error) {
         console.error(
-          "Webhook setup error:",
-          error.message
+          "❌ Webhook setup error:",
+          error?.description ||
+            error?.message ||
+            error
         );
       }
     }
@@ -2420,32 +2401,6 @@ async function startServer() {
 
     process.exit(1);
   }
-}
-
-/* =====================================================
-   TELEGRAM WEBHOOK
-===================================================== */
-
-if (bot) {
-  app.post(
-    "/telegram-webhook",
-    async (req, res) => {
-      try {
-        await bot.handleUpdate(
-          req.body
-        );
-
-        res.sendStatus(200);
-      } catch (error) {
-        console.error(
-          "Webhook error:",
-          error
-        );
-
-        res.sendStatus(500);
-      }
-    }
-  );
 }
 
 /* =====================================================
@@ -2473,5 +2428,9 @@ process.once(
     pool.end();
   }
 );
+
+/* =====================================================
+   START SERVER
+===================================================== */
 
 startServer();
