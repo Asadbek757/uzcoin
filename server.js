@@ -2459,6 +2459,14 @@ async function startServer() {
       );
     }
 
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    service: "UZCOIN",
+    uptime: process.uptime()
+  });
+});
+    
     const PORT =
       process.env.PORT || 3000;
 
