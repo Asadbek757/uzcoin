@@ -4346,6 +4346,21 @@ async function loadRank() {
   
     const users =  
       data.users || [];  
+
+        // Katta Liga kartasini yangilash
+    const rankLeagueIcon =
+      document.getElementById("rankLeagueIcon");
+
+    const rankLeagueName =
+      document.getElementById("rankLeagueName");
+
+    if (rankLeagueIcon && rankLeagueName) {
+      rankLeagueIcon.textContent =
+        league.icon || "🥉";
+
+      rankLeagueName.textContent =
+        league.name || "BRONZE";
+    }
   
   
     const list =  
