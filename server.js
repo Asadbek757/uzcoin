@@ -17,6 +17,36 @@ const REQUIRED_CHANNEL = "@uzcoin_officiall";
 const CHANNEL_URL = "https://t.me/uzcoin_officiall";
 const BOT_USERNAME = "UZCoinTapBot";
 
+// =========================
+// ADMIN CONFIG
+// =========================
+
+const ADMIN_ID = String(process.env.ADMIN_ID || "");
+
+function isAdmin(telegramId) {
+  if (!ADMIN_ID) return false;
+  return String(telegramId) === ADMIN_ID;
+}
+
+async function getAdminFromInitData(initData) {
+  try {
+    const telegramUser = validateInitData(initData);
+
+    if (!telegramUser) {
+      return null;
+    }
+
+    if (!isAdmin(telegramUser.id)) {
+      return null;
+    }
+
+    return telegramUser;
+  } catch (error) {
+    console.error("Admin auth error:", error);
+    return null;
+  }
+}
+
 if (!BOT_TOKEN) {
   console.error("BOT_TOKEN is missing");
 }
@@ -2365,6 +2395,249 @@ app.get(
   }
 );
 
+// =========================
+// ADMIN STATS
+// =========================
+
+app.post("/api/admin/stats", async (req, res) => {
+  try {
+    const { initData } = req.body;
+
+    const admin = await getAdminFromInitData(initData);
+
+    if (!admin) {
+      return res.status(403).json({
+        success: false,
+        error: "Admin access denied"
+      });
+    }
+
+    const usersResult = await pool.query(`
+      SELECT
+        COUNT(*)::int AS users,
+        COALESCE(SUM(balance), 0) AS total_balance,
+        COALESCE(SUM(referrals), 0)::int AS total_referrals
+      FROM users
+    `);
+
+    const todayResult = await pool.query(`
+      SELECT COUNT(*)::int AS today_users
+      FROM users
+      WHERE created_at::date = CURRENT_DATE
+    `);
+
+    const row = usersResult.rows[0];
+
+    res.json({
+      success: true,
+      stats: {
+        users: row.users,
+        totalBalance: Number(row.total_balance || 0),
+        totalReferrals: row.total_referrals,
+        todayUsers: todayResult.rows[0].today_users
+      }
+    });
+
+  } catch (error) {
+    console.error("Admin stats error:", error);
+
+    res.status(500).json({
+      success: false,
+      error: "Server error"
+    });
+  }
+});
+
+
+// =========================
+// ADMIN USERS SEARCH
+// =========================
+
+app.post("/api/admin/users", async (req, res) => {
+  try {
+    const { initData, search = "" } = req.body;
+
+    const admin = await getAdminFromInitData(initData);
+
+    if (!admin) {
+      return res.status(403).json({
+        success: false,
+        error: "Admin access denied"
+      });
+    }
+
+    const q = String(search).trim();
+
+    let result;
+
+    if (!q) {
+      result = await pool.query(`
+        SELECT
+          telegram_id,
+          username,
+          first_name,
+          balance,
+          energy,
+          max_energy,
+          tap_level,
+          energy_level,
+          referrals,
+          league_level,
+          created_at
+        FROM users
+        ORDER BY balance DESC
+        LIMIT 100
+      `);
+    } else {
+      result = await pool.query(`
+        SELECT
+          telegram_id,
+          username,
+          first_name,
+          balance,
+          energy,
+          max_energy,
+          tap_level,
+          energy_level,
+          referrals,
+          league_level,
+          created_at
+        FROM users
+        WHERE
+          telegram_id::text ILIKE $1
+          OR username ILIKE $1
+          OR first_name ILIKE $1
+        ORDER BY balance DESC
+        LIMIT 100
+      `, [`%${q}%`]);
+    }
+
+    res.json({
+      success: true,
+      users: result.rows
+    });
+
+  } catch (error) {
+    console.error("Admin users error:", error);
+
+    res.status(500).json({
+      success: false,
+      error: "Server error"
+    });
+  }
+});
+
+// =========================
+// ADMIN USER BALANCE UPDATE
+// =========================
+
+app.post("/api/admin/user/update", async (req, res) => {
+  try {
+    const {
+      initData,
+      telegramId,
+      balanceChange
+    } = req.body;
+
+    const admin = await getAdminFromInitData(initData);
+
+    if (!admin) {
+      return res.status(403).json({
+        success: false,
+        error: "Admin access denied"
+      });
+    }
+
+    if (!telegramId) {
+      return res.status(400).json({
+        success: false,
+        error: "telegramId required"
+      });
+    }
+
+    const change = Number(balanceChange);
+
+    if (!Number.isFinite(change)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid balanceChange"
+      });
+    }
+
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const userResult = await client.query(
+        `
+        SELECT *
+        FROM users
+        WHERE telegram_id = $1
+        FOR UPDATE
+        `,
+        [telegramId]
+      );
+
+      if (userResult.rows.length === 0) {
+        await client.query("ROLLBACK");
+
+        return res.status(404).json({
+          success: false,
+          error: "User not found"
+        });
+      }
+
+      const user = userResult.rows[0];
+
+      const oldBalance = Number(user.balance || 0);
+      const newBalance = Math.max(0, oldBalance + change);
+
+      const newLeague = getLeagueFromBalance(newBalance);
+
+      await client.query(
+        `
+        UPDATE users
+        SET
+          balance = $1,
+          league_level = GREATEST(league_level, $2),
+          updated_at = CURRENT_TIMESTAMP
+        WHERE telegram_id = $3
+        `,
+        [
+          newBalance,
+          newLeague.level,
+          telegramId
+        ]
+      );
+
+      await client.query("COMMIT");
+
+      res.json({
+        success: true,
+        telegramId,
+        oldBalance,
+        newBalance,
+        change
+      });
+
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+
+    } finally {
+      client.release();
+    }
+
+  } catch (error) {
+    console.error("Admin update error:", error);
+
+    res.status(500).json({
+      success: false,
+      error: "Server error"
+    });
+  }
+});
 
 /* =====================================================
    LEAGUES
