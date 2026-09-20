@@ -673,6 +673,12 @@
     const data =
       await response.json();
 
+    console.log(
+  "BLOCK RESPONSE:",
+  response.status,
+  data
+);
+
     if (!response.ok) {
       alert(
         data.error ||
