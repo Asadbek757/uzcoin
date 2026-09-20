@@ -244,7 +244,7 @@ function getEnergyUpgradeCost(level) {
   ];
 }
 
-const REFERRAL_BONUS = 500;
+const REFERRAL_BONUS = 1000;
 
 
 /* =====================================================
