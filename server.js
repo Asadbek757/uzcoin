@@ -1118,10 +1118,42 @@ Keyin <b>✅ Tekshirish</b> tugmasini bosing.
       );
 
       if (referrerId) {
+
         await processReferral(
           telegramUser.id,
           referrerId
         );
+      }
+
+      /* =========================================
+         ODDIY USER UCHUN TUGMALAR
+      ========================================= */
+
+      const buttons = [
+        [
+          Markup.button.webApp(
+            "🚀 Open UZCOIN",
+            PUBLIC_URL
+          )
+        ]
+      ];
+
+      /* =========================================
+         FAQAT ADMIN UCHUN ADMIN PANEL
+      ========================================= */
+
+      if (
+        ADMIN_ID &&
+        String(telegramUser.id) === ADMIN_ID
+      ) {
+
+        buttons.push([
+          Markup.button.webApp(
+            "🛠 Admin Panel",
+            `${PUBLIC_URL}/admin.html`
+          )
+        ]);
+
       }
 
       await ctx.reply(
@@ -1136,14 +1168,9 @@ Xush kelibsiz, ${
         {
           parse_mode: "HTML",
 
-          ...Markup.inlineKeyboard([
-            [
-              Markup.button.webApp(
-                "🚀 Open UZCOIN",
-                PUBLIC_URL
-              )
-            ]
-          ])
+          ...Markup.inlineKeyboard(
+            buttons
+          )
         }
       );
 
