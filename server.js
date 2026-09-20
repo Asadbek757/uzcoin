@@ -1572,6 +1572,25 @@ app.post(
         });
       }
 
+      const blockedResult =
+  await pool.query(
+    `
+    SELECT blocked
+    FROM users
+    WHERE telegram_id = $1
+    `,
+    [telegramUser.id]
+  );
+
+if (
+  blockedResult.rows.length &&
+  blockedResult.rows[0].blocked
+) {
+  return res.status(403).json({
+    error: "USER_BLOCKED"
+  });
+}
+
       /*
         Cache ishlatiladi.
         Har bir tapda Telegram API chaqirilmaydi.
@@ -1587,6 +1606,12 @@ app.post(
           error: "NOT_SUBSCRIBED"
         });
       }
+
+      if (auth.blocked) {
+  return res.status(403).json({
+    error: "USER_BLOCKED"
+  });
+}
 
       let taps =
         Math.floor(
@@ -1817,6 +1842,25 @@ app.post(
           error: "NOT_SUBSCRIBED"
         });
       }
+
+      const blockedResult =
+  await pool.query(
+    `
+    SELECT blocked
+    FROM users
+    WHERE telegram_id = $1
+    `,
+    [telegramUser.id]
+  );
+
+if (
+  blockedResult.rows.length &&
+  blockedResult.rows[0].blocked
+) {
+  return res.status(403).json({
+    error: "USER_BLOCKED"
+  });
+}
 
       const type =
         req.body.type;
@@ -2087,6 +2131,25 @@ app.post(
         });
       }
 
+      const blockedResult =
+  await pool.query(
+    `
+    SELECT blocked
+    FROM users
+    WHERE telegram_id = $1
+    `,
+    [telegramUser.id]
+  );
+
+if (
+  blockedResult.rows.length &&
+  blockedResult.rows[0].blocked
+) {
+  return res.status(403).json({
+    error: "USER_BLOCKED"
+  });
+}
+
       await client.query("BEGIN");
 
       let result =
@@ -2265,6 +2328,25 @@ app.post(
         });
       }
 
+      const blockedResult =
+  await pool.query(
+    `
+    SELECT blocked
+    FROM users
+    WHERE telegram_id = $1
+    `,
+    [telegramUser.id]
+  );
+
+if (
+  blockedResult.rows.length &&
+  blockedResult.rows[0].blocked
+) {
+  return res.status(403).json({
+    error: "USER_BLOCKED"
+  });
+}
+
       const success =
         await processReferral(
           telegramUser.id,
@@ -2361,9 +2443,8 @@ app.get(
             league_level
 
           FROM users
-
-          ORDER BY
-            balance DESC,
+            WHERE blocked = FALSE
+            ORDER BY balance DESC
             created_at ASC
 
           LIMIT 100
