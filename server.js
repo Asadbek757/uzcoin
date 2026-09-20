@@ -63,18 +63,47 @@ const LEAGUES = [
   },
   {
     level: 4,
-    name: "DIAMOND",
+    name: "PLATINUM",
     icon: "💎",
     min: 50000
   },
   {
     level: 5,
+    name: "DIAMOND",
+    icon: "💠",
+    min: 250000
+  },
+  {
+    level: 6,
     name: "MASTER",
     icon: "👑",
-    min: 100000
+    min: 1000000
+  },
+  {
+    level: 7,
+    name: "GRANDMASTER",
+    icon: "🔥",
+    min: 5000000
+  },
+  {
+    level: 8,
+    name: "CHAMPION",
+    icon: "⚔️",
+    min: 25000000
+  },
+  {
+    level: 9,
+    name: "LEGEND",
+    icon: "🌟",
+    min: 100000000
+  },
+  {
+    level: 10,
+    name: "TITAN",
+    icon: "🏆",
+    min: 500000000
   }
 ];
-
 
 function getLeagueByLevel(level) {
   let result = LEAGUES[0];
