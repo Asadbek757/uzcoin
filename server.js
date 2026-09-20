@@ -2524,6 +2524,7 @@ app.post("/api/admin/users", async (req, res) => {
           energy_level,
           referrals,
           league_level,
+          blocked,
           created_at
         FROM users
         ORDER BY balance DESC
@@ -2679,6 +2680,87 @@ app.post("/api/admin/user/update", async (req, res) => {
     });
   }
 });
+
+app.post(
+  "/api/admin/user/block",
+  async (req, res) => {
+
+    try {
+
+      const {
+        initData,
+        telegramId,
+        blocked
+      } = req.body;
+
+      const admin =
+        await getAdminFromInitData(
+          initData
+        );
+
+      if (!admin) {
+        return res.status(403).json({
+          success: false,
+          error: "Admin access denied"
+        });
+      }
+
+      if (!telegramId) {
+        return res.status(400).json({
+          success: false,
+          error: "telegramId required"
+        });
+      }
+
+      const newBlocked =
+        Boolean(blocked);
+
+      const result =
+        await pool.query(
+          `
+          UPDATE users
+          SET
+            blocked = $1,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE telegram_id = $2
+          RETURNING
+            telegram_id,
+            username,
+            first_name,
+            blocked
+          `,
+          [
+            newBlocked,
+            telegramId
+          ]
+        );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: "User not found"
+        });
+      }
+
+      return res.json({
+        success: true,
+        user: result.rows[0]
+      });
+
+    } catch (error) {
+
+      console.error(
+        "/api/admin/user/block:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        error: "SERVER_ERROR"
+      });
+    }
+  }
+);
 
 /* =====================================================
    LEAGUES
