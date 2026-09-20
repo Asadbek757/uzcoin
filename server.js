@@ -896,6 +896,15 @@ async function getAuthenticatedUser(
       telegramUser
     );
 
+  if (user.blocked) {
+  return {
+    telegramUser,
+    subscribed: true,
+    user: null,
+    blocked: true
+  };
+}
+
   return {
     telegramUser,
     subscribed: true,
