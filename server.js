@@ -456,6 +456,11 @@ async function initDatabase() {
     Liga faqat yuqoriga chiqadi.
   */
 
+    await pool.query(`
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS blocked BOOLEAN DEFAULT FALSE
+  `);
+
   for (const league of LEAGUES) {
     await pool.query(
       `
