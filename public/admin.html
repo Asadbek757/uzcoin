@@ -562,6 +562,17 @@
 
             </div>
 
+                        <div class="actions">
+
+              <button
+                class="${user.blocked ? 'remove' : 'add'}"
+                onclick="toggleBlock('${user.telegram_id}', ${user.blocked ? 'false' : 'true'})"
+              >
+                ${user.blocked ? '🔓 Unblock' : '🚫 Block'}
+              </button>
+
+            </div>
+
           </div>
         `;
 
@@ -632,6 +643,58 @@
       );
     }
   }
+
+  async function toggleBlock(
+  telegramId,
+  blocked
+) {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/admin/user/block",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            initData,
+            telegramId,
+            blocked
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      alert(
+        data.error ||
+        "Xatolik yuz berdi"
+      );
+      return;
+    }
+
+    await loadUsers();
+
+  } catch (error) {
+
+    console.error(
+      "toggleBlock:",
+      error
+    );
+
+    alert(
+      "Server bilan aloqa xatosi"
+    );
+  }
+}
 
 
   function escapeHtml(value) {
