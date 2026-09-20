@@ -1,1 +1,691 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
 
+  <title>UZCOIN Admin Panel</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top, #18243d 0%, #080b12 45%, #050609 100%);
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+      margin: auto;
+      padding: 18px 14px 40px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .badge {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 12px;
+      padding: 8px 11px;
+      font-size: 12px;
+      color: #aeb9ca;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .card {
+      background: rgba(20,26,39,.88);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      padding: 17px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+    }
+
+    .stat-label {
+      color: #8995a8;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 23px;
+      font-weight: 900;
+      word-break: break-word;
+    }
+
+    .section {
+      margin-top: 16px;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 8px;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: none;
+      color: white;
+      background: #151c2a;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 13px;
+      padding: 13px;
+      font-size: 14px;
+    }
+
+    button {
+      border: 0;
+      outline: none;
+      color: white;
+      font-weight: 800;
+      border-radius: 13px;
+      padding: 0 16px;
+      background: #2775ff;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(.97);
+    }
+
+    .users {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .user-card {
+      background: #111722;
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .user-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .user-name {
+      font-weight: 900;
+      font-size: 15px;
+    }
+
+    .user-id {
+      color: #7f8a9c;
+      font-size: 11px;
+      margin-top: 4px;
+      word-break: break-all;
+    }
+
+    .balance {
+      font-size: 16px;
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .details {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+    }
+
+    .detail {
+      background: #181f2c;
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 11px;
+      color: #9ba6b8;
+    }
+
+    .detail strong {
+      display: block;
+      color: white;
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .actions input {
+      padding: 11px;
+    }
+
+    .add {
+      background: #168f55;
+      min-width: 80px;
+    }
+
+    .remove {
+      background: #c93b4b;
+      min-width: 80px;
+    }
+
+    .status {
+      text-align: center;
+      color: #8d99aa;
+      font-size: 13px;
+      padding: 20px 5px;
+    }
+
+    .error {
+      color: #ff6677;
+    }
+
+    .success {
+      color: #54d98b;
+    }
+
+    @media (max-width: 430px) {
+      .title {
+        font-size: 21px;
+      }
+
+      .stat-value {
+        font-size: 20px;
+      }
+
+      button {
+        padding: 0 13px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="title">UZCOIN Admin</div>
+    <div class="badge">ADMIN</div>
+  </div>
+
+  <div id="mainStatus" class="status">
+    Admin tekshirilmoqda...
+  </div>
+
+  <div id="panel" style="display:none;">
+
+    <div class="grid">
+
+      <div class="card">
+        <div class="stat-label">Foydalanuvchilar</div>
+        <div id="usersCount" class="stat-value">0</div>
+      </div>
+
+      <div class="card">
+        <div class="stat-label">Jami UZCOIN</div>
+        <div id="totalBalance" class="stat-value">0</div>
+      </div>
+
+      <div class="card">
+        <div class="stat-label">Referral</div>
+        <div id="totalReferrals" class="stat-value">0</div>
+      </div>
+
+      <div class="card">
+        <div class="stat-label">Bugungi userlar</div>
+        <div id="todayUsers" class="stat-value">0</div>
+      </div>
+
+    </div>
+
+    <div class="section">
+
+      <div class="section-title">
+        👤 Foydalanuvchilar
+      </div>
+
+      <div class="search-box">
+        <input
+          id="search"
+          type="text"
+          placeholder="ID, username yoki ism..."
+        >
+
+        <button onclick="searchUsers()">
+          Qidirish
+        </button>
+      </div>
+
+      <div id="users" class="users">
+        <div class="status">
+          Yuklanmoqda...
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+  const tg = window.Telegram.WebApp;
+
+  tg.ready();
+  tg.expand();
+
+  const initData = tg.initData;
+
+  function showStatus(text, type = "") {
+    const el = document.getElementById("mainStatus");
+
+    el.textContent = text;
+    el.className = "status " + type;
+  }
+
+  function formatNumber(number) {
+    return Number(number || 0).toLocaleString("en-US");
+  }
+
+  async function api(url, body) {
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        initData,
+        ...body
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Server error"
+      );
+    }
+
+    return data;
+  }
+
+
+  async function loadStats() {
+
+    try {
+
+      const data =
+        await api(
+          "/api/admin/stats",
+          {}
+        );
+
+      const stats = data.stats;
+
+      document.getElementById(
+        "usersCount"
+      ).textContent =
+        formatNumber(stats.users);
+
+      document.getElementById(
+        "totalBalance"
+      ).textContent =
+        formatNumber(stats.totalBalance);
+
+      document.getElementById(
+        "totalReferrals"
+      ).textContent =
+        formatNumber(stats.totalReferrals);
+
+      document.getElementById(
+        "todayUsers"
+      ).textContent =
+        formatNumber(stats.todayUsers);
+
+    } catch (error) {
+
+      throw error;
+    }
+  }
+
+
+  async function searchUsers() {
+
+    const search =
+      document.getElementById(
+        "search"
+      ).value.trim();
+
+    const container =
+      document.getElementById(
+        "users"
+      );
+
+    container.innerHTML =
+      `<div class="status">
+        Qidirilmoqda...
+      </div>`;
+
+    try {
+
+      const data =
+        await api(
+          "/api/admin/users",
+          {
+            search
+          }
+        );
+
+      renderUsers(data.users);
+
+    } catch (error) {
+
+      container.innerHTML =
+        `<div class="status error">
+          ${escapeHtml(error.message)}
+        </div>`;
+    }
+  }
+
+
+  function renderUsers(users) {
+
+    const container =
+      document.getElementById(
+        "users"
+      );
+
+    if (!users || users.length === 0) {
+
+      container.innerHTML =
+        `<div class="status">
+          User topilmadi
+        </div>`;
+
+      return;
+    }
+
+    container.innerHTML =
+      users.map(user => {
+
+        const name =
+          user.first_name ||
+          user.username ||
+          "Player";
+
+        const username =
+          user.username
+            ? "@" + user.username
+            : "";
+
+        return `
+          <div class="user-card">
+
+            <div class="user-top">
+
+              <div>
+                <div class="user-name">
+                  ${escapeHtml(name)}
+                  ${username
+                    ? `<span style="color:#72809a;font-weight:500;">
+                        ${escapeHtml(username)}
+                       </span>`
+                    : ""}
+                </div>
+
+                <div class="user-id">
+                  ID: ${escapeHtml(
+                    String(user.telegram_id)
+                  )}
+                </div>
+              </div>
+
+              <div class="balance">
+                ${formatNumber(user.balance)}
+                <div style="font-size:10px;color:#788498;">
+                  UZCOIN
+                </div>
+              </div>
+
+            </div>
+
+            <div class="details">
+
+              <div class="detail">
+                Energy
+                <strong>
+                  ${formatNumber(user.energy)}
+                  /
+                  ${formatNumber(user.max_energy)}
+                </strong>
+              </div>
+
+              <div class="detail">
+                Tap Level
+                <strong>
+                  ${formatNumber(user.tap_level)}
+                </strong>
+              </div>
+
+              <div class="detail">
+                Energy Level
+                <strong>
+                  ${formatNumber(user.energy_level)}
+                </strong>
+              </div>
+
+              <div class="detail">
+                Referral
+                <strong>
+                  ${formatNumber(user.referrals)}
+                </strong>
+              </div>
+
+              <div class="detail">
+                League
+                <strong>
+                  ${formatNumber(user.league_level)}
+                </strong>
+              </div>
+
+              <div class="detail">
+                Telegram ID
+                <strong>
+                  ${escapeHtml(
+                    String(user.telegram_id)
+                  )}
+                </strong>
+              </div>
+
+            </div>
+
+            <div class="actions">
+
+              <input
+                id="amount-${user.telegram_id}"
+                type="number"
+                placeholder="UZCOIN miqdori"
+              >
+
+              <button
+                class="add"
+                onclick="changeBalance('${user.telegram_id}', 1)"
+              >
+                + Qo‘sh
+              </button>
+
+              <button
+                class="remove"
+                onclick="changeBalance('${user.telegram_id}', -1)"
+              >
+                −
+              </button>
+
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+  }
+
+
+  async function changeBalance(
+    telegramId,
+    direction
+  ) {
+
+    const input =
+      document.getElementById(
+        "amount-" + telegramId
+      );
+
+    const amount =
+      Number(input.value);
+
+    if (!Number.isFinite(amount) ||
+        amount <= 0) {
+
+      alert(
+        "UZCOIN miqdorini kiriting."
+      );
+
+      return;
+    }
+
+    const change =
+      amount * direction;
+
+    const confirmed =
+      confirm(
+        direction > 0
+          ? `${formatNumber(amount)} UZCOIN qo‘shilsinmi?`
+          : `${formatNumber(amount)} UZCOIN ayrilsinmi?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+
+      await api(
+        "/api/admin/user/update",
+        {
+          telegramId,
+          balanceChange: change
+        }
+      );
+
+      input.value = "";
+
+      await loadStats();
+      await searchUsers();
+
+      alert(
+        "Balans muvaffaqiyatli o‘zgartirildi."
+      );
+
+    } catch (error) {
+
+      alert(
+        error.message
+      );
+    }
+  }
+
+
+  function escapeHtml(value) {
+
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+
+  async function start() {
+
+    if (!initData) {
+
+      showStatus(
+        "Admin panelni Telegram ichidan oching.",
+        "error"
+      );
+
+      return;
+    }
+
+    try {
+
+      await loadStats();
+
+      document.getElementById(
+        "panel"
+      ).style.display = "block";
+
+      document.getElementById(
+        "mainStatus"
+      ).style.display = "none";
+
+      await searchUsers();
+
+    } catch (error) {
+
+      showStatus(
+        "Admin huquqi yo‘q yoki server xatosi.",
+        "error"
+      );
+
+      console.error(error);
+    }
+  }
+
+
+  start();
+
+</script>
+
+</body>
+  </html>
