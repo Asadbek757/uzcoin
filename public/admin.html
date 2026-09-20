@@ -648,59 +648,79 @@
   telegramId,
   blocked
 ) {
-
   try {
+    const response = await fetch(
+      "/api/admin/user/block",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          initData: initData,
+          telegramId: telegramId,
+          blocked: blocked
+        })
+      }
+    );
 
-    const response =
-      await fetch(
-        "/api/admin/user/block",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          body: JSON.stringify({
-            initData,
-            telegramId,
-            blocked
-          })
-        }
-      );
-
-    const data =
-      await response.json();
+    const text = await response.text();
 
     console.log(
-  "BLOCK RESPONSE:",
-  response.status,
-  data
-);
+      "BLOCK STATUS:",
+      response.status
+    );
 
-    if (!response.ok) {
+    console.log(
+      "BLOCK RESPONSE:",
+      text
+    );
+
+    let data = {};
+
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
       alert(
-        data.error ||
-        "Xatolik yuz berdi"
+        "Server javobi JSON emas.\n\n" +
+        "Status: " +
+        response.status +
+        "\n\n" +
+        text.substring(0, 500)
       );
       return;
     }
 
+    if (!response.ok) {
+      alert(
+        "Xatolik: " +
+        (data.error || "Noma'lum xato") +
+        "\nStatus: " +
+        response.status
+      );
+      return;
+    }
+
+    alert(
+      blocked
+        ? "🚫 User bloklandi"
+        : "🔓 User unblock qilindi"
+    );
+
     await loadUsers();
 
   } catch (error) {
-
     console.error(
-      "toggleBlock:",
+      "toggleBlock ERROR:",
       error
     );
 
     alert(
-      "Server bilan aloqa xatosi"
+      "Server bilan aloqa xatosi:\n\n" +
+      error.message
     );
   }
-}
+  }
 
 
   function escapeHtml(value) {
