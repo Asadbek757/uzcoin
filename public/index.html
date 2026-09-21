@@ -2255,21 +2255,38 @@ function updateHome() {
 
 function getTapUpgradeCost(level) {
 
-  return Math.floor(
-    500 * Math.pow(1.8, level - 1)
-  );
+  const costs = [
+    1500,
+    3500,
+    7000,
+    15000,
+    30000,
+    55000,
+    85000,
+    115000,
+    150000
+  ];
+
+  return costs[
+    Math.min(
+      level - 1,
+      costs.length - 1
+    )
+  ];
 }
 
 function getEnergyUpgradeCost(level) {
 
   const costs = [
-    1000,
     5000,
-    25000,
+    15000,
+    40000,
     100000,
-    500000,
-    2500000,
-    10000000
+    250000,
+    600000,
+    1500000,
+    3500000,
+    8000000
   ];
 
   return costs[
