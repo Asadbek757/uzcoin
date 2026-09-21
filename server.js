@@ -207,14 +207,16 @@ function getTapUpgradeCost(level) {
 
 function getMaxEnergy(level) {
   const limits = [
-    300,
     500,
     1000,
+    1500,
+    2000,
+    3000,
+    4000,
     5000,
-    10000,
-    25000,
-    50000,
-    100000
+    6500,
+    8000,
+    10000
   ];
 
   return limits[
@@ -227,13 +229,15 @@ function getMaxEnergy(level) {
 
 function getEnergyUpgradeCost(level) {
   const costs = [
-    1000,
     5000,
-    25000,
+    15000,
+    40000,
     100000,
-    500000,
-    2500000,
-    10000000
+    250000,
+    600000,
+    1500000,
+    3500000,
+    8000000
   ];
 
   return costs[
