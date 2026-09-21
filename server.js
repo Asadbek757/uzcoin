@@ -1352,85 +1352,7 @@ bot.command("skip", async (ctx) => {
 
 
 /* =========================
-   TEXT
-========================= */
-
-bot.on("text", async (ctx) => {
-
-  try {
-
-    if (!isBotAdmin(ctx)) {
-      return;
-    }
-
-    const adminId =
-      String(ctx.from.id);
-
-    const session =
-      broadcastSessions.get(adminId);
-
-    if (!session) {
-      return;
-    }
-
-    /*
-      /broadcast va /skip
-      alohida command sifatida ishlaydi.
-    */
-
-    if (
-      ctx.message.text.startsWith("/")
-    ) {
-      return;
-    }
-
-    if (
-      session.step !== "text"
-    ) {
-      return;
-    }
-
-    session.text =
-      ctx.message.text;
-
-    session.step =
-      "button";
-
-    broadcastSessions.set(
-      adminId,
-      session
-    );
-
-    await ctx.reply(
-      `
-🔘 <b>Tugma qo‘shamizmi?</b>
-
-Ha yoki yo‘q deb yozing.
-
-Masalan:
-<b>ha</b>
-yoki
-<b>yo‘q</b>
-      `,
-      {
-        parse_mode: "HTML"
-      }
-    );
-
-  } catch (error) {
-
-    console.error(
-      "Broadcast text error:",
-      error
-    );
-
-  }
-
-});
-
-
-/* =========================
-   BUTTON YES / NO
+   ALL BROADCAST TEXT STEPS
 ========================= */
 
 bot.on("text", async (ctx, next) => {
@@ -1441,35 +1363,168 @@ bot.on("text", async (ctx, next) => {
       return next();
     }
 
-    const adminId =
-      String(ctx.from.id);
+    const adminId = String(ctx.from.id);
 
-    const session =
-      broadcastSessions.get(adminId);
+    const session = broadcastSessions.get(adminId);
 
     if (!session) {
       return next();
     }
 
-    if (
-      session.step !== "button"
-    ) {
+    const text = ctx.message.text.trim();
+
+    // /broadcast va /skip kabi commandlarni o'tkazib yuboramiz
+    if (text.startsWith("/")) {
       return next();
     }
 
-    const answer =
-      ctx.message.text
-        .trim()
-        .toLowerCase();
 
-    if (
-      answer === "yo'q" ||
-      answer === "yo‘q" ||
-      answer === "yoq" ||
-      answer === "no"
-    ) {
+    /* =========================
+       1. MESSAGE TEXT
+    ========================= */
 
-      session.button = null;
+    if (session.step === "text") {
+
+      session.text = text;
+      session.step = "button";
+
+      broadcastSessions.set(adminId, session);
+
+      await ctx.reply(
+        `🔘 <b>Tugma qo‘shamizmi?</b>
+
+Ha yoki yo‘q deb yozing.
+
+Masalan:
+<b>ha</b>
+yoki
+<b>yo‘q</b>`,
+        {
+          parse_mode: "HTML"
+        }
+      );
+
+      return;
+    }
+
+
+    /* =========================
+       2. BUTTON YES / NO
+    ========================= */
+
+    if (session.step === "button") {
+
+      const answer = text.toLowerCase();
+
+      if (
+        answer === "ha" ||
+        answer === "yes"
+      ) {
+
+        session.step = "button_name";
+
+        broadcastSessions.set(
+          adminId,
+          session
+        );
+
+        await ctx.reply(
+          `🔘 Tugmada ko‘rinadigan nomni yuboring.
+
+Masalan:
+🎮 UZCOIN'ni ochish`
+        );
+
+        return;
+      }
+
+
+      if (
+        answer === "yo'q" ||
+        answer === "yo‘q" ||
+        answer === "yoq" ||
+        answer === "no"
+      ) {
+
+        session.button = null;
+        session.step = "preview";
+
+        broadcastSessions.set(
+          adminId,
+          session
+        );
+
+        await showBroadcastPreview(
+          ctx,
+          session
+        );
+
+        return;
+      }
+
+
+      await ctx.reply(
+        "❗ Faqat <b>ha</b> yoki <b>yo‘q</b> deb yozing.",
+        {
+          parse_mode: "HTML"
+        }
+      );
+
+      return;
+    }
+
+
+    /* =========================
+       3. BUTTON NAME
+    ========================= */
+
+    if (session.step === "button_name") {
+
+      session.buttonName = text;
+      session.step = "button_url";
+
+      broadcastSessions.set(
+        adminId,
+        session
+      );
+
+      await ctx.reply(
+        `🔗 Endi tugma ochadigan linkni yuboring.
+
+Masalan:
+https://t.me/UZCoinTapBot`
+      );
+
+      return;
+    }
+
+
+    /* =========================
+       4. BUTTON URL
+    ========================= */
+
+    if (session.step === "button_url") {
+
+      const url = text;
+
+      if (
+        !/^https?:\/\/\S+$/i.test(url)
+      ) {
+
+        await ctx.reply(
+          `❌ Link noto‘g‘ri.
+
+https:// bilan boshlanadigan link yuboring.`
+        );
+
+        return;
+      }
+
+      session.button = {
+        text: session.buttonName,
+        url: url
+      };
+
       session.step = "preview";
 
       broadcastSessions.set(
@@ -1485,171 +1540,12 @@ bot.on("text", async (ctx, next) => {
       return;
     }
 
-    if (
-      answer === "ha" ||
-      answer === "yes"
-    ) {
-
-      session.step =
-        "button_name";
-
-      broadcastSessions.set(
-        adminId,
-        session
-      );
-
-      await ctx.reply(
-        "🔘 Tugmada ko‘rinadigan nomni yuboring.\n\nMasalan: 🎮 UZCOIN'ni ochish"
-      );
-
-      return;
-    }
-
-    await ctx.reply(
-      "❗ Faqat <b>ha</b> yoki <b>yo‘q</b> deb yozing.",
-      {
-        parse_mode: "HTML"
-      }
-    );
-
-  } catch (error) {
-
-    console.error(
-      "Broadcast button answer error:",
-      error
-    );
-
     return next();
-  }
-
-});
-
-
-/* =========================
-   BUTTON NAME
-========================= */
-
-bot.on("text", async (ctx, next) => {
-
-  try {
-
-    if (!isBotAdmin(ctx)) {
-      return next();
-    }
-
-    const adminId =
-      String(ctx.from.id);
-
-    const session =
-      broadcastSessions.get(adminId);
-
-    if (!session) {
-      return next();
-    }
-
-    if (
-      session.step !== "button_name"
-    ) {
-      return next();
-    }
-
-    session.buttonName =
-      ctx.message.text.trim();
-
-    session.step =
-      "button_url";
-
-    broadcastSessions.set(
-      adminId,
-      session
-    );
-
-    await ctx.reply(
-      `
-🔗 Endi tugma ochadigan linkni yuboring.
-
-Masalan:
-https://t.me/UZCoinTapBot
-      `
-    );
 
   } catch (error) {
 
     console.error(
-      "Broadcast button name error:",
-      error
-    );
-
-    return next();
-  }
-
-});
-
-
-/* =========================
-   BUTTON URL
-========================= */
-
-bot.on("text", async (ctx, next) => {
-
-  try {
-
-    if (!isBotAdmin(ctx)) {
-      return next();
-    }
-
-    const adminId =
-      String(ctx.from.id);
-
-    const session =
-      broadcastSessions.get(adminId);
-
-    if (!session) {
-      return next();
-    }
-
-    if (
-      session.step !== "button_url"
-    ) {
-      return next();
-    }
-
-    const url =
-      ctx.message.text.trim();
-
-    if (
-      !/^https?:\/\/\S+$/i.test(url)
-    ) {
-
-      await ctx.reply(
-        "❌ Link noto‘g‘ri.\n\nhttps:// bilan boshlanadigan link yuboring."
-      );
-
-      return;
-    }
-
-    session.button = {
-      text: session.buttonName,
-      url
-    };
-
-    session.step =
-      "preview";
-
-    broadcastSessions.set(
-      adminId,
-      session
-    );
-
-    await showBroadcastPreview(
-      ctx,
-      session
-    );
-
-  } catch (error) {
-
-    console.error(
-      "Broadcast button URL error:",
+      "Broadcast text steps error:",
       error
     );
 
