@@ -1171,6 +1171,567 @@ Xush kelibsiz, ${
   }
 );
 
+/* =====================================================
+   ADMIN BROADCAST
+===================================================== */
+
+const broadcastSessions = new Map();
+
+function isBotAdmin(ctx) {
+  if (!ADMIN_ID) return false;
+  return String(ctx.from.id) === ADMIN_ID;
+}
+
+/* =========================
+   START BROADCAST
+========================= */
+
+bot.command("broadcast", async (ctx) => {
+
+  try {
+
+    if (!isBotAdmin(ctx)) {
+      return;
+    }
+
+    broadcastSessions.set(
+      String(ctx.from.id),
+      {
+        step: "photo"
+      }
+    );
+
+    await ctx.reply(
+      `
+📢 <b>UZCOIN BROADCAST</b>
+
+🖼 Rasmni yuboring.
+
+Agar rasmsiz xabar yubormoqchi bo‘lsangiz:
+<b>/skip</b>
+      `,
+      {
+        parse_mode: "HTML"
+      }
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Broadcast start error:",
+      error
+    );
+
+  }
+
+});
+
+
+/* =========================
+   PHOTO
+========================= */
+
+bot.on("photo", async (ctx) => {
+
+  try {
+
+    if (!isBotAdmin(ctx)) {
+      return;
+    }
+
+    const adminId =
+      String(ctx.from.id);
+
+    const session =
+      broadcastSessions.get(adminId);
+
+    if (!session) {
+      return;
+    }
+
+    if (
+      session.step !== "photo"
+    ) {
+      return;
+    }
+
+    const photos =
+      ctx.message.photo;
+
+    const largestPhoto =
+      photos[
+        photos.length - 1
+      ];
+
+    session.photo =
+      largestPhoto.file_id;
+
+    session.step =
+      "text";
+
+    broadcastSessions.set(
+      adminId,
+      session
+    );
+
+    await ctx.reply(
+      `
+✅ Rasm qabul qilindi.
+
+✍️ Endi xabar matnini yuboring.
+      `,
+      {
+        parse_mode: "HTML"
+      }
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Broadcast photo error:",
+      error
+    );
+
+  }
+
+});
+
+
+/* =========================
+   SKIP PHOTO
+========================= */
+
+bot.command("skip", async (ctx) => {
+
+  try {
+
+    if (!isBotAdmin(ctx)) {
+      return;
+    }
+
+    const adminId =
+      String(ctx.from.id);
+
+    const session =
+      broadcastSessions.get(adminId);
+
+    if (!session) {
+      return;
+    }
+
+    if (
+      session.step !== "photo"
+    ) {
+      return;
+    }
+
+    session.photo = null;
+
+    session.step =
+      "text";
+
+    broadcastSessions.set(
+      adminId,
+      session
+    );
+
+    await ctx.reply(
+      "✍️ Endi xabar matnini yuboring."
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Broadcast skip error:",
+      error
+    );
+
+  }
+
+});
+
+
+/* =========================
+   TEXT
+========================= */
+
+bot.on("text", async (ctx) => {
+
+  try {
+
+    if (!isBotAdmin(ctx)) {
+      return;
+    }
+
+    const adminId =
+      String(ctx.from.id);
+
+    const session =
+      broadcastSessions.get(adminId);
+
+    if (!session) {
+      return;
+    }
+
+    /*
+      /broadcast va /skip
+      alohida command sifatida ishlaydi.
+    */
+
+    if (
+      ctx.message.text.startsWith("/")
+    ) {
+      return;
+    }
+
+    if (
+      session.step !== "text"
+    ) {
+      return;
+    }
+
+    session.text =
+      ctx.message.text;
+
+    session.step =
+      "button";
+
+    broadcastSessions.set(
+      adminId,
+      session
+    );
+
+    await ctx.reply(
+      `
+🔘 <b>Tugma qo‘shamizmi?</b>
+
+Ha yoki yo‘q deb yozing.
+
+Masalan:
+<b>ha</b>
+yoki
+<b>yo‘q</b>
+      `,
+      {
+        parse_mode: "HTML"
+      }
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Broadcast text error:",
+      error
+    );
+
+  }
+
+});
+
+
+/* =========================
+   BUTTON YES / NO
+========================= */
+
+bot.on("text", async (ctx, next) => {
+
+  try {
+
+    if (!isBotAdmin(ctx)) {
+      return next();
+    }
+
+    const adminId =
+      String(ctx.from.id);
+
+    const session =
+      broadcastSessions.get(adminId);
+
+    if (!session) {
+      return next();
+    }
+
+    if (
+      session.step !== "button"
+    ) {
+      return next();
+    }
+
+    const answer =
+      ctx.message.text
+        .trim()
+        .toLowerCase();
+
+    if (
+      answer === "yo'q" ||
+      answer === "yo‘q" ||
+      answer === "yoq" ||
+      answer === "no"
+    ) {
+
+      session.button = null;
+      session.step = "preview";
+
+      broadcastSessions.set(
+        adminId,
+        session
+      );
+
+      await showBroadcastPreview(
+        ctx,
+        session
+      );
+
+      return;
+    }
+
+    if (
+      answer === "ha" ||
+      answer === "yes"
+    ) {
+
+      session.step =
+        "button_name";
+
+      broadcastSessions.set(
+        adminId,
+        session
+      );
+
+      await ctx.reply(
+        "🔘 Tugmada ko‘rinadigan nomni yuboring.\n\nMasalan: 🎮 UZCOIN'ni ochish"
+      );
+
+      return;
+    }
+
+    await ctx.reply(
+      "❗ Faqat <b>ha</b> yoki <b>yo‘q</b> deb yozing.",
+      {
+        parse_mode: "HTML"
+      }
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Broadcast button answer error:",
+      error
+    );
+
+    return next();
+  }
+
+});
+
+
+/* =========================
+   BUTTON NAME
+========================= */
+
+bot.on("text", async (ctx, next) => {
+
+  try {
+
+    if (!isBotAdmin(ctx)) {
+      return next();
+    }
+
+    const adminId =
+      String(ctx.from.id);
+
+    const session =
+      broadcastSessions.get(adminId);
+
+    if (!session) {
+      return next();
+    }
+
+    if (
+      session.step !== "button_name"
+    ) {
+      return next();
+    }
+
+    session.buttonName =
+      ctx.message.text.trim();
+
+    session.step =
+      "button_url";
+
+    broadcastSessions.set(
+      adminId,
+      session
+    );
+
+    await ctx.reply(
+      `
+🔗 Endi tugma ochadigan linkni yuboring.
+
+Masalan:
+https://t.me/UZCoinTapBot
+      `
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Broadcast button name error:",
+      error
+    );
+
+    return next();
+  }
+
+});
+
+
+/* =========================
+   BUTTON URL
+========================= */
+
+bot.on("text", async (ctx, next) => {
+
+  try {
+
+    if (!isBotAdmin(ctx)) {
+      return next();
+    }
+
+    const adminId =
+      String(ctx.from.id);
+
+    const session =
+      broadcastSessions.get(adminId);
+
+    if (!session) {
+      return next();
+    }
+
+    if (
+      session.step !== "button_url"
+    ) {
+      return next();
+    }
+
+    const url =
+      ctx.message.text.trim();
+
+    if (
+      !/^https?:\/\/\S+$/i.test(url)
+    ) {
+
+      await ctx.reply(
+        "❌ Link noto‘g‘ri.\n\nhttps:// bilan boshlanadigan link yuboring."
+      );
+
+      return;
+    }
+
+    session.button = {
+      text: session.buttonName,
+      url
+    };
+
+    session.step =
+      "preview";
+
+    broadcastSessions.set(
+      adminId,
+      session
+    );
+
+    await showBroadcastPreview(
+      ctx,
+      session
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Broadcast button URL error:",
+      error
+    );
+
+    return next();
+  }
+
+});
+
+
+/* =========================
+   PREVIEW
+========================= */
+
+async function showBroadcastPreview(
+  ctx,
+  session
+) {
+
+  const keyboard = [];
+
+  if (session.button) {
+
+    keyboard.push([
+      Markup.button.url(
+        session.button.text,
+        session.button.url
+      )
+    ]);
+
+  }
+
+  keyboard.push([
+    Markup.button.callback(
+      "✅ YUBORISH",
+      "broadcast_send"
+    ),
+    Markup.button.callback(
+      "❌ BEKOR QILISH",
+      "broadcast_cancel"
+    )
+  ]);
+
+  const extra = {
+    parse_mode: "HTML",
+    ...Markup.inlineKeyboard(
+      keyboard
+    )
+  };
+
+  const previewText =
+    `
+📢 <b>BROADCAST PREVIEW</b>
+
+${session.text}
+
+━━━━━━━━━━━━━━
+
+Yuqoridagi xabarni barcha foydalanuvchilarga yuborish uchun:
+
+<b>✅ YUBORISH</b> tugmasini bosing.
+    `;
+
+  if (session.photo) {
+
+    await ctx.replyWithPhoto(
+      session.photo,
+      {
+        caption: previewText,
+        ...extra
+      }
+    );
+
+  } else {
+
+    await ctx.reply(
+      previewText,
+      extra
+    );
+
+  }
+}
+
 
 /* =====================================================
    SUBSCRIPTION CALLBACK
