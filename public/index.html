@@ -2090,12 +2090,13 @@ function applyUser(user) {
     user.maxEnergy || 300  
   );  
   
-  power = Number(  
-    user.power || 1  
-  );  
-  
-  tapLevel = Number(  
-    user.tapLevel || 1  
+  tapLevel = Number(
+    user.tapLevel || 1
+  );
+
+  power = Math.max(
+    1,
+    Math.min(10, tapLevel)
   );  
   
   energyLevel = Number(  
@@ -2260,47 +2261,79 @@ function getEnergyUpgradeCost(level) {
   ];  
 }  
   
-function updateBoosts() {  
-  
-  const tapCost =  
-    getTapUpgradeCost(tapLevel);  
-  
-  const energyCost =  
-    getEnergyUpgradeCost(energyLevel);  
-  
-  const tapButton =  
-    document.getElementById(  
-      "tapUpgradeBtn"  
-    );  
-  
-  const energyButton =  
-    document.getElementById(  
-      "energyUpgradeBtn"  
-    );  
-  
-  tapButton.textContent =  
-    `🪙 ${formatNumber(tapCost)}`;  
-  
-  energyButton.textContent =  
-    `🪙 ${formatNumber(energyCost)}`;  
-  
-  tapButton.disabled =  
-    balance < tapCost;  
-  
-  energyButton.disabled =  
-    balance < energyCost;  
-  
-  document.getElementById(  
-    "tapBoostDesc"  
-  ).textContent =  
-    `Level ${tapLevel} • +${power} / tap`;  
-  
-  document.getElementById(  
-    "energyBoostDesc"  
-  ).textContent =  
-    `Level ${energyLevel} • Max ${formatNumber(maxEnergy)}`;  
-}  
-  
+function updateBoosts() {
+
+  const tapButton =
+    document.getElementById(
+      "tapUpgradeBtn"
+    );
+
+  const energyButton =
+    document.getElementById(
+      "energyUpgradeBtn"
+    );
+
+  const tapDesc =
+    document.getElementById(
+      "tapBoostDesc"
+    );
+
+  const energyDesc =
+    document.getElementById(
+      "energyBoostDesc"
+    );
+
+  if (tapLevel >= 10) {
+
+    tapDesc.textContent =
+      "Level 10 • +10 / tap";
+
+    tapButton.textContent =
+      "🔥 MAX LEVEL";
+
+    tapButton.disabled = true;
+
+  } else {
+
+    const tapCost =
+      getTapUpgradeCost(tapLevel);
+
+    tapDesc.textContent =
+      `Level ${tapLevel} • +${power} / tap`;
+
+    tapButton.textContent =
+      `🪙 ${formatNumber(tapCost)}`;
+
+    tapButton.disabled =
+      balance < tapCost;
+  }
+
+  if (energyLevel >= 10) {
+
+    energyDesc.textContent =
+      `Level 10 • Max ${formatNumber(maxEnergy)}`;
+
+    energyButton.textContent =
+      "⚡ MAX LEVEL";
+
+    energyButton.disabled = true;
+
+  } else {
+
+    const energyCost =
+      getEnergyUpgradeCost(energyLevel);
+
+    energyDesc.textContent =
+      `Level ${energyLevel} • Max ${formatNumber(maxEnergy)}`;
+
+    energyButton.textContent =
+      `🪙 ${formatNumber(energyCost)}`;
+
+    energyButton.disabled =
+      balance < energyCost;
+  }
+}
+
 /* =====================================================  
    PROFILE  
 ===================================================== */  
@@ -2492,106 +2525,58 @@ async function sendTaps() {
    UPGRADE  
 ===================================================== */  
   
-async function upgradeTap() {  
-  
-  const cost =  
-    getTapUpgradeCost(tapLevel);  
-  
-  if (balance < cost) {  
-  
-    showToast(  
-      "🪙 Coin yetarli emas."  
-    );  
-  
-    return;  
-  }  
-  
-  await upgrade("tap");  
-}  
-  
-async function upgradeEnergy() {  
-  
-  const cost =  
-    getEnergyUpgradeCost(energyLevel);  
-  
-  if (balance < cost) {  
-  
-    showToast(  
-      "🪙 Coin yetarli emas."  
-    );  
-  
-    return;  
-  }  
-  
-  await upgrade("energy");  
-}  
-  
-async function upgrade(type) {  
-  
-  try {  
-  
-    const response = await fetch(  
-      "/api/upgrade",  
-      {  
-        method: "POST",  
-        headers: {  
-          "Content-Type": "application/json"  
-        },  
-        body: JSON.stringify({  
-          initData,  
-          type  
-        })  
-      }  
-    );  
-  
-    const data =  
-      await response.json();  
-  
-    if (data.error === "NOT_SUBSCRIBED") {  
-  
-      showSubscription();  
-  
-      return;  
-    }  
-  
-    if (data.error === "NOT_ENOUGH_BALANCE") {  
-  
-      showToast(  
-        "🪙 Coin yetarli emas."  
-      );  
-  
-      return;  
-    }  
-  
-    if (!response.ok) {  
-  
-      showToast(  
-        "Upgrade amalga oshmadi."  
-      );  
-  
-      return;  
-    }  
-  
-    if (data.user) {  
-      applyUser(data.user);  
-    }  
-  
-    showToast(  
-      type === "tap"  
-        ? "🪙 Tap Power oshdi!"  
-        : "⚡ Energy Boost oshdi!"  
-    );  
-  
-  } catch (error) {  
-  
-    console.error(error);  
-  
-    showToast(  
-      "Xatolik yuz berdi."  
-    );  
-  }  
-}  
-  
+async function upgradeTap() {
+
+  if (tapLevel >= 10) {
+
+    showToast(
+      "🔥 Tap Power MAX LEVEL!"
+    );
+
+    return;
+  }
+
+  const cost =
+    getTapUpgradeCost(tapLevel);
+
+  if (balance < cost) {
+
+    showToast(
+      "🪙 Coin yetarli emas."
+    );
+
+    return;
+  }
+
+  await upgrade("tap");
+}
+
+async function upgradeEnergy() {
+
+  if (energyLevel >= 10) {
+
+    showToast(
+      "⚡ Energy MAX LEVEL!"
+    );
+
+    return;
+  }
+
+  const cost =
+    getEnergyUpgradeCost(energyLevel);
+
+  if (balance < cost) {
+
+    showToast(
+      "🪙 Coin yetarli emas."
+    );
+
+    return;
+  }
+
+  await upgrade("energy");
+}
+
 /* =====================================================  
    DAILY  
 ===================================================== */  
