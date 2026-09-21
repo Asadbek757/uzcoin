@@ -1569,10 +1569,10 @@ async function showBroadcastPreview(
   if (session.button) {
 
     keyboard.push([
-      Markup.button.url(
-        session.button.text,
-        session.button.url
-      )
+      Markup.button.webApp(
+  session.button.text,
+  "https://uzcoin.onrender.com"
+)
     ]);
 
   }
@@ -1697,10 +1697,10 @@ bot.action("broadcast_send", async (ctx) => {
         if (session.button) {
 
           keyboard.push([
-            Markup.button.url(
-              session.button.text,
-              session.button.url
-            )
+            Markup.button.webApp(
+           session.button.text,
+         "https://uzcoin.onrender.com"
+       )
           ]);
 
         }
