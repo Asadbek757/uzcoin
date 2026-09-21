@@ -294,92 +294,6 @@ function getEnergyUpgradeCost(level) {
 
 const REFERRAL_BONUS = 1000;
 
-/* =====================================================
-   SERVER ANTI-CHEAT
-===================================================== */
-
-const ANTI_CHEAT = {
-  MAX_TAPS_PER_REQUEST: 25,
-
-  // Bir foydalanuvchining tap requestlari orasidagi
-  // juda qisqa vaqtni aniqlash.
-  MIN_REQUEST_INTERVAL_MS: 70,
-
-  // Juda ko‘p request yuborilsa shubhali hisoblanadi.
-  MAX_REQUESTS_PER_SECOND: 12,
-
-  // Replay request uchun vaqt oynasi.
-  REPLAY_WINDOW_MS: 10000
-};
-
-// RAM ichidagi tezkor rate-limit.
-// Server qayta ishga tushsa avtomatik tozalanadi.
-const tapRateMap = new Map();
-
-function checkTapRate(telegramId) {
-  const key = String(telegramId);
-  const now = Date.now();
-
-  let state = tapRateMap.get(key);
-
-  if (!state) {
-    state = {
-      requests: [],
-      lastRequestAt: 0
-    };
-
-    tapRateMap.set(key, state);
-  }
-
-  // Eski requestlarni olib tashlaymiz
-  state.requests =
-    state.requests.filter(
-      time => now - time < 1000
-    );
-
-  const tooFast =
-    state.lastRequestAt > 0 &&
-    now - state.lastRequestAt <
-      ANTI_CHEAT.MIN_REQUEST_INTERVAL_MS;
-
-  const tooMany =
-    state.requests.length >=
-    ANTI_CHEAT.MAX_REQUESTS_PER_SECOND;
-
-  state.requests.push(now);
-  state.lastRequestAt = now;
-
-  return {
-    tooFast,
-    tooMany,
-    requestsLastSecond:
-      state.requests.length
-  };
-}
-
-function getTapRequestId(body) {
-  const value =
-    body &&
-    (
-      body.requestId ||
-      body.request_id ||
-      body.tapId ||
-      body.tap_id
-    );
-
-  if (!value) {
-    return null;
-  }
-
-  const id = String(value).trim();
-
-  if (!id || id.length > 200) {
-    return null;
-  }
-
-  return id;
-}
-
 
 /* =====================================================
    SUBSCRIPTION CACHE
@@ -516,10 +430,6 @@ async function initDatabase() {
     ["daily_claimed_at", "TIMESTAMP"],
     ["energy_updated_at", "TIMESTAMP"],
     ["blocked", "BOOLEAN DEFAULT FALSE"],
-    ["anti_cheat_score", "INTEGER DEFAULT 0"],
-    ["suspicious_taps", "INTEGER DEFAULT 0"],
-    ["last_tap_at", "TIMESTAMP"],
-    ["last_tap_request_id", "TEXT"],
     ["created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"],
     ["updated_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"]
   ];
@@ -2425,97 +2335,31 @@ app.post(
       if (!subscribed) {
         return res.status(403).json({
           error: "NOT_SUBSCRIBED"
-            
- // =========================
-// TAP COUNT + ANTI-CHEAT
-// =========================
+        });
+      }
 
-let rawTaps =
-  Number(req.body.taps || 0);
+      // =========================
+      // TAP COUNT
+      // =========================
 
-if (
-  !Number.isFinite(rawTaps) ||
-  rawTaps <= 0
-) {
-  return res.status(400).json({
-    error: "INVALID_TAPS"
-  });
-}
+      let taps =
+        Math.floor(
+          Number(req.body.taps || 0)
+        );
 
-let taps =
-  Math.floor(rawTaps);
+      if (taps <= 0) {
+        return res.status(400).json({
+          error: "INVALID_TAPS"
+        });
+      }
 
-// Server bir requestda ko‘pi bilan 25 ta tapni
-// hisoblaydi.
-const requestedTooMany =
-  taps > ANTI_CHEAT.MAX_TAPS_PER_REQUEST;
-
-if (requestedTooMany) {
-  taps =
-    ANTI_CHEAT.MAX_TAPS_PER_REQUEST;
-}
-
-// Juda tez requestlarni kuzatamiz.
-// Normal foydalanuvchini bloklamaymiz.
-const rate =
-  checkTapRate(telegramUser.id);
-
-// Replay ID bo‘lsa tekshiramiz.
-// Eski frontend requestId yubormasa ham endpoint
-// ishlashda davom etadi.
-const requestId =
-  getTapRequestId(req.body);
-
-if (rate.tooMany) {
-
-  console.warn(
-    "[ANTI-CHEAT] High tap request rate:",
-    {
-      telegramId: telegramUser.id,
-      requestsLastSecond:
-        rate.requestsLastSecond,
-      taps
-    }
-  );
-}
-
-// Juda katta taps yuborilgan bo‘lsa,
-// faqat server limitiga tushiramiz.
-if (requestedTooMany) {
-
-  console.warn(
-    "[ANTI-CHEAT] Large tap request:",
-    {
-      telegramId: telegramUser.id,
-      requested: Math.floor(rawTaps),
-      accepted:
-        ANTI_CHEAT.MAX_TAPS_PER_REQUEST
-    }
-  );
-}
+      taps =
+        Math.min(taps, 100);
 
       await client.query("BEGIN");
 
       let result =
         await client.query(
-
-// =========================
-// SERVER-SIDE ANTI-CHEAT
-// =========================
-
-let suspiciousPoints = 0;
-
-if (rate.tooFast) {
-  suspiciousPoints += 1;
-}
-
-if (rate.tooMany) {
-  suspiciousPoints += 2;
-}
-
-if (requestedTooMany) {
-  suspiciousPoints += 2;
-}          
           `
           SELECT *
           FROM users
@@ -2573,50 +2417,6 @@ if (requestedTooMany) {
 
       user =
         result.rows[0];
-
-// =========================
-// REPLAY DETECTION
-// =========================
-
-if (requestId) {
-
-  const previousRequestId =
-    user.last_tap_request_id
-      ? String(user.last_tap_request_id)
-      : null;
-
-  const lastTapAt =
-    user.last_tap_at
-      ? new Date(user.last_tap_at).getTime()
-      : 0;
-
-  const isRecentReplay =
-    previousRequestId &&
-    previousRequestId === requestId &&
-    lastTapAt > 0 &&
-    Date.now() - lastTapAt <
-      ANTI_CHEAT.REPLAY_WINDOW_MS;
-
-  if (isRecentReplay) {
-
-    await client.query(
-      "ROLLBACK"
-    );
-
-    console.warn(
-      "[ANTI-CHEAT] Replay request:",
-      {
-        telegramId:
-          telegramUser.id,
-        requestId
-      }
-    );
-
-    return res.status(409).json({
-      error: "DUPLICATE_TAP_REQUEST"
-    });
-  }
-}        
 
       const availableEnergy =
         Number(user.energy || 0);
@@ -2696,47 +2496,6 @@ if (requestId) {
         user.league_level
       );
 
-        
-// =========================
-// SAVE ANTI-CHEAT DATA
-// =========================
-
-await client.query(
-  `
-  UPDATE users
-  SET
-    anti_cheat_score =
-      LEAST(
-        COALESCE(anti_cheat_score, 0) + $2,
-        100
-      ),
-
-    suspicious_taps =
-      LEAST(
-        COALESCE(suspicious_taps, 0) + $3,
-        1000000
-      ),
-
-    last_tap_at =
-      CURRENT_TIMESTAMP,
-
-    last_tap_request_id =
-      COALESCE($4, last_tap_request_id),
-
-    updated_at =
-      CURRENT_TIMESTAMP
-
-  WHERE telegram_id = $1
-  `,
-  [
-    telegramUser.id,
-    suspiciousPoints,
-    requestedTooMany
-      ? Math.floor(rawTaps)
-      : 0,
-    requestId
-  ]
-);
       result =
         await client.query(
           `
