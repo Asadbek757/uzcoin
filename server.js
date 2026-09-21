@@ -2622,8 +2622,16 @@ app.post(
           });
         }
 
-        const newLevel =
-          level + 1;
+        if (level >= 10) {
+  await client.query("ROLLBACK");
+
+  return res.status(400).json({
+    error: "MAX_LEVEL"
+  });
+}
+
+const newLevel =
+  level + 1;
 
         const newMax =
           getMaxEnergy(newLevel);
