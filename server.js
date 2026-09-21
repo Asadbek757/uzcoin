@@ -200,9 +200,24 @@ async function updatePermanentLeague(
 ===================================================== */
 
 function getTapUpgradeCost(level) {
-  return Math.floor(
-    500 * Math.pow(1.8, Number(level) - 1)
-  );
+  const costs = [
+    1500,
+    3500,
+    7000,
+    15000,
+    30000,
+    55000,
+    85000,
+    115000,
+    150000
+  ];
+
+  return costs[
+    Math.min(
+      Math.max(Number(level) - 1, 0),
+      costs.length - 1
+    )
+  ];
 }
 
 function getMaxEnergy(level) {
