@@ -1628,6 +1628,158 @@ Yuqoridagi xabarni barcha foydalanuvchilarga yuborish uchun:
   }
 }
 
+/* =========================
+   BROADCAST CANCEL
+========================= */
+
+bot.action("broadcast_cancel", async (ctx) => {
+
+  if (!isBotAdmin(ctx)) return;
+
+  const adminId = String(ctx.from.id);
+
+  broadcastSessions.delete(adminId);
+
+  await ctx.answerCbQuery("Bekor qilindi ❌");
+
+  await ctx.reply(
+    "❌ Broadcast bekor qilindi."
+  );
+
+});
+
+
+/* =========================
+   BROADCAST SEND
+========================= */
+
+bot.action("broadcast_send", async (ctx) => {
+
+  if (!isBotAdmin(ctx)) return;
+
+  const adminId = String(ctx.from.id);
+
+  const session =
+    broadcastSessions.get(adminId);
+
+  if (!session || !session.text) {
+
+    await ctx.answerCbQuery(
+      "❌ Broadcast topilmadi."
+    );
+
+    return;
+  }
+
+  await ctx.answerCbQuery(
+    "📤 Yuborish boshlandi..."
+  );
+
+  try {
+
+    const result = await pool.query(`
+      SELECT telegram_id
+      FROM users
+      WHERE blocked = false
+    `);
+
+    const users = result.rows;
+
+    let sent = 0;
+    let failed = 0;
+
+    for (const user of users) {
+
+      try {
+
+        const keyboard = [];
+
+        if (session.button) {
+
+          keyboard.push([
+            Markup.button.url(
+              session.button.text,
+              session.button.url
+            )
+          ]);
+
+        }
+
+        const extra =
+          keyboard.length > 0
+            ? Markup.inlineKeyboard(keyboard)
+            : {};
+
+        if (session.photo) {
+
+          await bot.telegram.sendPhoto(
+            user.telegram_id,
+            session.photo,
+            {
+              caption: session.text,
+              ...extra
+            }
+          );
+
+        } else {
+
+          await bot.telegram.sendMessage(
+            user.telegram_id,
+            session.text,
+            extra
+          );
+
+        }
+
+        sent++;
+
+        // Telegram serverini ortiqcha yuklamaslik uchun
+        await new Promise(
+          resolve => setTimeout(resolve, 50)
+        );
+
+      } catch (error) {
+
+        failed++;
+
+        console.error(
+          "Broadcast user error:",
+          user.telegram_id,
+          error.message
+        );
+
+      }
+
+    }
+
+    broadcastSessions.delete(adminId);
+
+    await ctx.reply(
+      `📢 <b>BROADCAST YAKUNLANDI</b>
+
+👥 Jami: <b>${users.length}</b>
+✅ Yuborildi: <b>${sent}</b>
+❌ Yuborilmadi: <b>${failed}</b>`,
+      {
+        parse_mode: "HTML"
+      }
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Broadcast send error:",
+      error
+    );
+
+    await ctx.reply(
+      "❌ Broadcast yuborishda xatolik yuz berdi."
+    );
+
+  }
+
+});
+
 
 /* =====================================================
    SUBSCRIPTION CALLBACK
