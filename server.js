@@ -196,72 +196,101 @@ async function updatePermanentLeague(
 
 
 /* =====================================================
-   COSTS
+   COSTS / LEVELS
 ===================================================== */
 
+const MAX_TAP_LEVEL = 10;
+const MAX_ENERGY_LEVEL = 10;
+
 function getTapUpgradeCost(level) {
+
+  const currentLevel =
+    Number(level) || 1;
+
   const costs = [
-    1500,
-    3500,
-    7000,
-    15000,
-    30000,
-    55000,
-    85000,
-    115000,
-    150000
+    1500,     // 1 -> 2
+    3500,     // 2 -> 3
+    7000,     // 3 -> 4
+    15000,    // 4 -> 5
+    30000,    // 5 -> 6
+    55000,    // 6 -> 7
+    85000,    // 7 -> 8
+    115000,   // 8 -> 9
+    150000    // 9 -> 10
   ];
 
-  return costs[
+  if (currentLevel >= MAX_TAP_LEVEL) {
+    return 0;
+  }
+
+  const index =
     Math.min(
-      Math.max(Number(level) - 1, 0),
+      Math.max(currentLevel - 1, 0),
       costs.length - 1
-    )
-  ];
+    );
+
+  return costs[index];
 }
+
 
 function getMaxEnergy(level) {
+
+  const currentLevel =
+    Number(level) || 1;
+
   const limits = [
-    500,
-    1000,
-    1500,
-    2000,
-    3000,
-    4000,
-    5000,
-    6500,
-    8000,
-    10000
+    500,      // Level 1
+    1000,     // Level 2
+    1500,     // Level 3
+    2000,     // Level 4
+    3000,     // Level 5
+    4000,     // Level 6
+    5000,     // Level 7
+    6500,     // Level 8
+    8000,     // Level 9
+    10000     // Level 10
   ];
 
-  return limits[
+  const index =
     Math.min(
-      Math.max(Number(level) - 1, 0),
+      Math.max(currentLevel - 1, 0),
       limits.length - 1
-    )
-  ];
+    );
+
+  return limits[index];
 }
+
 
 function getEnergyUpgradeCost(level) {
+
+  const currentLevel =
+    Number(level) || 1;
+
   const costs = [
-    5000,
-    15000,
-    40000,
-    100000,
-    250000,
-    600000,
-    1500000,
-    3500000,
-    8000000
+    5000,       // 1 -> 2
+    15000,      // 2 -> 3
+    40000,      // 3 -> 4
+    100000,     // 4 -> 5
+    250000,     // 5 -> 6
+    600000,     // 6 -> 7
+    1500000,    // 7 -> 8
+    3500000,    // 8 -> 9
+    8000000     // 9 -> 10
   ];
 
-  return costs[
+  if (currentLevel >= MAX_ENERGY_LEVEL) {
+    return 0;
+  }
+
+  const index =
     Math.min(
-      Math.max(Number(level) - 1, 0),
+      Math.max(currentLevel - 1, 0),
       costs.length - 1
-    )
-  ];
+    );
+
+  return costs[index];
 }
+
 
 const REFERRAL_BONUS = 1000;
 
@@ -363,8 +392,8 @@ async function initDatabase() {
 
       balance NUMERIC DEFAULT 0,
 
-      energy INTEGER DEFAULT 300,
-      max_energy INTEGER DEFAULT 300,
+      energy INTEGER DEFAULT 500,
+      max_energy INTEGER DEFAULT 500,
 
       tap_level INTEGER DEFAULT 1,
       energy_level INTEGER DEFAULT 1,
@@ -391,8 +420,8 @@ async function initDatabase() {
     ["first_name", "TEXT"],
     ["photo_url", "TEXT"],
     ["balance", "NUMERIC DEFAULT 0"],
-    ["energy", "INTEGER DEFAULT 300"],
-    ["max_energy", "INTEGER DEFAULT 300"],
+    ["energy", "INTEGER DEFAULT 500"],
+    ["max_energy", "INTEGER DEFAULT 500"],
     ["tap_level", "INTEGER DEFAULT 1"],
     ["energy_level", "INTEGER DEFAULT 1"],
     ["referrals", "INTEGER DEFAULT 0"],
@@ -412,23 +441,62 @@ async function initDatabase() {
     `);
   }
 
+  // =========================
+  // LEVEL LIMITS
+  // =========================
+
+  // Eski 11, 12 va undan yuqori Tap level
+  // foydalanuvchilarni 10 ga tushiramiz.
   await pool.query(`
     UPDATE users
-    SET energy_level = 1
-    WHERE energy_level IS NULL
-       OR energy_level < 1
+    SET tap_level = ${MAX_TAP_LEVEL}
+    WHERE tap_level IS NULL
+       OR tap_level > ${MAX_TAP_LEVEL}
   `);
 
   await pool.query(`
     UPDATE users
     SET tap_level = 1
-    WHERE tap_level IS NULL
-       OR tap_level < 1
+    WHERE tap_level < 1
+  `);
+
+  // Eski 11, 12 va undan yuqori Energy level
+  // foydalanuvchilarni 10 ga tushiramiz.
+  await pool.query(`
+    UPDATE users
+    SET energy_level = ${MAX_ENERGY_LEVEL}
+    WHERE energy_level IS NULL
+       OR energy_level > ${MAX_ENERGY_LEVEL}
   `);
 
   await pool.query(`
     UPDATE users
-    SET max_energy = 300
+    SET energy_level = 1
+    WHERE energy_level < 1
+  `);
+
+  // Har bir Energy level uchun to'g'ri max energy.
+  for (let level = 1; level <= MAX_ENERGY_LEVEL; level++) {
+
+    const maxEnergy =
+      getMaxEnergy(level);
+
+    await pool.query(
+      `
+      UPDATE users
+      SET max_energy = $1
+      WHERE energy_level = $2
+      `,
+      [
+        maxEnergy,
+        level
+      ]
+    );
+  }
+
+  await pool.query(`
+    UPDATE users
+    SET max_energy = 500
     WHERE max_energy IS NULL
        OR max_energy < 1
   `);
@@ -437,7 +505,7 @@ async function initDatabase() {
     UPDATE users
     SET energy = LEAST(
       GREATEST(COALESCE(energy, 0), 0),
-      GREATEST(COALESCE(max_energy, 300), 300)
+      GREATEST(COALESCE(max_energy, 500), 500)
     )
   `);
 
@@ -614,8 +682,8 @@ async function createOrUpdateUser(
         $3,
         $4,
         0,
-        300,
-        300,
+        500,
+        500,
         1,
         1,
         0,
@@ -668,7 +736,7 @@ async function regenerateEnergy(
     Number(user.energy || 0);
 
   const maxEnergy =
-    Number(user.max_energy || 300);
+    Number(user.max_energy || 500);
 
   if (energy >= maxEnergy) {
     return {
@@ -752,6 +820,27 @@ function formatUser(
       )
     );
 
+  const tapLevel =
+    Math.min(
+      Math.max(
+        Number(user.tap_level || 1),
+        1
+      ),
+      MAX_TAP_LEVEL
+    );
+
+  const energyLevel =
+    Math.min(
+      Math.max(
+        Number(user.energy_level || 1),
+        1
+      ),
+      MAX_ENERGY_LEVEL
+    );
+
+  const maxEnergy =
+    getMaxEnergy(energyLevel);
+
   return {
 
     telegramId:
@@ -770,10 +859,12 @@ function formatUser(
       Number(user.balance || 0),
 
     energy:
-      Number(user.energy || 0),
+      Math.min(
+        Number(user.energy || 0),
+        maxEnergy
+      ),
 
-    maxEnergy:
-      Number(user.max_energy || 300),
+    maxEnergy,
 
     energyUpdatedAt:
       user.energy_updated_at
@@ -782,14 +873,12 @@ function formatUser(
           ).toISOString()
         : new Date().toISOString(),
 
-    tapLevel:
-      Number(user.tap_level || 1),
+    tapLevel,
 
     power:
-      Number(user.tap_level || 1),
+      tapLevel,
 
-    energyLevel:
-      Number(user.energy_level || 1),
+    energyLevel,
 
     referrals:
       Number(user.referrals || 0),
@@ -807,34 +896,24 @@ function formatUser(
 
       tap: {
         level:
-          Number(
-            user.tap_level || 1
-          ),
+          tapLevel,
 
         cost:
           getTapUpgradeCost(
-            Number(
-              user.tap_level || 1
-            )
+            tapLevel
           )
       },
 
       energy: {
         level:
-          Number(
-            user.energy_level || 1
-          ),
+          energyLevel,
 
         max:
-          Number(
-            user.max_energy || 300
-          ),
+          maxEnergy,
 
         cost:
           getEnergyUpgradeCost(
-            Number(
-              user.energy_level || 1
-            )
+            energyLevel
           )
       }
     }
@@ -1190,6 +1269,7 @@ Xush kelibsiz, ${
   }
 );
 
+
 /* =====================================================
    ADMIN BROADCAST
 ===================================================== */
@@ -1200,6 +1280,7 @@ function isBotAdmin(ctx) {
   if (!ADMIN_ID) return false;
   return String(ctx.from.id) === ADMIN_ID;
 }
+
 
 /* =========================
    START BROADCAST
@@ -1382,17 +1463,19 @@ bot.on("text", async (ctx, next) => {
       return next();
     }
 
-    const adminId = String(ctx.from.id);
+    const adminId =
+      String(ctx.from.id);
 
-    const session = broadcastSessions.get(adminId);
+    const session =
+      broadcastSessions.get(adminId);
 
     if (!session) {
       return next();
     }
 
-    const text = ctx.message.text.trim();
+    const text =
+      ctx.message.text.trim();
 
-    // /broadcast va /skip kabi commandlarni o'tkazib yuboramiz
     if (text.startsWith("/")) {
       return next();
     }
@@ -1407,7 +1490,10 @@ bot.on("text", async (ctx, next) => {
       session.text = text;
       session.step = "button";
 
-      broadcastSessions.set(adminId, session);
+      broadcastSessions.set(
+        adminId,
+        session
+      );
 
       await ctx.reply(
         `🔘 <b>Tugma qo‘shamizmi?</b>
@@ -1433,14 +1519,16 @@ yoki
 
     if (session.step === "button") {
 
-      const answer = text.toLowerCase();
+      const answer =
+        text.toLowerCase();
 
       if (
         answer === "ha" ||
         answer === "yes"
       ) {
 
-        session.step = "button_name";
+        session.step =
+          "button_name";
 
         broadcastSessions.set(
           adminId,
@@ -1589,9 +1677,9 @@ async function showBroadcastPreview(
 
     keyboard.push([
       Markup.button.webApp(
-  session.button.text,
-  "https://uzcoin.onrender.com"
-)
+        session.button.text,
+        "https://uzcoin.onrender.com"
+      )
     ]);
 
   }
@@ -1647,6 +1735,7 @@ Yuqoridagi xabarni barcha foydalanuvchilarga yuborish uchun:
   }
 }
 
+
 /* =========================
    BROADCAST CANCEL
 ========================= */
@@ -1655,11 +1744,14 @@ bot.action("broadcast_cancel", async (ctx) => {
 
   if (!isBotAdmin(ctx)) return;
 
-  const adminId = String(ctx.from.id);
+  const adminId =
+    String(ctx.from.id);
 
   broadcastSessions.delete(adminId);
 
-  await ctx.answerCbQuery("Bekor qilindi ❌");
+  await ctx.answerCbQuery(
+    "Bekor qilindi ❌"
+  );
 
   await ctx.reply(
     "❌ Broadcast bekor qilindi."
@@ -1676,7 +1768,8 @@ bot.action("broadcast_send", async (ctx) => {
 
   if (!isBotAdmin(ctx)) return;
 
-  const adminId = String(ctx.from.id);
+  const adminId =
+    String(ctx.from.id);
 
   const session =
     broadcastSessions.get(adminId);
@@ -1696,13 +1789,15 @@ bot.action("broadcast_send", async (ctx) => {
 
   try {
 
-    const result = await pool.query(`
-      SELECT telegram_id
-      FROM users
-      WHERE blocked = false
-    `);
+    const result =
+      await pool.query(`
+        SELECT telegram_id
+        FROM users
+        WHERE blocked = false
+      `);
 
-    const users = result.rows;
+    const users =
+      result.rows;
 
     let sent = 0;
     let failed = 0;
@@ -1717,16 +1812,18 @@ bot.action("broadcast_send", async (ctx) => {
 
           keyboard.push([
             Markup.button.webApp(
-           session.button.text,
-         "https://uzcoin.onrender.com"
-       )
+              session.button.text,
+              "https://uzcoin.onrender.com"
+            )
           ]);
 
         }
 
         const extra =
           keyboard.length > 0
-            ? Markup.inlineKeyboard(keyboard)
+            ? Markup.inlineKeyboard(
+                keyboard
+              )
             : {};
 
         if (session.photo) {
@@ -1752,9 +1849,9 @@ bot.action("broadcast_send", async (ctx) => {
 
         sent++;
 
-        // Telegram serverini ortiqcha yuklamaslik uchun
         await new Promise(
-          resolve => setTimeout(resolve, 50)
+          resolve =>
+            setTimeout(resolve, 50)
         );
 
       } catch (error) {
@@ -1771,7 +1868,9 @@ bot.action("broadcast_send", async (ctx) => {
 
     }
 
-    broadcastSessions.delete(adminId);
+    broadcastSessions.delete(
+      adminId
+    );
 
     await ctx.reply(
       `📢 <b>BROADCAST YAKUNLANDI</b>
@@ -1844,12 +1943,14 @@ bot.action(
         );
 
       if (user.blocked) {
+
         await ctx.answerCbQuery(
           "🚫 Akkauntingiz bloklangan.",
           {
             show_alert: true
           }
         );
+
         return;
       }
 
@@ -2339,7 +2440,13 @@ app.post(
       }
 
       const power =
-        Number(user.tap_level || 1);
+        Math.min(
+          Math.max(
+            Number(user.tap_level || 1),
+            1
+          ),
+          MAX_TAP_LEVEL
+        );
 
       const earned =
         actualTaps * power;
@@ -2535,7 +2642,10 @@ app.post(
         result.rows[0];
 
       if (user.blocked) {
-        await client.query("ROLLBACK");
+
+        await client.query(
+          "ROLLBACK"
+        );
 
         return res.status(403).json({
           error: "USER_BLOCKED"
@@ -2564,23 +2674,74 @@ app.post(
       const balance =
         Number(user.balance || 0);
 
+
+      /* =================================================
+         TAP UPGRADE
+      ================================================= */
+
       if (type === "tap") {
 
         const level =
-          Number(user.tap_level || 1);
+          Math.min(
+            Math.max(
+              Number(
+                user.tap_level || 1
+              ),
+              1
+            ),
+            MAX_TAP_LEVEL
+          );
+
+        // =========================
+        // MAX LEVEL = 10
+        // =========================
+
+        if (
+          level >= MAX_TAP_LEVEL
+        ) {
+
+          await client.query(
+            "ROLLBACK"
+          );
+
+          return res.status(400).json({
+            error: "MAX_LEVEL"
+          });
+        }
 
         const cost =
-          getTapUpgradeCost(level);
+          getTapUpgradeCost(
+            level
+          );
+
+        if (
+          !cost ||
+          cost <= 0
+        ) {
+
+          await client.query(
+            "ROLLBACK"
+          );
+
+          return res.status(400).json({
+            error: "MAX_LEVEL"
+          });
+        }
 
         if (balance < cost) {
 
-          await client.query("ROLLBACK");
+          await client.query(
+            "ROLLBACK"
+          );
 
           return res.status(400).json({
             error:
               "NOT_ENOUGH_BALANCE"
           });
         }
+
+        const newLevel =
+          level + 1;
 
         await client.query(
           `
@@ -2590,7 +2751,7 @@ app.post(
               balance - $2,
 
             tap_level =
-              tap_level + 1,
+              $3,
 
             updated_at =
               CURRENT_TIMESTAMP
@@ -2599,22 +2760,71 @@ app.post(
           `,
           [
             telegramUser.id,
-            cost
+            cost,
+            newLevel
           ]
         );
       }
 
+
+      /* =================================================
+         ENERGY UPGRADE
+      ================================================= */
+
       if (type === "energy") {
 
         const level =
-          Number(user.energy_level || 1);
+          Math.min(
+            Math.max(
+              Number(
+                user.energy_level || 1
+              ),
+              1
+            ),
+            MAX_ENERGY_LEVEL
+          );
+
+        // =========================
+        // MAX LEVEL = 10
+        // =========================
+
+        if (
+          level >= MAX_ENERGY_LEVEL
+        ) {
+
+          await client.query(
+            "ROLLBACK"
+          );
+
+          return res.status(400).json({
+            error: "MAX_LEVEL"
+          });
+        }
 
         const cost =
-          getEnergyUpgradeCost(level);
+          getEnergyUpgradeCost(
+            level
+          );
+
+        if (
+          !cost ||
+          cost <= 0
+        ) {
+
+          await client.query(
+            "ROLLBACK"
+          );
+
+          return res.status(400).json({
+            error: "MAX_LEVEL"
+          });
+        }
 
         if (balance < cost) {
 
-          await client.query("ROLLBACK");
+          await client.query(
+            "ROLLBACK"
+          );
 
           return res.status(400).json({
             error:
@@ -2622,19 +2832,13 @@ app.post(
           });
         }
 
-        if (level >= 10) {
-  await client.query("ROLLBACK");
-
-  return res.status(400).json({
-    error: "MAX_LEVEL"
-  });
-}
-
-const newLevel =
-  level + 1;
+        const newLevel =
+          level + 1;
 
         const newMax =
-          getMaxEnergy(newLevel);
+          getMaxEnergy(
+            newLevel
+          );
 
         await client.query(
           `
@@ -2669,6 +2873,11 @@ const newLevel =
         );
       }
 
+
+      /* =================================================
+         UPDATE USER
+      ================================================= */
+
       result =
         await client.query(
           `
@@ -2702,7 +2911,9 @@ const newLevel =
       user =
         result.rows[0];
 
-      await client.query("COMMIT");
+      await client.query(
+        "COMMIT"
+      );
 
       return res.json({
         success: true,
@@ -2713,7 +2924,9 @@ const newLevel =
     } catch (error) {
 
       try {
-        await client.query("ROLLBACK");
+        await client.query(
+          "ROLLBACK"
+        );
       } catch (e) {}
 
       console.error(
@@ -2786,7 +2999,9 @@ app.post(
         });
       }
 
-      await client.query("BEGIN");
+      await client.query(
+        "BEGIN"
+      );
 
       let result =
         await client.query(
@@ -2822,7 +3037,10 @@ app.post(
         result.rows[0];
 
       if (user.blocked) {
-        await client.query("ROLLBACK");
+
+        await client.query(
+          "ROLLBACK"
+        );
 
         return res.status(403).json({
           error: "USER_BLOCKED"
@@ -2842,6 +3060,7 @@ app.post(
       let alreadyClaimed = false;
 
       if (lastClaim) {
+
         alreadyClaimed =
           lastClaim.toDateString() ===
           now.toDateString();
@@ -2849,7 +3068,9 @@ app.post(
 
       if (alreadyClaimed) {
 
-        await client.query("ROLLBACK");
+        await client.query(
+          "ROLLBACK"
+        );
 
         return res.status(400).json({
           error:
@@ -2908,7 +3129,9 @@ app.post(
       updatedUser =
         result.rows[0];
 
-      await client.query("COMMIT");
+      await client.query(
+        "COMMIT"
+      );
 
       return res.json({
         success: true,
@@ -2920,7 +3143,9 @@ app.post(
     } catch (error) {
 
       try {
-        await client.query("ROLLBACK");
+        await client.query(
+          "ROLLBACK"
+        );
       } catch (e) {}
 
       console.error(
@@ -3194,14 +3419,17 @@ app.post(
         await pool.query(`
           SELECT
             COUNT(*)::int AS users,
+
             COALESCE(
               SUM(balance),
               0
             ) AS total_balance,
+
             COALESCE(
               SUM(referrals),
               0
             )::int AS total_referrals
+
           FROM users
         `);
 
@@ -3414,7 +3642,9 @@ app.post(
 
       try {
 
-        await client.query("BEGIN");
+        await client.query(
+          "BEGIN"
+        );
 
         const userResult =
           await client.query(
@@ -3484,7 +3714,9 @@ app.post(
           ]
         );
 
-        await client.query("COMMIT");
+        await client.query(
+          "COMMIT"
+        );
 
         return res.json({
           success: true,
@@ -3556,12 +3788,6 @@ app.post(
           error: "telegramId required"
         });
       }
-
-      /*
-        Boolean("false") JavaScriptda TRUE
-        bo'lib qolishi mumkin.
-        Shuning uchun xavfsiz parse qilamiz.
-      */
 
       let newBlocked;
 
