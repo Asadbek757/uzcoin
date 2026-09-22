@@ -2547,10 +2547,14 @@ const energyBeforeRequest = energy;
     }  
   
     if (data.user) {
+  const serverBalance = Number(data.user.balance || 0);
+  const serverEnergy = Number(data.user.energy || 0);
 
-  applyUser(data.user);
+  balance = Math.max(balance, serverBalance);
+  energy = Math.min(energy, serverEnergy);
 
-}
+  updateTapUI();
+    }
 
 } catch (error) {
 
