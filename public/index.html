@@ -2577,6 +2577,100 @@ async function upgradeEnergy() {
   await upgrade("energy");
 }
 
+ async function upgrade(type) {
+
+  try {
+
+    const response = await fetch(
+      "/api/upgrade",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          initData,
+          type
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.error === "NOT_SUBSCRIBED") {
+
+      showSubscription();
+
+      return;
+    }
+
+    if (data.error === "NOT_ENOUGH_BALANCE") {
+
+      showToast(
+        "🪙 Coin yetarli emas."
+      );
+
+      await loadUser();
+
+      return;
+    }
+
+    if (data.error === "MAX_LEVEL") {
+
+      showToast(
+        "🔥 Bu upgrade MAX LEVEL!"
+      );
+
+      await loadUser();
+
+      return;
+    }
+
+    if (!response.ok) {
+
+      console.error(
+        "Upgrade error:",
+        data
+      );
+
+      showToast(
+        "Upgrade amalga oshmadi."
+      );
+
+      return;
+    }
+
+    if (data.success && data.user) {
+
+      applyUser(data.user);
+
+      if (type === "tap") {
+
+        showToast(
+          `🪙 Tap Power ${tapLevel}-levelga oshdi!`
+        );
+
+      } else if (type === "energy") {
+
+        showToast(
+          `⚡ Energy ${energyLevel}-levelga oshdi!`
+        );
+      }
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Upgrade request error:",
+      error
+    );
+
+    showToast(
+      "Server bilan bog‘lanishda xatolik."
+    );
+  }
+ }   
+
 /* =====================================================  
    DAILY  
 ===================================================== */  
