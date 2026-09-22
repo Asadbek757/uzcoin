@@ -2554,30 +2554,27 @@ const energyBeforeRequest = energy;
   const serverEnergy =
     Number(data.user.energy || 0);
 
-  const localBalanceAfterTaps =
-    balanceBeforeRequest +
-    taps * power;
+  if (tapQueue === 0) {
 
-  const localEnergyAfterTaps =
-    Math.max(
-      0,
-      energyBeforeRequest - taps
-    );
+    applyUser(data.user);
 
-  balance =
-    Math.max(
-      serverBalance,
-      localBalanceAfterTaps
-    );
+  } else {
 
-  energy =
-    Math.min(
-      localEnergyAfterTaps,
-      serverEnergy
-    );
+    balance =
+      Math.max(
+        balance,
+        serverBalance
+      );
 
-  updateTapUI();
-}
+    energy =
+      Math.min(
+        energy,
+        serverEnergy
+      );
+
+    updateTapUI();
+  }
+    }
       
   
 /* =====================================================  
