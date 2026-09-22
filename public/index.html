@@ -2503,9 +2503,12 @@ async function sendTaps() {
   clearTimeout(tapTimer);  
   tapTimer = null;  
   
-  const taps = tapQueue;  
-  
-  tapQueue = 0;  
+  const taps = tapQueue;
+
+tapQueue = 0;
+
+const balanceBeforeRequest = balance;
+const energyBeforeRequest = energy;
   
   if (taps <= 0) {  
     return;  
