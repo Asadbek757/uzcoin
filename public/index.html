@@ -2554,38 +2554,31 @@ const energyBeforeRequest = energy;
   const serverEnergy =
     Number(data.user.energy || 0);
 
-  if (tapQueue === 0) {
+  const localBalanceAfterTaps =
+    balanceBeforeRequest +
+    taps * power;
 
-    applyUser(data.user);
+  const localEnergyAfterTaps =
+    Math.max(
+      0,
+      energyBeforeRequest - taps
+    );
 
-  } else {
+  balance =
+    Math.max(
+      serverBalance,
+      localBalanceAfterTaps
+    );
 
-    balance =
-      Math.max(
-        balance,
-        serverBalance
-      );
+  energy =
+    Math.min(
+      localEnergyAfterTaps,
+      serverEnergy
+    );
 
-    energy =
-      Math.min(
-        energy,
-        serverEnergy
-      );
-
-    updateTapUI();
-  }
+  updateTapUI();
 }
-  
-  } catch (error) {  
-  
-    console.error(  
-      "Tap error:",  
-      error  
-    );  
-  
-    await loadUser();  
-  }  
-}  
+      
   
 /* =====================================================  
    UPGRADE  
