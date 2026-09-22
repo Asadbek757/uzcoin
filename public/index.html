@@ -2548,33 +2548,19 @@ const energyBeforeRequest = energy;
   
     if (data.user) {
 
-  const serverBalance =
-    Number(data.user.balance || 0);
+  applyUser(data.user);
 
-  const serverEnergy =
-    Number(data.user.energy || 0);
+}
 
-  if (tapQueue === 0) {
+} catch (error) {
 
-    applyUser(data.user);
+  console.error(
+    "Tap error:",
+    error
+  );
 
-  } else {
-
-    balance =
-      Math.max(
-        balance,
-        serverBalance
-      );
-
-    energy =
-      Math.min(
-        energy,
-        serverEnergy
-      );
-
-    updateTapUI();
+  await loadUser();
   }
-    }
       
   
 /* =====================================================  
