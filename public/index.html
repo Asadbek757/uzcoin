@@ -2543,9 +2543,35 @@ async function sendTaps() {
       return;  
     }  
   
-    if (data.user) {  
-      applyUser(data.user);  
-    }  
+    if (data.user) {
+
+  const serverBalance =
+    Number(data.user.balance || 0);
+
+  const serverEnergy =
+    Number(data.user.energy || 0);
+
+  if (tapQueue === 0) {
+
+    applyUser(data.user);
+
+  } else {
+
+    balance =
+      Math.max(
+        balance,
+        serverBalance
+      );
+
+    energy =
+      Math.min(
+        energy,
+        serverEnergy
+      );
+
+    updateTapUI();
+  }
+}
   
   } catch (error) {  
   
