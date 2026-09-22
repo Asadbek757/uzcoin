@@ -2388,46 +2388,83 @@ function updateProfile() {
 /* =====================================================  
    TAP  
 ===================================================== */  
-  
-function tapCoin(event) {  
-  
-  if (energy <= 0) {  
-  
-    showToast("⚡ Energy tugadi!");  
-  
-    return;  
-  }  
-  
-  const coin =  
-    document.getElementById("bigCoin");  
-  
-  coin.classList.add("pressed");  
-  
-  setTimeout(() => {  
-    coin.classList.remove("pressed");  
-  }, 80);  
-  
-  balance += power;  
-  energy -= 1;  
-  tapQueue += 1;  
-  
-  createTapEffect(  
-    event.clientX,  
-    event.clientY,  
-    power  
-  );  
-  
-  updateAll();  
-  
-  if (!tapTimer) {  
-  
-    tapTimer =  
-      setTimeout(  
-        sendTaps,  
-        250  
-      );  
-  }  
-}  
+
+let tapUIFrame = null;
+
+function scheduleTapUIUpdate() {
+  if (tapUIFrame) return;
+
+  tapUIFrame = requestAnimationFrame(() => {
+    tapUIFrame = null;
+    updateTapUI();
+  });
+}
+
+function updateTapUI() {
+  const balanceElement = document.getElementById("balance");
+  const topBalanceElement = document.getElementById("topUserBalance");
+  const energyElement = document.getElementById("energy");
+  const maxEnergyElement = document.getElementById("maxEnergy");
+  const energyFill = document.getElementById("energyFill");
+
+  if (balanceElement) {
+    balanceElement.textContent = formatNumber(balance);
+  }
+
+  if (topBalanceElement) {
+    topBalanceElement.textContent = formatNumber(balance);
+  }
+
+  if (energyElement) {
+    energyElement.textContent = formatNumber(energy);
+  }
+
+  if (maxEnergyElement) {
+    maxEnergyElement.textContent =
+      " / " + formatNumber(maxEnergy);
+  }
+
+  if (energyFill) {
+    const percent =
+      maxEnergy > 0
+        ? (energy / maxEnergy) * 100
+        : 0;
+
+    energyFill.style.width =
+      Math.max(0, Math.min(100, percent)) + "%";
+  }
+}
+    
+function tapCoin(event) {
+  if (energy <= 0) {
+    showToast("⚡ Energy tugadi!");
+    return;
+  }
+
+  const coin = document.getElementById("bigCoin");
+
+  coin.classList.add("pressed");
+
+  setTimeout(() => {
+    coin.classList.remove("pressed");
+  }, 80);
+
+  balance += power;
+  energy -= 1;
+  tapQueue += 1;
+
+  createTapEffect(
+    event.clientX,
+    event.clientY,
+    power
+  );
+
+  scheduleTapUIUpdate();
+
+  if (!tapTimer) {
+    tapTimer = setTimeout(sendTaps, 250);
+  }
+}
   
 /* =====================================================  
    TAP EFFECT  
@@ -3086,8 +3123,7 @@ setInterval(() => {
         energy + 1  
       );  
   
-    updateHome();  
-    updateProfile();  
+    updateTapUI();
   }  
   
 }, 1000);  
