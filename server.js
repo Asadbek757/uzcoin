@@ -295,6 +295,7 @@ function getEnergyUpgradeCost(level) {
 const REFERRAL_BONUS = 1000;
 
 
+
 /* =====================================================
    SUBSCRIPTION CACHE
 ===================================================== */
@@ -305,39 +306,30 @@ const SUB_CACHE_MS = 60 * 1000;
 
 async function isSubscribed(telegramId) {
   try {
-    const member =
-      await bot.telegram.getChatMember(
-        REQUIRED_CHANNEL,
-        telegramId
-      );
+    const member = await bot.telegram.getChatMember(
+      REQUIRED_CHANNEL,
+      telegramId
+    );
 
-    if (
-      [
-        "creator",
-        "administrator",
-        "member"
-      ].includes(member.status)
-    ) {
-      return true;
-    }
-
-    if (
-      member.status === "restricted" &&
-      member.is_member === true
-    ) {
-      return true;
-    }
-
-    return false;
+    return (
+      ["creator", "administrator", "member"].includes(
+        member.status
+      ) ||
+      (
+        member.status === "restricted" &&
+        member.is_member === true
+      )
+    );
 
   } catch (error) {
     console.error(
-      "Subscription check:",
+      "Subscription check failed:",
+      error.response?.description ||
       error.description ||
       error.message
     );
 
-    return false;
+    throw error;
   }
 }
 
@@ -346,33 +338,34 @@ async function isSubscribedCached(
   force = false
 ) {
   const key = String(telegramId);
-
-  const cached =
-    subscriptionCache.get(key);
+  const cached = subscriptionCache.get(key);
 
   if (
     !force &&
     cached &&
-    Date.now() - cached.checkedAt <
-      SUB_CACHE_MS
+    Date.now() - cached.checkedAt < SUB_CACHE_MS
   ) {
     return cached.value;
   }
 
-  const value =
-    await isSubscribed(telegramId);
+  try {
+    const value = await isSubscribed(telegramId);
 
-  subscriptionCache.set(
-    key,
-    {
+    subscriptionCache.set(key, {
       value,
       checkedAt: Date.now()
-    }
-  );
+    });
 
-  return value;
+    return value;
+
+  } catch (error) {
+    // Tekshiruvda xato bo‘lsa, noto‘g‘ri
+    // natijani keshga saqlamaymiz.
+    subscriptionCache.delete(key);
+    throw error;
+  }
 }
-
+ 
 
 /* =====================================================
    DATABASE
