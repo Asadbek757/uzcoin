@@ -877,7 +877,8 @@ async function sendTaps() {
       const serverBalance = Number(data.user.balance || 0);
       const serverEnergy = Number(data.user.energy || 0);
       balance = Math.max(balance, serverBalance);
-      energy = Math.min(energy, serverEnergy);
+      // Server energiyasi asosiy manba hisoblanadi.
+      energy = serverEnergy;
       updateTapUI();
     }
 
@@ -1113,13 +1114,10 @@ async function loadLeagues() {
   }
 }
 
-/* ENERGY +1 / SEC */
-setInterval(() => {
-  if (energy < maxEnergy) {
-    energy = Math.min(maxEnergy, energy + 1);
-    updateTapUI();
-  }
-}, 1000);
+/* ENERGY */
+ /* Energiya server tomonidan tiklanadi.
+    Frontendda alohida timer ishlatilmaydi, aks holda server bilan
+    sinxronlashda energiya noto'g'ri ko'rinishi mumkin. */
 
 /* SERVER SYNC */
 setInterval(async () => {
