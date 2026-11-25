@@ -1103,6 +1103,71 @@ button {
     height: 270px;  
   }  
 }  
+
+/* =========================
+   IXCHAM HOME (bo'sh joyni yo'qotish)
+========================= */
+
+.app-content {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(105px + env(safe-area-inset-bottom));
+}
+
+.top-user { flex-shrink: 0; }
+
+.screen,
+.screen.active {
+  min-height: 0;
+}
+
+.screen.active {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#homeScreen.active {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#homeScreen .home-screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#homeScreen .main-balance {
+  flex-shrink: 0;
+  margin-top: 14px;
+}
+
+#homeScreen .coin-area {
+  flex: 1;
+  height: auto !important;
+  min-height: 0;
+}
+
+#homeScreen .big-coin {
+  width: min(335px, 72vw, 40dvh) !important;
+  height: min(335px, 72vw, 40dvh) !important;
+}
+
+#homeScreen .coin-glow {
+  width: min(390px, 90vw, 48dvh);
+  height: min(390px, 90vw, 48dvh);
+}
+
+#homeScreen .energy-row,
+#homeScreen .energy-bar {
+  flex-shrink: 0;
+}
 </style>  </head>  <body>  <!-- LOADING -->  <div id="loading">  
   <div class="loading-box">  
     <div class="loading-coin">U</div>  
@@ -3252,4 +3317,4 @@ async function init() {
 init();  
   
 </script>  </body>  
-  </html>
+    </html>
