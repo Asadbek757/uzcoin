@@ -720,68 +720,56 @@ async function createOrUpdateUser(
    ENERGY REGENERATION
 ===================================================== */
 
-async function regenerateEnergy(
-  client,
-  user
-) {
-
-  let energy =
-    Number(user.energy || 0);
-
-  const maxEnergy =
-    Number(user.max_energy || 500);
+async function regenerateEnergy(client, user) {
+  let energy = Number(user.energy || 0);
+  const maxEnergy = Number(user.max_energy || 500);
 
   if (energy >= maxEnergy) {
     return {
       energy: maxEnergy,
-      energyUpdatedAt:
-        user.energy_updated_at ||
-        new Date()
+      energyUpdatedAt: user.energy_updated_at || new Date()
     };
   }
 
-  const lastUpdate =
-    new Date(
-      user.energy_updated_at ||
-      user.updated_at ||
-      Date.now()
-    );
+  const lastUpdate = new Date(
+    user.energy_updated_at ||
+    user.updated_at ||
+    Date.now()
+  );
 
-  const now =
-    Date.now();
+  const now = Date.now();
 
-  const elapsedSeconds =
-    Math.floor(
-      (now - lastUpdate.getTime()) / 1000
-    );
+  // Har 500 millisekundda +1 energiya
+  const elapsedIntervals = Math.floor(
+    (now - lastUpdate.getTime()) / 500
+  );
 
-  if (elapsedSeconds <= 0) {
+  if (elapsedIntervals <= 0) {
     return {
       energy,
       energyUpdatedAt: lastUpdate
     };
   }
 
-  const newEnergy =
-    Math.min(
-      maxEnergy,
-      energy + elapsedSeconds
-    );
+  const newEnergy = Math.min(
+    maxEnergy,
+    energy + elapsedIntervals
+  );
 
-  const newTimestamp =
-    new Date(
-      lastUpdate.getTime() +
-      elapsedSeconds * 1000
-    );
+  // Qolgan millisekundlarni yo'qotmaymiz
+  const newTimestamp = new Date(
+    lastUpdate.getTime() +
+    (newEnergy - energy) * 500
+  );
 
   await client.query(
     `
-    UPDATE users
-    SET
-      energy = $2,
-      energy_updated_at = $3,
-      updated_at = CURRENT_TIMESTAMP
-    WHERE telegram_id = $1
+      UPDATE users
+      SET
+        energy = $2,
+        energy_updated_at = $3,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE telegram_id = $1
     `,
     [
       user.telegram_id,
