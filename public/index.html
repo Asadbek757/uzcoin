@@ -313,7 +313,7 @@ button { border: 0; outline: none; font-family: inherit; }
             <span class="energy-current" id="energy">300</span>
             <span class="energy-max" id="maxEnergy"> / 300</span>
           </div>
-          <div class="energy-recharge">+1 / sec</div>
+          <div class="energy-recharge">+2 / sec</div>
         </div>
         <div class="energy-bar"><div class="energy-fill" id="energyFill"></div></div>
       </div>
@@ -1114,10 +1114,15 @@ async function loadLeagues() {
   }
 }
 
-/* ENERGY */
- /* Energiya server tomonidan tiklanadi.
-    Frontendda alohida timer ishlatilmaydi, aks holda server bilan
-    sinxronlashda energiya noto'g'ri ko'rinishi mumkin. */
+/* ENERGY +1 / 0.5 SEC */
+setInterval(() => {
+  if (!initData) return;
+
+  if (energy < maxEnergy) {
+    energy = Math.min(maxEnergy, energy + 1);
+    updateTapUI();
+  }
+}, 500);
 
 /* SERVER SYNC */
 setInterval(async () => {
