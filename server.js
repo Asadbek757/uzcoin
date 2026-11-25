@@ -2266,10 +2266,8 @@ app.get(
       });
     }
   }
-);
 
-
-/* =====================================================
+  /* =====================================================
    TAP
 ===================================================== */
 
@@ -2277,21 +2275,221 @@ app.post(
   "/api/tap",
   async (req, res) => {
 
-    const client =
-      await pool.connect();
+    const client = await pool.connect();
 
     try {
 
       const telegramUser =
-        validateInitData(
-          req.body.initData
-        );
+        validateInitData(req.body.initData);
 
       if (!telegramUser) {
         return res.status(401).json({
           error: "INVALID_INIT_DATA"
         });
       }
+
+      const blockedResult =
+        await client.query(
+          `
+          SELECT blocked
+          FROM users
+          WHERE telegram_id = $1
+          `,
+          [telegramUser.id]
+        );
+
+      if (
+        blockedResult.rows.length &&
+        blockedResult.rows[0].blocked
+      ) {
+        return res.status(403).json({
+          error: "USER_BLOCKED"
+        });
+      }
+
+      const subscribed =
+        await isSubscribedCached(telegramUser.id);
+
+      if (!subscribed) {
+        return res.status(403).json({
+          error: "NOT_SUBSCRIBED"
+        });
+      }
+
+      let taps =
+        Math.floor(Number(req.body.taps || 0));
+
+      if (taps <= 0) {
+        return res.status(400).json({
+          error: "INVALID_TAPS"
+        });
+      }
+
+      taps = Math.min(taps, 100);
+
+      await client.query("BEGIN");
+
+      let result =
+        await client.query(
+          `
+          SELECT *
+          FROM users
+          WHERE telegram_id = $1
+          FOR UPDATE
+          `,
+          [telegramUser.id]
+        );
+
+      if (!result.rows.length) {
+
+        await createOrUpdateUser(
+          telegramUser,
+          client
+        );
+
+        result =
+          await client.query(
+            `
+            SELECT *
+            FROM users
+            WHERE telegram_id = $1
+            FOR UPDATE
+            `,
+            [telegramUser.id]
+          );
+      }
+
+      let user = result.rows[0];
+
+      if (user.blocked) {
+        await client.query("ROLLBACK");
+
+        return res.status(403).json({
+          error: "USER_BLOCKED"
+        });
+      }
+
+      await regenerateEnergy(client, user);
+
+      result =
+        await client.query(
+          `
+          SELECT *
+          FROM users
+          WHERE telegram_id = $1
+          FOR UPDATE
+          `,
+          [telegramUser.id]
+        );
+
+      user = result.rows[0];
+
+      const availableEnergy =
+        Number(user.energy || 0);
+
+      const power =
+        Math.min(
+          Math.max(Number(user.tap_level || 1), 1),
+          MAX_TAP_LEVEL
+        );
+
+      // Har bir tap uchun Tap Level miqdorida energiya ketadi.
+      const actualTaps =
+        Math.min(
+          taps,
+          Math.floor(availableEnergy / power)
+        );
+
+      if (actualTaps <= 0) {
+
+        await client.query("COMMIT");
+
+        return res.json({
+          earned: 0,
+          taps: 0,
+          user: formatUser(user)
+        });
+      }
+
+      const earned = actualTaps * power;
+      const energyCost = actualTaps * power;
+
+      await client.query(
+        `
+        UPDATE users
+        SET
+          balance = balance + $2,
+          energy = energy - $3,
+          energy_updated_at = CURRENT_TIMESTAMP,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE telegram_id = $1
+        `,
+        [
+          telegramUser.id,
+          earned,
+          energyCost
+        ]
+      );
+
+      result =
+        await client.query(
+          `
+          SELECT *
+          FROM users
+          WHERE telegram_id = $1
+          `,
+          [telegramUser.id]
+        );
+
+      user = result.rows[0];
+
+      await updatePermanentLeague(
+        client,
+        telegramUser.id,
+        user.balance,
+        user.league_level
+      );
+
+      result =
+        await client.query(
+          `
+          SELECT *
+          FROM users
+          WHERE telegram_id = $1
+          `,
+          [telegramUser.id]
+        );
+
+      user = result.rows[0];
+
+      await client.query("COMMIT");
+
+      return res.json({
+        earned,
+        taps: actualTaps,
+        user: formatUser(user)
+      });
+
+    } catch (error) {
+
+      try {
+        await client.query("ROLLBACK");
+      } catch (e) {}
+
+      console.error(
+        "/api/tap:",
+        error
+      );
+
+      return res.status(500).json({
+        error: "SERVER_ERROR"
+      });
+
+    } finally {
+      client.release();
+    }
+  }
+);
 
       // =========================
       // BLOCK CHECK
