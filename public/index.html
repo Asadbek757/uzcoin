@@ -812,8 +812,10 @@ function updateTapUI() {
 }
 
 function tapCoin(event) {
-  if (energy <= 0) {
-    showToast("⚡ Energy tugadi!");
+  // Har bir bosish uchun joriy Tap Power miqdorida energiya kerak.
+  const energyCost = Math.max(1, Number(power) || 1);
+  if (energy < energyCost) {
+    showToast("⚡ Energy yetarli emas!");
     return;
   }
 
@@ -822,7 +824,7 @@ function tapCoin(event) {
   setTimeout(() => { coin.classList.remove("pressed"); }, 80);
 
   balance += power;
-  energy -= 1;
+  energy -= energyCost;
   tapQueue += 1;
 
   createTapEffect(event.clientX, event.clientY, power);
