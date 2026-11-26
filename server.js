@@ -351,10 +351,17 @@ async function isSubscribedCached(
   try {
     const value = await isSubscribed(telegramId);
 
-    subscriptionCache.set(key, {
-      value,
-      checkedAt: Date.now()
-    });
+    // Faqat obuna borligi tasdiqlansa keshga saqlaymiz.
+    // Obuna yo‘q degan natija 60 soniya davomida noto‘g‘ri
+    // bloklab qo‘ymasligi uchun false natijani saqlamaymiz.
+    if (value) {
+      subscriptionCache.set(key, {
+        value: true,
+        checkedAt: Date.now()
+      });
+    } else {
+      subscriptionCache.delete(key);
+    }
 
     return value;
 
@@ -1995,13 +2002,19 @@ app.post(
           telegramUser.id
         );
 
-      subscriptionCache.set(
-        String(telegramUser.id),
-        {
-          value: subscribed,
-          checkedAt: Date.now()
-        }
-      );
+      // Faqat tasdiqlangan obunani keshlaymiz.
+      // False natija keyingi tekshiruvlarda qayta tekshiriladi.
+      if (subscribed) {
+        subscriptionCache.set(
+          String(telegramUser.id),
+          {
+            value: true,
+            checkedAt: Date.now()
+          }
+        );
+      } else {
+        subscriptionCache.delete(String(telegramUser.id));
+      }
 
       if (subscribed) {
 
