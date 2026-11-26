@@ -621,19 +621,27 @@ async function checkSubscription(showMessages = true) {
     });
     const data = await response.json();
 
-    if (data.subscribed) {
+    if (!response.ok) {
+      throw new Error(data.error || "Subscription check failed");
+    }
+
+    if (data.subscribed === true) {
       hideSubscription();
       return true;
     }
 
-    showSubscription();
-    if (showMessages) showToast("Avval kanalga obuna bo‘ling.");
-    return false;
+    if (data.subscribed === false) {
+      showSubscription();
+      if (showMessages) showToast("Avval kanalga obuna bo‘ling.");
+      return false;
+    }
+
+    throw new Error("Subscription status missing");
 
   } catch (error) {
     console.error("Subscription error:", error);
-    if (showMessages) showToast("Tekshirishda xatolik.");
-    return false;
+    if (showMessages) showToast("Obunani tekshirib bo‘lmadi. Qayta urinib ko‘ring.");
+    return null;
   }
 }
 
@@ -1152,9 +1160,14 @@ async function init() {
 
     const subscribed = await checkSubscription(false);
 
-    if (!subscribed) {
+    if (subscribed === false) {
       document.getElementById("loading").style.display = "none";
       showSubscription();
+      return;
+    }
+
+    if (subscribed !== true) {
+      document.getElementById("loading").style.display = "none";
       return;
     }
 
