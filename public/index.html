@@ -89,6 +89,18 @@ button { border: 0; outline: none; font-family: inherit; }
 .task-btn { padding: 11px 13px; border-radius: 13px; color: white; background: #e99a00; font-size: 12px; font-weight: 900; white-space: nowrap; }
 .task-btn.done { background: rgba(255,255,255,.09); color: rgba(255,255,255,.5); }
 
+
+/* TURBO DAILY BOOSTER */
+.turbo-section-title { font-size: 23px; font-weight: 950; margin: 4px 0 13px; }
+.turbo-card { display: flex; align-items: center; gap: 13px; margin-bottom: 18px; padding: 16px; }
+.turbo-icon { width: 58px; height: 58px; flex-shrink: 0; border-radius: 17px; display: flex; align-items: center; justify-content: center; font-size: 31px; background: linear-gradient(135deg,#34363d,#22242b); }
+.turbo-info { flex: 1; min-width: 0; }
+.turbo-title { font-size: 18px; font-weight: 900; }
+.turbo-count { margin-top: 4px; color: rgba(255,255,255,.58); font-size: 14px; font-weight: 700; }
+.turbo-watch-btn { min-width: 105px; padding: 12px 13px; border-radius: 13px; color: #fff; background: linear-gradient(135deg,#f7bd20,#e58b00); font-size: 13px; font-weight: 950; }
+.turbo-watch-btn:disabled { opacity: .45; }
+.turbo-note { margin: -7px 2px 18px; color: rgba(255,255,255,.48); font-size: 12px; line-height: 1.45; }
+
 /* BOOST */
 .boost-card { display: flex; align-items: center; gap: 13px; }
 .boost-icon { width: 56px; height: 56px; flex-shrink: 0; border-radius: 17px; display: flex; align-items: center; justify-content: center; font-size: 29px; background: linear-gradient(135deg,#ffd53c,#e18000); }
@@ -388,6 +400,17 @@ button { border: 0; outline: none; font-family: inherit; }
       <div class="page">
         <div class="page-title">Boosts</div>
         <div class="page-subtitle">Tap kuchi va energiyani oshiring.</div>
+
+        <div class="turbo-section-title">Free daily boosters</div>
+        <div class="card turbo-card">
+          <div class="turbo-icon">🚀</div>
+          <div class="turbo-info">
+            <div class="turbo-title">Turbo</div>
+            <div class="turbo-count" id="turboCount">5/5 available</div>
+          </div>
+          <button class="turbo-watch-btn" id="turboWatchBtn" onclick="startTurboAd()">WATCH AD</button>
+        </div>
+        <div class="turbo-note">Reklamani to‘liq ko‘ring: 30 soniya davomida har bir tap +100 beradi va energiya sarflanmaydi.</div>
 
         <div class="card boost-card">
           <div class="boost-icon"><span class="coin-img-icon" style="width:42px;height:42px"></span></div>
@@ -894,6 +917,11 @@ async function sendTaps() {
     console.error("Tap error:", error);
     await loadUser();
   }
+}
+
+/* ADSGRAM TURBO — UI placeholder until the AdsGram Block ID is approved */
+function startTurboAd() {
+  showToast("AdsGram Block ID tasdiqlangach ulanadi.");
 }
 
 /* UPGRADE */
